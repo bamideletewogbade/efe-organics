@@ -1,0 +1,8 @@
+
+> efe-organics@0.1.0 start
+> next start --port 3230
+
+▲ Next.js 16.2.11
+- Local:         http://localhost:3230
+- Network:       http://192.168.1.180:3230
+✓ Ready in 739ms

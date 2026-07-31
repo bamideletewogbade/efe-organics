@@ -217,7 +217,11 @@
 
   @media (min-width: 1024px) {
     html {
-      font-size: 125%; /* 20px — the zoom level that read best */
+      /* 19px. 125% (20px) was the zoom level that read best in the browser, but
+         browser zoom also shrinks the viewport — an effect the container token
+         reproduces separately. Doing BOTH at full strength overshot, so the type
+         sits one step back at 118.75% and the density comes from `--container`. */
+      font-size: 118.75%;
     }
   }
 

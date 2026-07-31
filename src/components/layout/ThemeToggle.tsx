@@ -68,7 +68,7 @@ export function ThemeToggle() {
 
   // Holds the header's layout until hydration so nothing shifts.
   if (theme === null) {
-    return <span aria-hidden className="h-9 w-9 shrink-0" />;
+    return <span aria-hidden className="h-11 w-11 sm:h-9 sm:w-9 shrink-0" />;
   }
 
   const dark = theme === "dark";
@@ -78,7 +78,7 @@ export function ThemeToggle() {
       type="button"
       onClick={() => setTheme(dark ? "light" : "dark")}
       aria-label={dark ? "Switch to light theme" : "Switch to dark theme"}
-      className="relative flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-paper/80 transition-colors hover:bg-paper/10 hover:text-paper"
+      className="relative flex h-11 w-11 sm:h-9 sm:w-9 shrink-0 items-center justify-center rounded-full text-paper/80 transition-colors hover:bg-paper/10 hover:text-paper"
     >
       <motion.span
         key={theme}

@@ -399,7 +399,7 @@ function CartButton() {
           ? `Basket, ${count} ${count === 1 ? "item" : "items"}`
           : "Basket, empty"
       }
-      className="relative ml-1 flex h-9 w-9 items-center justify-center rounded-full text-paper/80 transition-colors hover:bg-paper/10 hover:text-paper"
+      className="relative ml-1 flex h-11 w-11 sm:h-9 sm:w-9 items-center justify-center rounded-full text-paper/80 transition-colors hover:bg-paper/10 hover:text-paper"
     >
       <svg
         viewBox="0 0 20 20"
@@ -445,7 +445,7 @@ function IconButton({
     <button
       type="button"
       aria-label={label}
-      className="hidden h-9 w-9 items-center justify-center rounded-full text-paper/80 transition-colors hover:bg-paper/10 hover:text-paper sm:flex"
+      className="hidden h-11 w-11 sm:h-9 sm:w-9 items-center justify-center rounded-full text-paper/80 transition-colors hover:bg-paper/10 hover:text-paper sm:flex"
     >
       <svg
         viewBox="0 0 20 20"

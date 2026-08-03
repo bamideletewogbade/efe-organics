@@ -1,27 +1,29 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
+import Script from "next/script";
 
-import { SiteFooter } from "@/components/layout/SiteFooter";
-import { SiteHeader } from "@/components/layout/SiteHeader";
-import { AnalyticsProvider } from "@/components/analytics/AnalyticsProvider";
-import { CartDrawer } from "@/components/cart/CartDrawer";
-import { CartProvider } from "@/components/cart/CartProvider";
 import { brand } from "@/lib/brand";
-import { listCategories, listProducts } from "@/lib/catalog";
 import { env } from "@/lib/env";
 import "./globals.css";
 
 /**
- * Fonts are SELF-HOSTED, not pulled via `next/font/google`.
+ * Root layout, the DOCUMENT ONLY.
  *
- * That helper fetches from Google at build time and this environment cannot
- * reach it — every build failed on "Failed to fetch `Fraunces` from Google
- * Fonts". Self-hosting takes the network out of the build and is faster for
- * users. Refresh the files with `node scripts/fetch-fonts.mjs`.
+ * Fonts, the theme script, `<html>` and `<body>`. Nothing visual, because this
+ * wraps the storefront AND the admin, and those two share a document but not a
+ * single piece of chrome.
  *
- * Display: Fraunces, standing in for the deck's Recoleta (not yet licensed).
- * Both are variable, so one file each covers every weight.
+ * Header, footer, cart and analytics live in `(shop)/layout.tsx`; the admin
+ * brings its own sidebar. Keeping them here is what made `/admin` render a shop
+ * header and a basket icon over the back office.
+ *
+ * Fonts are SELF-HOSTED rather than pulled via `next/font/google`: that helper
+ * fetches at BUILD time and this environment cannot reach Google, so every build
+ * died on "Failed to fetch". Self-hosting removes the network from the build and
+ * is faster for users. Refresh with `node scripts/fetch-fonts.mjs`.
  */
+
+/** Display: warm, slightly irregular. Carries headlines and product names. */
 const bricolage = localFont({
   src: "./fonts/bricolage-variable.woff2",
   variable: "--font-bricolage",
@@ -29,7 +31,7 @@ const bricolage = localFont({
   weight: "200 800",
 });
 
-/** UI, stats and labels. Geometric, and heavy enough to carry a number. */
+/** Body, labels and prices. Its numerals stay unambiguous at 12px. */
 const figtree = localFont({
   src: "./fonts/figtree-variable.woff2",
   variable: "--font-figtree",
@@ -37,15 +39,33 @@ const figtree = localFont({
   weight: "200 800",
 });
 
+/**
+ * Identifiers only: order references and SKUs.
+ *
+ * An order reference gets read down a phone. Figtree does not distinguish 0
+ * from O, or 1 from l from I, which at 12px in a table is a real source of
+ * "she read it back wrong". JetBrains Mono has a slashed zero and disambiguated
+ * letterforms. Deliberately NOT used for prices, where Figtree's tabular
+ * figures already align and a monospace would look like a terminal.
+ */
+const jetbrainsMono = localFont({
+  src: "./fonts/jetbrains-mono-variable.woff2",
+  // Named for the face, not the role: `--font-mono` is the semantic token in
+  // globals.css and would otherwise reference itself.
+  variable: "--font-mono-jetbrains",
+  display: "swap",
+  weight: "400 700",
+});
+
 export const metadata: Metadata = {
   metadataBase: new URL(env.public.siteUrl),
   title: {
-    default: `${brand.name} — ${brand.tagline}`,
+    default: `${brand.name} · ${brand.tagline}`,
     template: `%s · ${brand.name}`,
   },
   description: brand.description,
   openGraph: {
-    title: `${brand.name} — ${brand.tagline}`,
+    title: `${brand.name} · ${brand.tagline}`,
     description: brand.description,
     url: brand.url,
     siteName: brand.name,
@@ -55,66 +75,48 @@ export const metadata: Metadata = {
   robots: { index: true, follow: true },
 };
 
-export default async function RootLayout({
+export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
-  // Category counts feed the header's mega-menu. Fetched once in the layout so
-  // the header stays a presentational client component with no data access.
-  const [categories, products] = await Promise.all([
-    listCategories(),
-    listProducts({ includeWholesale: true }),
-  ]);
-
-  const catalogue = Object.fromEntries(
-    products.map((product) => [product.slug, product]),
-  );
-
   return (
     <html
       lang="en-GH"
-      className={`${bricolage.variable} ${figtree.variable} h-full antialiased`}
+      className={`${bricolage.variable} ${figtree.variable} ${jetbrainsMono.variable} h-full antialiased`}
+      /**
+       * The theme script stamps `data-theme` on this element before React
+       * hydrates, so the server HTML (no attribute) and the client DOM (attribute
+       * present) necessarily differ. That is the intended behaviour, not a bug,
+       * `suppressHydrationWarning` tells React to accept it on this element only.
+       *
+       * Without it you get "A tree hydrated but some attributes … didn't match",
+       * which is noise that hides real hydration bugs.
+       */
+      suppressHydrationWarning
     >
-      {/*
-        Blocking theme script. Must run BEFORE first paint, otherwise the page
-        renders in light and repaints to dark — the classic flash. It is inline
-        and synchronous for that reason, and it is the only inline script on the
-        site. Kept to a single expression so there is nothing to get wrong.
-      */}
-      <script
-        dangerouslySetInnerHTML={{
-          // Light unless the viewer has explicitly chosen dark. The OS
-          // preference is deliberately NOT consulted — see globals.css.
-          __html: `(function(){try{document.documentElement.dataset.theme=localStorage.getItem("efe-theme")==="dark"?"dark":"light"}catch(e){document.documentElement.dataset.theme="light"}})()`,
-        }}
-      />
       <body className="flex min-h-full flex-col">
+        {/*
+          Theme script via `next/script` with `beforeInteractive`.
+
+          Two earlier attempts were wrong and both produced console errors:
+          a raw <script> as a child of <html> is invalid HTML ("cannot be a child
+          of <html>"), and a raw <script> anywhere in a React tree draws
+          "Scripts inside React components are never executed when rendering on
+          the client".
+
+          `next/script` is the supported route: Next hoists it into the document
+          so it runs before hydration. Which is the whole requirement, since the
+          theme must be set before first paint or the page flashes the wrong one.
+        */}
+        <Script id="efe-theme" strategy="beforeInteractive">
+          {`(function(){try{document.documentElement.dataset.theme=localStorage.getItem("efe-theme")==="dark"?"dark":"light"}catch(e){document.documentElement.dataset.theme="light"}})()`}
+        </Script>
         <a
           href="#main"
           className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-100 focus:rounded-full focus:bg-forest focus:px-5 focus:py-2 focus:text-sm focus:text-paper"
         >
           Skip to content
         </a>
-        {/*
-          The whole catalogue is handed to the cart once, here, so the drawer can
-          resolve names, prices and imagery with no fetch and no loading state.
-          42 SKUs is a few KB — see CartProvider for why this is only reasonable
-          at this catalogue size.
-        */}
-        <CartProvider catalogue={catalogue}>
-          <SiteHeader
-            categories={categories.map((c) => ({
-              slug: c.slug,
-              name: c.name,
-              count: c.count,
-            }))}
-          />
-          <main id="main" className="flex-1">
-            {children}
-          </main>
-          <SiteFooter />
-          <CartDrawer />
-          <AnalyticsProvider />
-        </CartProvider>
+        {children}
       </body>
     </html>
   );

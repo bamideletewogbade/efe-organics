@@ -1,20 +1,20 @@
 /**
  * A slow marquee of the botanicals actually in the range.
  *
- * This earns its place because the content is true — every name is parsed out of
+ * This earns its place because the content is true, every name is parsed out of
  * a real ingredient list in the catalogue. For an organic skincare brand the
  * ingredient list *is* the pitch, so putting it in motion at the foot of the
  * hero says more than another line of marketing copy would.
  *
  * The loop is a CSS animation rather than Framer Motion, on purpose. It is a
- * linear infinite translate — the one case where CSS is strictly better: it runs
+ * linear infinite translate. The one case where CSS is strictly better: it runs
  * off the main thread, and `animation-play-state: paused` stops it on hover so
  * the names can actually be read. Motion drives transforms from JavaScript,
  * where there is no play state to pause. See `.marquee-track` in globals.css.
  *
  * The list is rendered twice and the track translates exactly -50%, so the seam
  * is invisible with no measurement. The duplicate is hidden from screen readers.
- * No client component needed — this is static markup.
+ * No client component needed, this is static markup.
  */
 export function IngredientTicker({ items }: { items: string[] }) {
   if (items.length === 0) return null;

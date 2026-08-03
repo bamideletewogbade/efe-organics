@@ -1,5 +1,5 @@
 /**
- * Database schema — the backend Efe owns.
+ * Database schema, the backend Efe owns.
  *
  * Built to replace a rented storefront admin, so it has to cover what that
  * admin does: catalogue, stock, pricing rules, orders, customers, and enough
@@ -19,7 +19,7 @@
  *
  * 3. **Orders snapshot their lines.** An order row copies the name and price at
  *    the time of purchase. Joining to live products would silently rewrite
- *    history the first time someone edits a price — the single most common
+ *    history the first time someone edits a price, the single most common
  *    e-commerce data bug.
  *
  * 4. **Nothing is hard-deleted.** Products archive, orders cancel, discounts
@@ -33,6 +33,7 @@
 import {
   bigint,
   boolean,
+  customType,
   index,
   integer,
   jsonb,
@@ -45,6 +46,21 @@ import {
   uuid,
   varchar,
 } from "drizzle-orm/pg-core";
+
+/**
+ * Raw bytes. Drizzle has no built-in bytea, so it is declared here.
+ *
+ * Used to keep uploaded documents in Postgres rather than object storage. At
+ * Efe's scale that is a handful of price lists and certificates, and putting
+ * them in the database means the whole feature ships today instead of waiting
+ * on a Vercel Blob or Cloudflare R2 decision that nobody has made. The cost is
+ * that backups get bigger and very large files are a bad idea, so uploads are
+ * capped and the column can be swapped for a URL later without touching the
+ * rest of the schema.
+ */
+const bytea = customType<{ data: Buffer; default: false }>({
+  dataType: () => "bytea",
+});
 
 /* -------------------------------------------------------------------------- */
 /* Enums                                                                      */
@@ -144,7 +160,7 @@ export const products = pgTable(
 
     blurb: text("blurb"),
     description: text("description"),
-    /** Present for 38 of 42 imported SKUs — the factual base for AI copy. */
+    /** Present for 38 of 42 imported SKUs, the factual base for AI copy. */
     ingredients: text("ingredients"),
     howToUse: text("how_to_use"),
     tags: jsonb("tags").$type<string[]>().notNull().default([]),
@@ -183,7 +199,7 @@ export const variants = pgTable(
     /** Stable public identifier, also the URL segment. */
     slug: varchar("slug", { length: 180 }).notNull(),
     sku: varchar("sku", { length: 64 }),
-    /** "350ml", "1L", "250g" — display label for the size selector. */
+    /** Display label for the size selector: "350ml", "1L", "250g". */
     sizeLabel: varchar("size_label", { length: 48 }),
     sizeMl: integer("size_ml"),
     sizeG: integer("size_g"),
@@ -191,7 +207,7 @@ export const variants = pgTable(
     priceMinor: bigint("price_minor", { mode: "number" }).notNull(),
     /** RRP for the strike-through. Null when there is no discount to show. */
     compareAtMinor: bigint("compare_at_minor", { mode: "number" }),
-    /** What it costs Efe to make. Admin-only — powers margin reporting. */
+    /** What it costs Efe to make. Admin-only, powers margin reporting. */
     costMinor: bigint("cost_minor", { mode: "number" }),
 
     channel: salesChannel("channel").notNull().default("retail"),
@@ -271,7 +287,7 @@ export const discounts = pgTable(
     kind: discountKind("kind").notNull(),
     scope: discountScope("scope").notNull(),
 
-    /** Percentage: 0–100. Fixed: minor units off. */
+    /** Percentage: 0-100. Fixed: minor units off. */
     value: integer("value").notNull(),
 
     /** Null for an automatic discount; set for a code the customer enters. */
@@ -356,7 +372,7 @@ export const customers = pgTable(
     email: varchar("email", { length: 240 }).notNull(),
     name: varchar("name", { length: 200 }),
     phone: varchar("phone", { length: 40 }),
-    /** Marketing consent — recorded, not assumed. */
+    /** Marketing consent. Recorded, not assumed. */
     acceptsMarketing: boolean("accepts_marketing").notNull().default(false),
     notes: text("notes"),
     createdAt: timestamp("created_at", { withTimezone: true })
@@ -381,12 +397,28 @@ export const orders = pgTable(
     discountMinor: bigint("discount_minor", { mode: "number" })
       .notNull()
       .default(0),
-    /** Null until quoted — delivery rates are confirmed with the customer. */
+    /** Null until quoted, delivery rates are confirmed with the customer. */
     deliveryMinor: bigint("delivery_minor", { mode: "number" }),
+
+    /**
+     * Tax charged, and the rate it was charged at.
+     *
+     * Both are here BEFORE anyone knows whether Efe is VAT registered, because
+     * adding tax columns after real orders exist means backfilling history you
+     * can no longer reconstruct. Zero and null are the honest values for "we did
+     * not charge tax", and they cost nothing.
+     *
+     * The rate is stored per order in basis points rather than read from
+     * settings at report time: rates change, and an invoice from last year has
+     * to still say what was actually charged. 1500 = 15.0%.
+     */
+    taxMinor: bigint("tax_minor", { mode: "number" }).notNull().default(0),
+    taxRateBp: integer("tax_rate_bp"),
+
     totalMinor: bigint("total_minor", { mode: "number" }).notNull(),
     currency: varchar("currency", { length: 3 }).notNull().default("GHS"),
 
-    /** Snapshot — a customer moving house must not rewrite past orders. */
+    /** Snapshot. A customer moving house must not rewrite past orders. */
     deliveryName: varchar("delivery_name", { length: 200 }),
     deliveryPhone: varchar("delivery_phone", { length: 40 }),
     deliveryEmail: varchar("delivery_email", { length: 240 }),
@@ -399,6 +431,17 @@ export const orders = pgTable(
     discountId: uuid("discount_id").references(() => discounts.id),
     paystackReference: varchar("paystack_reference", { length: 120 }),
 
+    /**
+     * Set when the order came from a spreadsheet rather than the checkout.
+     *
+     * `legacyReference` is the order number the OLD system used, and it is
+     * unique, which is what makes an import safely repeatable: running the same
+     * export twice updates the same rows instead of inventing a second year of
+     * revenue. Without it there is no way to tell a re-import from real growth.
+     */
+    importBatchId: uuid("import_batch_id").references(() => importBatches.id),
+    legacyReference: varchar("legacy_reference", { length: 120 }),
+
     placedAt: timestamp("placed_at", { withTimezone: true })
       .notNull()
       .defaultNow(),
@@ -408,6 +451,7 @@ export const orders = pgTable(
   },
   (table) => [
     uniqueIndex("orders_reference_idx").on(table.reference),
+    uniqueIndex("orders_legacy_ref_idx").on(table.legacyReference),
     index("orders_status_idx").on(table.status),
     index("orders_placed_idx").on(table.placedAt),
   ],
@@ -415,7 +459,7 @@ export const orders = pgTable(
 
 /**
  * Order lines snapshot name and price. `variantId` is a soft pointer kept for
- * reporting — if the variant is archived the line still reads correctly.
+ * reporting. If the variant is archived the line still reads correctly.
  */
 export const orderItems = pgTable(
   "order_items",
@@ -428,6 +472,15 @@ export const orderItems = pgTable(
 
     nameSnapshot: varchar("name_snapshot", { length: 300 }).notNull(),
     sizeSnapshot: varchar("size_snapshot", { length: 48 }),
+    /**
+     * The catalogue slug at time of purchase.
+     *
+     * `variantId` is null while the catalogue still lives in a static file, so
+     * without this an order line has no way back to the thing that was bought.
+     * It is also what "customers who bought this" and reorder links key on, and
+     * unlike a foreign key it keeps working after a product is archived.
+     */
+    slugSnapshot: varchar("slug_snapshot", { length: 180 }),
     unitPriceMinor: bigint("unit_price_minor", { mode: "number" }).notNull(),
     quantity: integer("quantity").notNull(),
     lineTotalMinor: bigint("line_total_minor", { mode: "number" }).notNull(),
@@ -444,8 +497,8 @@ export const orderItems = pgTable(
  *
  * One wide table rather than a table per event type: event shapes change
  * constantly and migrations should not be the cost of tracking something new.
- * `props` is jsonb; the columns that get queried in every report — session,
- * name, time, path — are promoted out for indexing.
+ * `props` is jsonb; the columns that get queried in every report. Session,
+ * name, time, path, are promoted out for indexing.
  *
  * `anonymousId` is a first-party cookie, not a fingerprint. No third-party
  * scripts, so this survives ad blockers and is a lot easier to justify under
@@ -469,7 +522,7 @@ export const events = pgTable(
 
     props: jsonb("props").$type<Record<string, unknown>>().notNull().default({}),
 
-    /** Coarse only — no raw IP, no user agent string. */
+    /** Coarse only. No raw IP, no user agent string. */
     country: varchar("country", { length: 2 }),
     deviceType: varchar("device_type", { length: 16 }),
 
@@ -485,6 +538,140 @@ export const events = pgTable(
 );
 
 /* -------------------------------------------------------------------------- */
+/* Shop configuration                                                         */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * What delivery costs, per region.
+ *
+ * This table is why the order screen can stop being a manual job. Until now
+ * every order needed someone to work out a delivery charge by hand and type it
+ * in, which is fine at three orders a week and unworkable at thirty.
+ *
+ * A region with NO ROW is not free, it is unquoted. That distinction is the
+ * whole point: an absent rate means "we will call you", and the checkout says
+ * so. Storing 0 to mean "not set up yet" is how a shop accidentally ships
+ * nationwide for nothing.
+ *
+ * `freeOverMinor` is the free-delivery threshold for that region. Null means
+ * there is no threshold, not that everything is free.
+ */
+export const deliveryRates = pgTable(
+  "delivery_rates",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    /** Matches a value in lib/checkout REGIONS. */
+    region: varchar("region", { length: 80 }).notNull(),
+    feeMinor: bigint("fee_minor", { mode: "number" }).notNull(),
+    /** Basket subtotal at or above which delivery is free. Null = no offer. */
+    freeOverMinor: bigint("free_over_minor", { mode: "number" }),
+    /** Shown to the customer, e.g. "1 to 2 working days". */
+    etaLabel: varchar("eta_label", { length: 80 }),
+    active: boolean("active").notNull().default(true),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (table) => [uniqueIndex("delivery_rates_region_idx").on(table.region)],
+);
+
+/**
+ * Shop-wide settings, one row per key.
+ *
+ * Key/value rather than a single wide row so adding a setting is an insert, not
+ * a migration. `value` is jsonb so a setting can be a number, a string or a
+ * small object without a new column each time.
+ */
+export const settings = pgTable("settings", {
+  key: varchar("key", { length: 64 }).primaryKey(),
+  value: jsonb("value").$type<unknown>().notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+});
+
+/* -------------------------------------------------------------------------- */
+/* Bringing the old business in                                               */
+/* -------------------------------------------------------------------------- */
+
+export const documentKind = pgEnum("document_kind", [
+  "price_list",
+  "supplier",
+  "certificate",
+  "financial",
+  "brand",
+  "data_export",
+  "other",
+]);
+
+/**
+ * Files the owner uploads: price lists, certificates, supplier terms, exports
+ * from whatever system the business ran on before.
+ *
+ * This exists so the history of the business can arrive on day one rather than
+ * being retyped. It is also the raw material for anything AI: a price list and
+ * a certificate are facts a model can be grounded in, and grounding is the
+ * difference between a useful assistant and one that invents claims about a
+ * cosmetic product.
+ *
+ * Bytes live in the row. See the `bytea` note at the top of this file for why,
+ * and for the conditions under which that should change.
+ */
+export const documents = pgTable(
+  "documents",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    name: varchar("name", { length: 240 }).notNull(),
+    kind: documentKind("kind").notNull().default("other"),
+    mimeType: varchar("mime_type", { length: 120 }).notNull(),
+    sizeBytes: integer("size_bytes").notNull(),
+    content: bytea("content").notNull(),
+    /** What it is and why it was kept, in the owner's words. */
+    notes: text("notes"),
+    uploadedBy: varchar("uploaded_by", { length: 240 }),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (table) => [index("documents_kind_idx").on(table.kind)],
+);
+
+export const importStatus = pgEnum("import_status", [
+  "previewed",
+  "committed",
+  "failed",
+]);
+
+/**
+ * A record of every spreadsheet that was brought in.
+ *
+ * Imports go wrong quietly: a date column read as American, a price read as
+ * cedis when it was pesewas, one duplicate run that doubles a year of revenue.
+ * Without a batch record there is no way to tell which rows came from where, so
+ * every committed row carries its batch id and a bad import can be identified
+ * and undone rather than argued about.
+ */
+export const importBatches = pgTable(
+  "import_batches",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    filename: varchar("filename", { length: 300 }).notNull(),
+    /** What the file turned out to contain. */
+    entity: varchar("entity", { length: 40 }).notNull(),
+    status: importStatus("status").notNull().default("previewed"),
+    rowsTotal: integer("rows_total").notNull().default(0),
+    rowsImported: integer("rows_imported").notNull().default(0),
+    rowsSkipped: integer("rows_skipped").notNull().default(0),
+    /** Column mapping used, plus the reason for every skipped row. */
+    report: jsonb("report").$type<Record<string, unknown>>(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (table) => [index("import_batches_time_idx").on(table.createdAt)],
+);
+
+/* -------------------------------------------------------------------------- */
 /* Admin                                                                      */
 /* -------------------------------------------------------------------------- */
 
@@ -495,8 +682,29 @@ export const adminUsers = pgTable(
     email: varchar("email", { length: 240 }).notNull(),
     name: varchar("name", { length: 200 }),
     role: adminRole("role").notNull().default("staff"),
-    /** External auth subject (Clerk user id). No passwords stored here. */
+    /** External auth subject (Clerk user id), once Clerk lands. */
     authSubject: varchar("auth_subject", { length: 120 }),
+
+    /**
+     * scrypt hash, stored as `scrypt$N$r$p$salt$hash`, all base64url.
+     *
+     * This column exists because the single shared ADMIN_PASSWORD made the audit
+     * log a lie: every row recorded actor "admin", so the moment a second person
+     * had the password there was no way to tell who changed a price, and no way
+     * to revoke one person without locking everyone out.
+     *
+     * scrypt rather than bcrypt because it is in Node's standard library and
+     * this project should not take a native dependency for one function. It is
+     * memory-hard, which is the property that matters against the GPU attack a
+     * leaked hash invites.
+     *
+     * Null is legitimate: an invited user who has not set a password yet, or a
+     * user who will authenticate through Clerk later.
+     */
+    passwordHash: text("password_hash"),
+    /** Forces a password change on next sign-in. Set when an owner resets one. */
+    mustChangePassword: boolean("must_change_password").notNull().default(false),
+
     active: boolean("active").notNull().default(true),
     lastSeenAt: timestamp("last_seen_at", { withTimezone: true }),
     createdAt: timestamp("created_at", { withTimezone: true })

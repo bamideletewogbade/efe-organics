@@ -24,7 +24,7 @@ import { MAX_QTY_PER_LINE } from "@/lib/cart";
  *   · focus moves into the panel on open and back to the trigger on close;
  *   · body scroll is locked while open, so the page behind cannot scroll away.
  *
- * On mobile it is a bottom sheet, on desktop a right-hand panel — the same
+ * On mobile it is a bottom sheet, on desktop a right-hand panel, the same
  * component, because thumb reach and cursor reach want different edges.
  */
 export function CartDrawer() {
@@ -129,7 +129,7 @@ export function CartDrawer() {
                   Nothing in here yet
                 </p>
                 <p className="mt-2 text-sm/6 text-muted">
-                  Black soap, herbal shampoos, shea butters — have a look.
+                  Black soap, herbal shampoos, shea butters, have a look.
                 </p>
                 <Link
                   href="/shop"

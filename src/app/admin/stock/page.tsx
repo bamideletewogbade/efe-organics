@@ -1,3 +1,4 @@
+import { Empty, PageHeader, Pill } from "@/components/admin/AdminUI";
 import { listAdminVariants } from "@/db/queries/admin";
 import { StockTable } from "@/components/admin/StockTable";
 
@@ -22,27 +23,33 @@ export default async function AdminStockPage() {
 
   return (
     <div>
-      <h1 className="text-2xl">Stock</h1>
-      <p className="mt-2 text-sm text-muted">
-        Every sellable size. Adjust with a reason so the history stays honest.
-      </p>
-
-      <div className="mt-6 flex flex-wrap gap-3 text-sm">
-        <span className="rounded-full bg-red-500/10 px-3 py-1.5 text-red-600 dark:text-red-400">
-          {out} out of stock
-        </span>
-        <span className="rounded-full bg-amber-500/10 px-3 py-1.5 text-amber-700 dark:text-amber-400">
-          {low} running low
-        </span>
-        <span className="rounded-full bg-surface-sunken px-3 py-1.5 text-muted">
-          {untracked} not tracked
-        </span>
-      </div>
+      <PageHeader
+        title="Stock"
+        description="Every sellable size. Adjust with a reason so the history stays honest."
+        meta={
+          variants.length > 0 ? `${variants.length} sizes tracked` : undefined
+        }
+        action={
+          variants.length > 0 ? (
+            <div className="flex flex-wrap gap-2">
+              {/* Only the counts that mean something appear. A row of zeroes
+                  trains the eye to ignore the whole strip. */}
+              {out > 0 && <Pill tone="bad">{out} out of stock</Pill>}
+              {low > 0 && <Pill tone="warn">{low} running low</Pill>}
+              {out === 0 && low === 0 && (
+                <Pill tone="good">Everything in stock</Pill>
+              )}
+              {untracked > 0 && <Pill>{untracked} not tracked</Pill>}
+            </div>
+          ) : undefined
+        }
+      />
 
       {variants.length === 0 ? (
-        <p className="mt-10 rounded-2xl border border-line bg-surface-sunken p-8 text-center text-sm text-muted">
-          Nothing to show yet — connect a database and run the seed.
-        </p>
+        <Empty
+          title="No stock to show"
+          body="Sizes appear here once the catalogue is loaded. Connect a database and run the seed."
+        />
       ) : (
         <StockTable variants={variants} />
       )}

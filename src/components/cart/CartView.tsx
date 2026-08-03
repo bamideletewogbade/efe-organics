@@ -17,7 +17,7 @@ import { discountPercent, formatPrice } from "@/lib/money";
  * products usually carries a real discount and that is worth stating at the
  * moment someone is deciding whether to go through with it.
  *
- * The summary is sticky on desktop so the total stays visible down a long list —
+ * The summary is sticky on desktop so the total stays visible down a long list,
  * on mobile it sits after the items, where a sticky bar would eat the viewport.
  *
  * Checkout is not wired yet (Paystack, Phase 2). The button says so plainly
@@ -47,7 +47,7 @@ export function CartView() {
           Your basket is empty
         </p>
         <p className="measure mx-auto mt-2 text-sm/6 text-muted">
-          Start with the African Black Soap bath bar — it is where most people
+          Start with the African Black Soap bath bar, it is where most people
           begin, and it is GH₵15.
         </p>
         <Link

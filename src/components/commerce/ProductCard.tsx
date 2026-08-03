@@ -13,7 +13,7 @@ import { discountPercent, formatPrice } from "@/lib/money";
  * One shelf entry. A size family renders as a single card led by its cheapest
  * variant, so the grid shows 28 decisions rather than 41 near-duplicates.
  *
- * Micro-interactions, all pulling in one direction — "this is a physical object
+ * Micro-interactions, all pulling in one direction, "this is a physical object
  * you could pick up":
  *   · the card lifts and its shadow warms to leaf green;
  *   · the photograph cross-fades to a second angle (drawn from anywhere in the
@@ -101,7 +101,7 @@ export function ProductCard({
             </span>
           )}
 
-          {/* Size pills slide up on hover — they are secondary to the image. */}
+          {/* Size pills slide up on hover, they are secondary to the image. */}
           {sizes.length > 1 && (
             <div className="pointer-events-none absolute inset-x-3 bottom-3 flex translate-y-3 flex-wrap gap-1.5 opacity-0 transition-all duration-300 ease-out group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:translate-y-0 group-focus-within:opacity-100">
               {sizes.map((size) => (

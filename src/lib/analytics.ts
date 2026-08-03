@@ -7,7 +7,7 @@
  *
  * 1. **It must not cost the shopper anything.** Events are queued and flushed on
  *    a timer, with `navigator.sendBeacon` so a flush survives the page being
- *    closed. A `fetch` in an unload handler is routinely cancelled — which is
+ *    closed. A `fetch` in an unload handler is routinely cancelled, which is
  *    exactly when the most interesting events (abandon, exit) happen.
  *
  * 2. **It must not break anything.** Every call is wrapped; storage can throw in
@@ -51,7 +51,7 @@ function writeStore(key: string, value: string): void {
   try {
     window.localStorage.setItem(key, value);
   } catch {
-    /* private browsing — tracking degrades, the shop does not */
+    /* private browsing. Tracking degrades, the shop does not */
   }
 }
 
@@ -68,7 +68,7 @@ function anonymousId(): string {
   return id;
 }
 
-/** Rotates after 30 minutes of inactivity — the conventional session boundary. */
+/** Rotates after 30 minutes of inactivity, the conventional session boundary. */
 function sessionId(): string {
   const now = Date.now();
   const raw = readStore(SESSION_KEY);

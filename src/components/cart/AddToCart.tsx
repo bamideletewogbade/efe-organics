@@ -10,7 +10,7 @@ import { duration, easeSoft } from "@/components/motion/tokens";
  * Add-to-basket control for the product page.
  *
  * Quantity stepper plus the button, because on a product page someone buying
- * three bars should not have to press "add" three times — whereas on a grid card
+ * three bars should not have to press "add" three times, whereas on a grid card
  * a single tap is right, which is why the card uses its own minimal version.
  *
  * The button confirms in place: it swaps to "Added" for ~1.6s rather than firing

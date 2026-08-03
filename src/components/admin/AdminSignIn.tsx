@@ -3,6 +3,7 @@
 import { useActionState } from "react";
 
 import { signInAction } from "@/app/admin/actions";
+import { Wordmark } from "@/components/brand/Wordmark";
 
 /**
  * Admin sign-in.
@@ -20,10 +21,19 @@ export function AdminSignIn() {
         action={action}
         className="w-full max-w-sm rounded-2xl border border-gold/20 bg-forest-deep p-8"
       >
-        <p className="font-[family-name:var(--font-display)] text-2xl font-bold text-paper">
-          Efe <span className="text-gold">Admin</span>
+        {/* The mark gets real size here, this is the one admin screen someone
+            lands on cold, so it should look unmistakably like Efe before it
+            asks for a password. */}
+        {/* Wrapper does the centring: Wordmark's root is `inline-flex`, which
+            shrink-wraps, so `justify-center` on it has nothing to distribute. */}
+        <div className="flex justify-center">
+          <Wordmark onDark size="large" />
+        </div>
+
+        <p className="mt-5 text-center text-[0.62rem] font-semibold uppercase tracking-[0.22em] text-accent-quiet">
+          Admin
         </p>
-        <p className="mt-2 text-sm text-paper/55">
+        <p className="mt-3 text-center text-sm text-paper/60">
           Sign in to manage the shop.
         </p>
 
@@ -41,8 +51,10 @@ export function AdminSignIn() {
           />
         </label>
 
+        {/* This plate is always dark, so the dark-theme blocked tone is used
+            directly rather than via the theme-switching token. */}
         {state?.error && (
-          <p role="alert" className="mt-3 text-sm text-red-400">
+          <p role="alert" className="mt-3 text-sm text-[#e08a72]">
             {state.error}
           </p>
         )}

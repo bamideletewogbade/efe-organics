@@ -42,7 +42,7 @@ export function ShopToolbar({
 
   return (
     <div className="flex flex-col gap-5 border-b border-line pb-6">
-      {/* Categories — horizontally scrollable on a phone rather than wrapping
+      {/* Categories. Horizontally scrollable on a phone rather than wrapping
           into four ragged rows and pushing the grid off the screen. */}
       <div className="-mx-4 overflow-x-auto px-4 sm:mx-0 sm:px-0 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         <ul className="flex w-max items-center gap-2 sm:w-auto sm:flex-wrap">

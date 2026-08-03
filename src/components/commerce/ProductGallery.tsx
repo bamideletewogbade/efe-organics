@@ -11,7 +11,7 @@ import { duration, easeSoft } from "@/components/motion/tokens";
  *
  * Most SKUs have one photograph and a few have three, so the component has to
  * look deliberate at both extremes rather than showing a thumbnail rail with a
- * single lonely item — with one image the rail is simply not rendered.
+ * single lonely item. With one image the rail is simply not rendered.
  *
  * The active image cross-fades rather than swapping: these are photographs of
  * the same object from different angles, and a hard cut reads as a glitch where
@@ -58,7 +58,7 @@ export function ProductGallery({
             <Image
               src={images[active]}
               alt={
-                active === 0 ? name : `${name} — view ${active + 1}`
+                active === 0 ? name : `${name}, view ${active + 1}`
               }
               fill
               priority={active === 0}

@@ -9,7 +9,7 @@
  * the gold has specular highlights and cast shadow, and a mean smears those
  * into a muddy beige that appears nowhere in the artwork.
  *
- * Output is advisory — it tells us what the mark is actually made of. The tokens
+ * Output is advisory. It tells us what the mark is actually made of. The tokens
  * in globals.css are then chosen from that, adjusted for contrast.
  */
 
@@ -48,7 +48,7 @@ function median(values) {
 
 function report(label, pixels) {
   if (pixels.length < 50) {
-    console.log(`  ${label.padEnd(14)} — too few pixels`);
+    console.log(`  ${label.padEnd(14)}, too few pixels`);
     return;
   }
   const byLuma = pixels.slice().sort((a, b) => luma(...a) - luma(...b));

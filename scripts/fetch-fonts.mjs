@@ -4,7 +4,7 @@
  *   node scripts/fetch-fonts.mjs
  *
  * Why self-hosted rather than `next/font/google`: that helper fetches from
- * Google at BUILD time, and the build environment cannot reach it — every build
+ * Google at BUILD time, and the build environment cannot reach it, every build
  * died on "Failed to fetch `Fraunces` from Google Fonts". Self-hosting removes
  * the network from the build entirely, and is faster for users too (one less
  * origin, no redirect chain).
@@ -33,6 +33,19 @@ const FACES = [
     file: "figtree-variable.woff2",
     css: "https://fonts.googleapis.com/css2?family=Figtree:wght@300..900&display=swap",
   },
+  /**
+   * Identifiers only: order references, SKUs.
+   *
+   * An order reference is read aloud down a phone ("EFE-4K2P9-A7QX"), and
+   * Figtree does not distinguish 0 from O, or 1 from l from I. JetBrains Mono
+   * has a slashed zero and disambiguated letterforms, which turns a whole class
+   * of "she read it back wrong" into a non-problem. Not used for prices, where
+   * Figtree's tabular figures already line up correctly.
+   */
+  {
+    file: "jetbrains-mono-variable.woff2",
+    css: "https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400..700&display=swap",
+  },
 ];
 
 await mkdir(OUT, { recursive: true });
@@ -42,8 +55,8 @@ for (const face of FACES) {
 
   /**
    * The stylesheet ships one @font-face block per subset (vietnamese, latin-ext,
-   * latin, …). We only want plain latin. Identify it by its unicode-range —
-   * the latin block is the one containing U+0000-00FF — rather than by position,
+   * latin, …). We only want plain latin. Identify it by its unicode-range,
+   * the latin block is the one containing U+0000-00FF. Rather than by position,
    * which changes as Google adds subsets.
    */
   const blocks = css.split("@font-face").slice(1);

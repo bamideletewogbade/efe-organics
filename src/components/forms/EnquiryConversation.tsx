@@ -16,7 +16,7 @@ import {
  * Conversational enquiry.
  *
  * One question at a time, in Efe's voice, instead of a wall of labelled boxes.
- * The reason this converts better is not novelty — it is that each screen asks
+ * The reason this converts better is not novelty, it is that each screen asks
  * for one small thing, and every answer you give raises the odds you finish the
  * next one. A twelve-field form shows you the whole cost up front.
  *
@@ -27,16 +27,16 @@ import {
  * Deliberate choices:
  *
  *   · **Answered questions stay visible** as a scrollback above the current one.
- *     A conversation you cannot re-read is worse than a form — you lose the
+ *     A conversation you cannot re-read is worse than a form, you lose the
  *     sense of how much you have already invested, and of what you said.
  *   · **Any answer is editable** by clicking it. No "back" ping-pong.
  *   · **Enter advances**, Shift+Enter makes a newline in long answers. Choice
  *     steps advance on click; there is no separate "next" to hunt for.
  *   · **A plain-form escape hatch.** Some people hate this pattern and some
  *     assistive tech handles a static form far better. The toggle is not a
- *     nicety — it is the accessible baseline, and it keeps the flow honest.
+ *     nicety. It is the accessible baseline, and it keeps the flow honest.
  *
- * Delivery is still `mailto:` — see EnquiryForm for why (no mail provider is
+ * Delivery is still `mailto:`. See EnquiryForm for why (no mail provider is
  * configured, and a form that silently discards a lead is worse than one that
  * opens your mail app).
  */
@@ -44,15 +44,30 @@ export function EnquiryConversation({
   script,
   kind,
   fallback,
+  seed,
 }: {
   script: EnquiryScript;
   kind: "trade" | "general";
   /** Static-form alternative, rendered when the visitor opts out. */
   fallback: React.ReactNode;
+  /**
+   * Answers already known from where the visitor came from.
+   *
+   * Someone who clicks "enquire about bulk supply" from the raw material
+   * section has already told us what they want, and asking again is the kind of
+   * small stupidity that makes people abandon a form. The conversation opens on
+   * the first question the seed does not already answer.
+   */
+  seed?: Record<string, string>;
 }) {
   const reduce = useReducedMotion();
-  const [answers, setAnswers] = useState<Record<string, string>>({});
-  const [index, setIndex] = useState(0);
+  const [answers, setAnswers] = useState<Record<string, string>>(seed ?? {});
+  const [index, setIndex] = useState(() => {
+    if (!seed) return 0;
+    const steps = visibleSteps(script, seed);
+    const first = steps.findIndex((step) => !seed[step.id]);
+    return first === -1 ? 0 : first;
+  });
   const [draft, setDraft] = useState("");
   const [editing, setEditing] = useState<string | null>(null);
   const [done, setDone] = useState(false);
@@ -93,7 +108,7 @@ export function EnquiryConversation({
     setAnswers(next);
     setDraft("");
 
-    // Recompute visibility with the new answer — a choice can reveal a step.
+    // Recompute visibility with the new answer, a choice can reveal a step.
     const nextSteps = visibleSteps(script, next);
     const position = nextSteps.findIndex((s) => s.id === step.id);
 
@@ -124,8 +139,8 @@ export function EnquiryConversation({
 
     const subject =
       kind === "trade"
-        ? `Wholesale enquiry — ${answers.business_type ?? "trade"}`
-        : `Website enquiry — ${answers.topic ?? "general"}`;
+        ? `Wholesale enquiry, ${answers.business_type ?? "trade"}`
+        : `Website enquiry, ${answers.topic ?? "general"}`;
 
     return (
       <motion.div
@@ -246,13 +261,13 @@ export function EnquiryConversation({
         {/*
           A keyed `motion.div` rather than `AnimatePresence mode="wait"`.
           `mode="wait"` holds the next child until the previous one's EXIT
-          animation reports completion — so if frames stop ticking (backgrounded
+          animation reports completion, so if frames stop ticking (backgrounded
           tab, throttled rendering, an interrupted transition) the conversation
           deadlocks on the old question and the visitor is stuck. Observed
           exactly that: the step frozen at its initial style, content one answer
           behind, progress counter already advanced.
 
-          Changing `key` remounts the node, so the entrance still animates — we
+          Changing `key` remounts the node, so the entrance still animates, we
           simply give up the exit animation, which nobody was going to notice, in
           exchange for a flow that cannot jam.
         */}

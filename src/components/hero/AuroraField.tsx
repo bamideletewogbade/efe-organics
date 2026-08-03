@@ -8,20 +8,20 @@ import { easeInOut } from "@/components/motion/tokens";
  * The hero's gradient backdrop: three soft colour fields drifting behind the
  * content, finished with a grain layer.
  *
- * Design intent — this is a botanical skincare brand, so the gradient reads as
+ * Design intent. This is a botanical skincare brand, so the gradient reads as
  * light moving through leaves rather than the purple-to-blue SaaS hero. Colours
  * are drawn only from the brand palette: forest depth, a gold shaft, one leaf
  * green. Nothing here is a hue the brand does not already own.
  *
- * Performance — blurred surfaces are expensive to repaint, so:
+ * Performance. Blurred surfaces are expensive to repaint, so:
  *   · only `transform` animates, never blur, size or colour;
  *   · durations are 20s+, so the compositor does very little per frame;
  *   · two of the three fields are gated behind `sm:` and never render on phones;
  *   · `willChange: transform` keeps each field on its own layer.
- * The grain is a static SVG data URI — animated noise is a battery fire.
+ * The grain is a static SVG data URI, animated noise is a battery fire.
  */
 
-/* Not `as const` — Framer Motion's keyframe arrays must be mutable. */
+/* Not `as const`, Framer Motion's keyframe arrays must be mutable. */
 const FIELDS: Array<{
   className: string;
   animate: { x: number[]; y: number[]; scale: number[] };

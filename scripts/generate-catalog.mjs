@@ -3,7 +3,7 @@
  *
  *   node scripts/scrape-reseller.mjs && node scripts/generate-catalog.mjs
  *
- * The generated file is committed — the site must build without network access.
+ * The generated file is committed, the site must build without network access.
  * Edit `curation.mjs` (taxonomy) or re-run the scrape (facts); never hand-edit
  * the generated output.
  */
@@ -31,7 +31,7 @@ const CATEGORY_ORDER = [
 
 const q = (s) => JSON.stringify(s);
 
-/** Strip the size off a display name — the size selector renders it instead. */
+/** Strip the size off a display name, the size selector renders it instead. */
 function baseName(name) {
   return name
     .replace(/\s*\d+(\.\d+)?\s*(ml|ltr|litre|liter|l|g|kgs|kg)\b\.?/gi, "")
@@ -109,7 +109,7 @@ const shelf = products.filter((p) => !p.wholesale);
 const decisions = new Set(shelf.map((p) => p.group ?? p.slug)).size;
 
 const file = `/**
- * GENERATED FILE — do not edit by hand.
+ * GENERATED FILE, do not edit by hand.
  *
  *   node scripts/scrape-reseller.mjs      # refresh facts from the reseller
  *   node scripts/generate-catalog.mjs     # rebuild this file
@@ -117,13 +117,13 @@ const file = `/**
  * Facts (names, prices, copy, ingredients, imagery) come from the live
  * Coloursbay listing, captured ${source.capturedAt.slice(0, 10)}.
  * Taxonomy (category, line, size, variant grouping, slugs) comes from
- * scripts/curation.mjs — the reseller's own categories are not usable.
+ * scripts/curation.mjs, the reseller's own categories are not usable.
  *
  * IMAGERY: imported from the reseller as a working placeholder set. Ownership
- * is unconfirmed — see public/products/README.md before launch.
+ * is unconfirmed, see public/products/README.md before launch.
  *
  * PRICES: the reseller's selling prices, not confirmed as Efe's own RRP.
- * See docs/OPEN-QUESTIONS.md #1 — do not switch on checkout against these.
+ * See docs/OPEN-QUESTIONS.md #1, do not switch on checkout against these.
  *
  * ${products.length} SKUs · ${shelf.length} on the consumer shelf · ${decisions} buying decisions
  * after variant grouping (${groups.size} size families).

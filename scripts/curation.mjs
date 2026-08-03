@@ -1,7 +1,7 @@
 /**
  * Curation map: reseller slug → Efe's own taxonomy.
  *
- * The reseller's own categories are not usable — 22 products sit in `bodycare`
+ * The reseller's own categories are not usable, 22 products sit in `bodycare`
  * (including every black soap bath) while `african-black-soap` holds 2, and it
  * carries both `bodycare` and `body-care` as separate slugs. So the scrape
  * supplies facts (name, price, copy, ingredients, imagery) and this file owns
@@ -9,7 +9,7 @@
  *
  * `group` is the important one: it collapses 42 SKUs into ~26 buying decisions
  * by turning "Lemon Blast 350ml / 500ml / 1L" into one product with a size
- * selector — the upsell identified in the transformation brief.
+ * selector, the upsell identified in the transformation brief.
  */
 
 export const CURATION = {
@@ -118,7 +118,7 @@ export const CURATION = {
     group: "organic-gentle-glow-black-soap-bath",
   },
 
-  // Raw material, sold by the quarter-tonne. Not a consumer product — it is
+  // Raw material, sold by the quarter-tonne. Not a consumer product, it is
   // hidden from the shop and surfaced on the wholesale page instead.
   "pure-african-black-soap-crumble-250kgs": {
     slug: "african-black-soap-crumble-250kg",

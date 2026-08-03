@@ -2,7 +2,7 @@
  * Shop URL contract: which query parameters exist and how they are parsed.
  *
  * Kept out of the page component so the toolbar, the page and any future
- * sitemap generator all agree on the same vocabulary — and so an unknown or
+ * sitemap generator all agree on the same vocabulary, and so an unknown or
  * hand-edited parameter degrades to the default rather than throwing.
  */
 
@@ -12,7 +12,7 @@ export const SORTS = [
   { key: "featured", label: "Featured" },
   { key: "price-asc", label: "Price ↑" },
   { key: "price-desc", label: "Price ↓" },
-  { key: "name", label: "A–Z" },
+  { key: "name", label: "A-Z" },
 ] as const;
 
 export type SortKey = (typeof SORTS)[number]["key"];
@@ -31,8 +31,8 @@ export function parseSort(value: unknown): SortKey {
 }
 
 /**
- * `featured` is the order `listShelf()` already returns — flagship line first,
- * then cheapest first — so it is left untouched rather than re-sorted.
+ * `featured` is the order `listShelf()` already returns. Flagship line first,
+ * then cheapest first. So it is left untouched rather than re-sorted.
  */
 export function sortShelf(
   groups: ProductGroup[],

@@ -1,5 +1,5 @@
 /**
- * GENERATED FILE — do not edit by hand.
+ * GENERATED FILE, do not edit by hand.
  *
  *   node scripts/scrape-reseller.mjs      # refresh facts from the reseller
  *   node scripts/generate-catalog.mjs     # rebuild this file
@@ -7,13 +7,13 @@
  * Facts (names, prices, copy, ingredients, imagery) come from the live
  * Coloursbay listing, captured 2026-07-25.
  * Taxonomy (category, line, size, variant grouping, slugs) comes from
- * scripts/curation.mjs — the reseller's own categories are not usable.
+ * scripts/curation.mjs, the reseller's own categories are not usable.
  *
  * IMAGERY: imported from the reseller as a working placeholder set. Ownership
- * is unconfirmed — see public/products/README.md before launch.
+ * is unconfirmed, see public/products/README.md before launch.
  *
  * PRICES: the reseller's selling prices, not confirmed as Efe's own RRP.
- * See docs/OPEN-QUESTIONS.md #1 — do not switch on checkout against these.
+ * See docs/OPEN-QUESTIONS.md #1, do not switch on checkout against these.
  *
  * 42 SKUs · 41 on the consumer shelf · 27 buying decisions
  * after variant grouping (11 size families).
@@ -480,7 +480,7 @@ export const PRODUCTS: Product[] = [
     priceMinor: 11500,
     compareAtMinor: 13800,
     sizeMl: 1000,
-    blurb: "African Black Soap Gel Bath 1 Liter — fragrance free.",
+    blurb: "African Black Soap Gel Bath 1 Liter. Fragrance free.",
     ingredients: "African Black Soap Crumble",
     howToUse: "Use for Bath or Hair Wash",
     tags: ["black soap", "bath gel", "unscented", "1 liter", "African"],

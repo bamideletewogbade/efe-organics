@@ -4,15 +4,15 @@
  * TWO THINGS ARE DELIBERATELY NOT INVENTED HERE:
  *
  * 1. **Delivery rates.** Nobody has told us what Efe charges to deliver to
- *    Kumasi (docs/OPEN-QUESTIONS.md #4). Rather than make a number up — which
- *    would be quoting a customer a price the business never agreed to — regions
+ *    Kumasi (docs/OPEN-QUESTIONS.md #4). Rather than make a number up, which
+ *    would be quoting a customer a price the business never agreed to, regions
  *    are collected and delivery is quoted on confirmation. `feeMinor: null`
  *    means "we will tell you", not "free".
  *
  * 2. **Payment capture.** Paystack is the intended provider (MoMo + card) but no
  *    keys exist. `capabilities.hasPaystack` gates it. Until then an order is
  *    RECORDED and handed to the customer as a reference plus a WhatsApp/email
- *    handoff — nothing is charged, and the UI says so.
+ *    handoff. Nothing is charged, and the UI says so.
  *
  * The order reference is generated client-side purely so the customer has
  * something to quote. It is not an identity: the server will mint the real one
@@ -75,7 +75,7 @@ export type DraftOrder = {
  * Builds order lines from the cart, re-reading every price from the catalogue.
  *
  * This is the same rule as the cart: the client never states a price. When this
- * moves server-side the function is unchanged — it already treats the incoming
+ * moves server-side the function is unchanged, it already treats the incoming
  * lines as nothing but slugs and quantities.
  */
 export function buildOrderLines(

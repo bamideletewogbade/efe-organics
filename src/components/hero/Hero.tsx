@@ -22,7 +22,7 @@ export type HeroStat = { value: string; label: string };
  * to read and one thing to do.
  *
  * So the hero now carries: what this is, what it costs to start, and two ways
- * in. The products moved to the rail immediately below, where a grid belongs —
+ * in. The products moved to the rail immediately below, where a grid belongs,
  * nothing was lost, it just stopped competing with the film.
  *
  * ONE SCREEN. `min-h-svh` with the content centred and the ingredient ticker
@@ -30,7 +30,7 @@ export type HeroStat = { value: string; label: string };
  * height. `svh` rather than `vh` so a phone's collapsing URL bar does not shift
  * the layout mid-scroll.
  *
- * LANGUAGE. Plain words only — "Shop the collection", "Our story", "Free
+ * LANGUAGE. Plain words only. "Shop the collection", "Our story", "Free
  * delivery over…". Nothing a first-time visitor has to decode.
  */
 export function Hero({
@@ -58,7 +58,7 @@ export function Hero({
     offset: ["start start", "end start"],
   });
 
-  // Gentle lift as the hero leaves. Small numbers — a big parallax over video
+  // Gentle lift as the hero leaves. Small numbers, a big parallax over video
   // makes the page feel like it is lagging behind the scroll.
   const copyY = useTransform(scrollYProgress, [0, 1], ["0%", "-14%"]);
   const fade = useTransform(scrollYProgress, [0, 0.9], [1, 0.35]);
@@ -82,7 +82,7 @@ export function Hero({
           style={reduce ? undefined : { opacity: fade, y: copyY }}
           className="hero-tight flex flex-1 flex-col justify-center py-10"
         >
-          {/* Eyebrow — a hairline and the tagline, not a bordered pill. */}
+          {/* Eyebrow. A hairline and the tagline, not a bordered pill. */}
           <motion.p {...at(0.05)} className="flex items-center gap-3.5">
             <span aria-hidden className="h-px w-10 bg-gold/70" />
             <span className="eyebrow text-[0.62rem] tracking-[0.28em] text-accent-quiet">
@@ -103,7 +103,7 @@ export function Hero({
             className="measure mt-5 text-base/7 text-paper/75 sm:mt-6 sm:text-lg/8"
           >
             Handcrafted African Black Soap, herbal hair care and natural body
-            care — made in {city} the traditional way.
+            care, made in {city} the traditional way.
           </motion.p>
 
           <motion.div
@@ -137,7 +137,7 @@ export function Hero({
             </Link>
           </motion.div>
 
-          {/* One line of plain facts. Price first — it is the question a
+          {/* One line of plain facts. Price first, it is the question a
               first-time visitor actually has. */}
           <motion.p
             {...at(0.96)}
@@ -154,7 +154,7 @@ export function Hero({
         </motion.div>
       </Container>
 
-      {/* Ingredient marquee — real botanicals from the catalogue, pinned to the
+      {/* Ingredient marquee. Real botanicals from the catalogue, pinned to the
           section's bottom edge so it marks where the hero ends. */}
       <motion.div
         initial={{ opacity: 0 }}

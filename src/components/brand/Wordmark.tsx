@@ -16,7 +16,7 @@ import { brand } from "@/lib/brand";
  * desktop). It is legible, it is the client's actual artwork, and it is what
  * every premium beauty brand does with a monogram this decorative.
  *
- * Two variants exist because the masters are JPEGs with no alpha —
+ * Two variants exist because the masters are JPEGs with no alpha,
  * `scripts/generate-brand-assets.mjs` keys each against its own background, so
  * each one's anti-aliased edge carries the tint of the surface it belongs on.
  */
@@ -26,7 +26,7 @@ export function Wordmark({
   size = "bar",
 }: {
   className?: string;
-  /** True on forest-deep plates — the site header, the footer. */
+  /** True on forest-deep plates. The site header, the footer. */
   onDark?: boolean;
   /** `bar` for the header; `large` for footers and mastheads. */
   size?: "bar" | "large";
@@ -47,7 +47,7 @@ export function Wordmark({
             : "h-20 w-auto sm:h-24"
         }
       />
-      {/* The mark is the name — a screen reader should hear it once. */}
+      {/* The mark is the name, a screen reader should hear it once. */}
       <span className="sr-only">{brand.name}</span>
     </span>
   );

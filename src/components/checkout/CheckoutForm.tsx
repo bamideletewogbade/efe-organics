@@ -22,14 +22,14 @@ import { formatPrice } from "@/lib/money";
  * Checkout.
  *
  * Single page, not a wizard. With one address and no account, a multi-step flow
- * is friction for its own sake — every step is a place to drop out, and the
+ * is friction for its own sake. Every step is a place to drop out, and the
  * whole form fits on one screen at this scale.
  *
  * **Payment is not live.** No Paystack keys exist and the prices are still the
  * reseller's rather than confirmed RRP, so this places a *reservation*: the
  * order is assembled, given a reference, and handed over for confirmation. The
  * button says "Place order" and the copy is explicit that nothing is charged
- * yet. When Paystack is wired this component keeps its shape — `onSubmit` calls
+ * yet. When Paystack is wired this component keeps its shape, `onSubmit` calls
  * a server action instead of composing a handoff.
  *
  * Delivery is quoted on confirmation because nobody has given us a rate card.
@@ -41,14 +41,45 @@ export function CheckoutForm({ paystackReady }: { paystackReady: boolean }) {
   const reduce = useReducedMotion();
   const [placed, setPlaced] = useState<DraftOrder | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  /** The order could not be recorded, so the email handoff is the only copy. */
+  const [storeFailed, setStoreFailed] = useState(false);
+  /**
+   * What the server actually charged, as opposed to what the basket estimated.
+   *
+   * Discount, tax and the WhatsApp handoff are all decided server-side and only
+   * become known in the response, so they are held separately from `placed`
+   * rather than being recomputed here. The browser must never be the thing that
+   * says what a discount was worth.
+   */
+  const [settled, setSettled] = useState<{
+    discountMinor: number;
+    discountLabel: string | null;
+    taxMinor: number;
+    totalMinor: number | null;
+    whatsappUrl: string | null;
+    emailed: boolean;
+  } | null>(null);
 
   const field =
     "w-full rounded-xl border border-line bg-surface-raised px-4 py-3 text-sm text-body transition-colors placeholder:text-muted/60 focus:border-accent focus:outline-none";
 
-  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+  /**
+   * Sends slugs and quantities, and lets the server decide everything else.
+   *
+   * The reference, the totals and the delivery charge all come back from the
+   * response rather than being computed here. A price calculated in the browser
+   * is a suggestion; the number the customer is held to has to be the server's.
+   *
+   * If the request fails the order is NOT lost. The basket is left intact and
+   * the same confirmation screen renders from local data with a warning, so the
+   * customer still has a reference and the email handoff. Losing a filled-in
+   * checkout because a database was asleep is the worst outcome available.
+   */
+  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (lines.length === 0) return;
+    if (lines.length === 0 || submitting) return;
     setSubmitting(true);
+    setStoreFailed(false);
 
     const data = new FormData(event.currentTarget);
     const delivery: DeliveryDetails = {
@@ -71,16 +102,51 @@ export function CheckoutForm({ paystackReady }: { paystackReady: boolean }) {
       }),
     );
 
-    const order: DraftOrder = {
-      reference: makeReference(),
+    let reference = makeReference();
+    let deliveryFeeMinor: number | null = null;
+    let stored = false;
+
+    try {
+      const response = await fetch("/api/orders", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          lines: lines.map(({ product, qty }) => ({
+            slug: product.slug,
+            qty,
+          })),
+          delivery,
+        }),
+      });
+      const result = await response.json();
+      if (response.ok && result?.ok) {
+        reference = result.reference;
+        deliveryFeeMinor = result.deliveryMinor ?? null;
+        stored = true;
+        setSettled({
+          discountMinor: result.discountMinor ?? 0,
+          discountLabel: result.discount
+            ? `${result.discount.name} (${result.discount.label})`
+            : null,
+          taxMinor: result.taxMinor ?? 0,
+          totalMinor: result.totalMinor ?? null,
+          whatsappUrl: result.whatsappUrl ?? null,
+          emailed: Boolean(result.confirmationEmailed),
+        });
+      }
+    } catch {
+      // Network failure. Fall through to the local handoff below.
+    }
+
+    setStoreFailed(!stored);
+    setPlaced({
+      reference,
       placedAt: new Date().toISOString(),
       lines: orderLines,
       subtotalMinor: subtotalOf(orderLines),
-      deliveryFeeMinor: null,
+      deliveryFeeMinor,
       delivery,
-    };
-
-    setPlaced(order);
+    });
     clear();
     setSubmitting(false);
     window.scrollTo({ top: 0, behavior: reduce ? "auto" : "smooth" });
@@ -93,11 +159,28 @@ export function CheckoutForm({ paystackReady }: { paystackReady: boolean }) {
       "",
       ...placed.lines.map(
         (line) =>
-          `${line.qty} × ${line.name} — ${formatPrice(line.lineTotalMinor)}`,
+          `${line.qty} × ${line.name}. ${formatPrice(line.lineTotalMinor)}`,
       ),
       "",
       `Subtotal: ${formatPrice(placed.subtotalMinor)}`,
-      "Delivery: to be confirmed",
+      ...(settled && settled.discountMinor > 0
+        ? [`Discount: -${formatPrice(settled.discountMinor)}`]
+        : []),
+      placed.deliveryFeeMinor === null
+        ? "Delivery: to be confirmed"
+        : `Delivery: ${formatPrice(placed.deliveryFeeMinor)}`,
+      ...(settled && settled.taxMinor > 0
+        ? [`Tax: ${formatPrice(settled.taxMinor)}`]
+        : []),
+      ...(settled?.totalMinor !== null && settled?.totalMinor !== undefined
+        ? [`Total: ${formatPrice(settled.totalMinor)}`]
+        : placed.deliveryFeeMinor === null
+          ? []
+          : [
+              `Total: ${formatPrice(
+                placed.subtotalMinor + placed.deliveryFeeMinor,
+              )}`,
+            ]),
       "",
       `${placed.delivery.name}`,
       `${placed.delivery.phone} · ${placed.delivery.email}`,
@@ -138,18 +221,77 @@ export function CheckoutForm({ paystackReady }: { paystackReady: boolean }) {
           <span className="font-semibold text-strong">
             {placed.delivery.phone}
           </span>{" "}
-          to confirm the delivery charge to {placed.delivery.town} and take
-          payment by mobile money or card.
+          {placed.deliveryFeeMinor === null ? (
+            <>
+              to confirm the delivery charge to {placed.delivery.town} and take
+              payment by mobile money or card.
+            </>
+          ) : (
+            <>
+              to take payment by mobile money or card. Delivery to{" "}
+              {placed.delivery.town} is{" "}
+              <span className="font-semibold text-strong">
+                {formatPrice(placed.deliveryFeeMinor)}
+              </span>
+              , so your total is{" "}
+              <span className="font-semibold text-strong">
+                {formatPrice(placed.subtotalMinor + placed.deliveryFeeMinor)}
+              </span>
+              .
+            </>
+          )}
         </p>
+
+        {/* Only shown when the order could not be recorded. The customer needs
+            to know their reference is not enough on its own. */}
+        {storeFailed && (
+          <p className="measure mx-auto mt-4 rounded-2xl border border-[color-mix(in_oklab,var(--progress)_35%,transparent)] bg-[color-mix(in_oklab,var(--progress)_8%,transparent)] p-4 text-sm/6 text-strong">
+            We could not save this order automatically. Please send it to us
+            using the button below so nothing is missed.
+          </p>
+        )}
+
+        {/* A discount only ever appears here, from the server's figure. */}
+        {settled && settled.discountMinor > 0 && (
+          <p className="measure mx-auto mt-4 rounded-2xl border border-[color-mix(in_oklab,var(--live)_35%,transparent)] bg-[color-mix(in_oklab,var(--live)_8%,transparent)] p-4 text-sm/6 text-strong">
+            {settled.discountLabel} applied. You saved{" "}
+            <span className="font-semibold">
+              {formatPrice(settled.discountMinor)}
+            </span>
+            .
+          </p>
+        )}
 
         <p className="measure mx-auto mt-4 rounded-2xl bg-surface-raised p-4 text-sm/6 text-muted">
           <span className="font-semibold text-strong">
             Nothing has been charged.
           </span>{" "}
           Payment happens once we have confirmed your total including delivery.
+          {settled?.emailed && " A copy is on its way to your inbox."}
         </p>
 
         <div className="mt-8 flex flex-wrap justify-center gap-3">
+          {/*
+            WhatsApp first, deliberately.
+
+            This is how Ghanaian beauty purchases actually get confirmed, and
+            unlike email it needs no verified sending domain to work. The link
+            arrives pre-written with the whole order in it, so the customer taps
+            once and Efe has the order in the app they already have open.
+
+            It only renders when an owner number is configured, and the email
+            handoff stays as the path that always exists.
+          */}
+          {settled?.whatsappUrl && (
+            <a
+              href={settled.whatsappUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="rounded-full bg-saffron-light px-6 py-3 text-sm font-semibold text-forest-deep transition-transform active:scale-[0.98]"
+            >
+              Send this order on WhatsApp
+            </a>
+          )}
           <a
             href={`mailto:${brand.contact.email}?subject=${encodeURIComponent(
               `Order ${placed.reference}`,

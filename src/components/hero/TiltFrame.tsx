@@ -10,14 +10,14 @@ import { pointerSpring } from "@/components/motion/tokens";
  * Pointer-tracked 3D frame for the hero product.
  *
  * Two things track the cursor: the card's tilt, and a gold specular sheen that
- * moves across it. The sheen is the point — a bare rotating rectangle reads as a
+ * moves across it. The sheen is the point, a bare rotating rectangle reads as a
  * gimmick, but light catching a surface as you move past it reads as a physical
  * object on a shelf, which is what we want for a premium skincare product.
  *
  * Tilt is capped at 7deg. Past roughly 10deg the product photograph starts to
  * look distorted and the effect turns into a toy.
  *
- * Touch devices get nothing — there is no pointer to track, and `pointermove`
+ * Touch devices get nothing. There is no pointer to track, and `pointermove`
  * on touch would fight the scroll. Reduced motion gets nothing.
  */
 const MAX_TILT = 7;
@@ -33,7 +33,7 @@ export function TiltFrame({
   const reduce = useReducedMotion();
 
   /**
-   * Imperative springs — seeded with a plain number, not a source MotionValue.
+   * Imperative springs. Seeded with a plain number, not a source MotionValue.
    * `useSpring(someMotionValue)` makes the spring *track* that value, and then
    * `.set()` on the spring gets overridden on the next source update. Seeding
    * with a number is the pattern that lets us drive it from the pointer handler.

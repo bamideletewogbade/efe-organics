@@ -9,7 +9,7 @@ import * as schema from "./schema";
  *
  * **Returns null when `DATABASE_URL` is absent, and that is deliberate.** The
  * house rule is that the app must run, build and demo with an empty
- * `.env.local` — so the catalogue falls back to the committed static file and
+ * `.env.local`. So the catalogue falls back to the committed static file and
  * the site keeps working. Throwing on a missing connection string would make
  * the whole project undemoable the moment the database is unreachable, which is
  * exactly when you most want to show it to someone.
@@ -18,11 +18,25 @@ import * as schema from "./schema";
  * genuinely is the point (admin writes, order placement).
  *
  * The client is cached on `globalThis` because Next's dev server re-evaluates
- * modules on every hot reload — without this you exhaust the connection pool
+ * modules on every hot reload, without this you exhaust the connection pool
  * after a few dozen saves.
  */
 
-type Db = ReturnType<typeof drizzle<typeof schema>>;
+export type Db = ReturnType<typeof drizzle<typeof schema>>;
+
+/**
+ * A Drizzle transaction handle, derived rather than hand-written.
+ *
+ * Helpers that write must run inside the caller's transaction, not open their
+ * own, or a partial failure leaves an order committed with no matching stock
+ * movement. Typing them against `Db | Tx` lets the same function be called
+ * either way and keeps the alternative (`any` with a lint suppression at every
+ * call site) out of the codebase.
+ */
+export type Tx = Parameters<Parameters<Db["transaction"]>[0]>[0];
+
+/** Anything that can run queries: the pool, or a transaction inside it. */
+export type Executor = Db | Tx;
 
 const globalForDb = globalThis as unknown as {
   __efeDb?: Db | null;

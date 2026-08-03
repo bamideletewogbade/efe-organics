@@ -9,13 +9,13 @@
  * WHY NOT `console.log` EVERYWHERE
  * A bare console call loses the two things that make a log useful after the
  * fact: the request it belonged to, and consistent field names. `logger.child()`
- * binds context once — a request id, an order reference — and every line
+ * binds context once, a request id, an order reference, and every line
  * beneath it carries that automatically, so a failed checkout can be read end to
  * end by filtering on one value.
  *
  * REDACTION IS NOT OPTIONAL
  * This app handles phone numbers, emails and addresses. Logging those in full
- * turns the log store into a copy of the customer database — a privacy problem
+ * turns the log store into a copy of the customer database, a privacy problem
  * and a breach-severity multiplier. `redact()` masks known-sensitive keys on the
  * way out, so a careless `logger.info({ customer })` cannot leak a phone number.
  */

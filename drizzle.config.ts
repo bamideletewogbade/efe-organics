@@ -1,7 +1,7 @@
 import type { Config } from "drizzle-kit";
 
 /**
- * Drizzle Kit config — migration generation only.
+ * Drizzle Kit config, migration generation only.
  *
  * Migrations are generated into `drizzle/` and COMMITTED. `db:push` exists for
  * local iteration but must never touch production: pushing diffs the schema and

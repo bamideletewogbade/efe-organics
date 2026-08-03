@@ -1,0 +1,648 @@
+<!doctype html>
+<html lang="en-GH">
+<head>
+<meta charset="utf-8">
+<title>Efe Organics: Digital Transformation Proposal</title>
+<style>
+  /*
+    Print-first. This document exists to be a PDF and then a printout on
+    somebody's desk in a meeting, so everything is sized in millimetres, the
+    palette assumes ink on white, and nothing depends on hover, dark mode or a
+    screen wider than A4.
+  */
+  @page {
+    size: A4;
+    margin: 18mm 16mm 16mm;
+  }
+
+  :root {
+    --forest: #14432c;
+    --forest-deep: #0d2c1d;
+    --gold: #9a7d2e;
+    --ink: #16191a;
+    --ink-soft: #3f453f;
+    --muted: #6b706a;
+    --rule: #d9d5c9;
+    --rule-soft: #ece8dd;
+    --wash: #f4f2eb;
+
+    --display: "Segoe UI Variable Display", "Segoe UI", Arial, sans-serif;
+    --body: Georgia, "Times New Roman", serif;
+
+    /*
+      Figures are set in the display face with tabular figures, NOT in a
+      monospace.
+
+      Cascadia Mono has no cedi sign, so every GH₵ fell back to a different font
+      and rendered as a cent sign, and its comma sat in a full monospace cell so
+      thousands read as "48 , 000". A currency this document is entirely about
+      cannot be the one glyph that does not render. Segoe UI carries ₵ and its
+      tabular figures still line up down a column, which was the only reason to
+      reach for a monospace in the first place.
+    */
+    --data: "Segoe UI Variable Text", "Segoe UI", Arial, sans-serif;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: #fff;
+    color: var(--ink);
+    font-family: var(--body);
+    font-size: 10.5pt;
+    line-height: 1.55;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  h1, h2, h3, th, .label, .fig, .chip { font-family: var(--display); }
+
+  h1 {
+    font-size: 26pt;
+    line-height: 1.06;
+    letter-spacing: -0.02em;
+    font-weight: 700;
+    margin: 0;
+  }
+  h2 {
+    font-size: 14pt;
+    line-height: 1.2;
+    letter-spacing: -0.01em;
+    font-weight: 700;
+    margin: 0 0 3mm;
+    color: var(--forest);
+  }
+  h3 { font-size: 10.5pt; font-weight: 700; margin: 0 0 1.5mm; }
+
+  p { margin: 0 0 3mm; max-width: 62em; }
+  p:last-child { margin-bottom: 0; }
+  strong { font-weight: 700; }
+
+  .label {
+    font-size: 7pt;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  /* ---------- cover ---------- */
+
+  .cover {
+    display: flex;
+    flex-direction: column;
+    min-height: 245mm;
+    break-after: page;
+  }
+  .cover .top { flex: 1; }
+  .rule-gold { height: 2pt; background: var(--gold); width: 28mm; margin: 6mm 0; }
+
+  .cover h1 { margin-top: 4mm; color: var(--forest-deep); }
+  .cover .standfirst {
+    font-size: 12pt;
+    color: var(--ink-soft);
+    margin-top: 5mm;
+    max-width: 42em;
+  }
+
+  .cover-facts {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 4mm 8mm;
+    margin-top: 10mm;
+    padding-top: 5mm;
+    border-top: 0.5pt solid var(--rule);
+  }
+  .cover-facts div { font-size: 9pt; }
+  .cover-facts dt { font-family: var(--display); font-size: 7pt; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); }
+  .cover-facts dd { margin: 1mm 0 0; color: var(--ink); }
+
+  .headline-figure {
+    background: var(--forest-deep);
+    color: #fff;
+    padding: 7mm 8mm;
+    margin-top: 9mm;
+    border-radius: 2mm;
+  }
+  .headline-figure .fig {
+    font-family: var(--data);
+    font-variant-numeric: tabular-nums lining;
+    font-size: 26pt;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: #f2d99a;
+    margin: 1mm 0 0;
+  }
+  .headline-figure p { color: rgba(255,255,255,0.82); margin: 2mm 0 0; font-size: 9.5pt; max-width: 46em; }
+
+  /* ---------- sections ---------- */
+
+  section { margin-bottom: 9mm; break-inside: avoid; }
+  section.break { break-before: page; }
+
+  /* ---------- tables ---------- */
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: var(--display);
+    font-size: 9pt;
+    break-inside: avoid;
+  }
+  th {
+    text-align: left;
+    font-size: 7pt;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    border-bottom: 1pt solid var(--forest);
+    padding: 0 4mm 1.5mm 0;
+    vertical-align: bottom;
+  }
+  td {
+    padding: 2mm 4mm 2mm 0;
+    border-bottom: 0.5pt solid var(--rule-soft);
+    vertical-align: top;
+    color: var(--ink-soft);
+  }
+  td:first-child { color: var(--ink); font-weight: 700; }
+  tr:last-child td { border-bottom: 0; }
+
+  th.num, td.num { text-align: right; padding-right: 0; }
+  td.num {
+    font-family: var(--data);
+    font-variant-numeric: tabular-nums lining;
+    font-feature-settings: "tnum" 1, "lnum" 1;
+    color: var(--ink);
+    white-space: nowrap;
+  }
+  td.was { color: var(--muted); text-decoration: line-through; }
+
+  tr.total td {
+    background: var(--wash);
+    border-bottom: 0;
+    font-weight: 700;
+    padding-top: 2.5mm;
+    padding-bottom: 2.5mm;
+  }
+  tr.total td.num { color: var(--forest); }
+  tr.total td:first-child { padding-left: 3mm; }
+
+  /* ---------- stage cards ---------- */
+
+  .stages { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4mm; break-inside: avoid; }
+  .stage {
+    border: 0.5pt solid var(--rule);
+    border-top: 2pt solid var(--forest);
+    border-radius: 1.5mm;
+    padding: 5mm;
+  }
+  .stage .chip {
+    font-size: 6.5pt; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--gold);
+  }
+  .stage h3 { margin-top: 2mm; }
+  .stage .fig {
+    font-family: var(--data);
+    font-size: 14pt;
+    font-weight: 700;
+    color: var(--forest);
+    margin: 2mm 0 3mm;
+  }
+  .stage ul { margin: 0; padding-left: 4mm; font-size: 8.5pt; color: var(--ink-soft); }
+  .stage li { margin-bottom: 1mm; }
+
+  /* ---------- callout ---------- */
+
+  .note {
+    border-left: 2pt solid var(--forest);
+    background: var(--wash);
+    padding: 4mm 5mm;
+    font-size: 9.5pt;
+    break-inside: avoid;
+  }
+  .note p { max-width: none; }
+
+  ol.steps { margin: 0; padding-left: 5mm; }
+  ol.steps li { margin-bottom: 2.5mm; padding-left: 1mm; }
+
+  .fine { font-size: 8pt; color: var(--muted); }
+
+  footer.doc {
+    margin-top: 10mm;
+    padding-top: 3mm;
+    border-top: 0.5pt solid var(--rule);
+    font-size: 7.5pt;
+    color: var(--muted);
+  }
+  footer.doc p { max-width: none; }
+</style>
+</head>
+<body>
+
+<!-- ===================== COVER ===================== -->
+<div class="cover">
+  <div class="top">
+    <p class="label">Proposal, prepared for the management of Efe Organics</p>
+    <div class="rule-gold"></div>
+    <h1>An online shop Efe owns,<br>and the tools to run it.</h1>
+    <p class="standfirst">
+      A complete sales channel with its own back office, plus an AI layer that
+      answers customers on WhatsApp, drafts your marketing, and tells you what
+      is selling.
+    </p>
+
+    <div class="headline-figure">
+      <p class="label" style="color:rgba(255,255,255,0.6)">Total build</p>
+      <p class="fig">GH&#8373;48,000</p>
+      <p>
+        Against roughly GH&#8373;870,000 at agency rates, and against more than
+        GH&#8373;500,000 a year to build the same thing with an in-house team.
+        Paid in three stages, as each part starts working.
+      </p>
+    </div>
+
+    <dl class="cover-facts">
+      <div>
+        <dt>Prepared by</dt>
+        <dd>[YOUR NAME], [YOUR BUSINESS]</dd>
+      </div>
+      <div>
+        <dt>Date</dt>
+        <dd>3 August 2026</dd>
+      </div>
+      <div>
+        <dt>Valid until</dt>
+        <dd>3 September 2026</dd>
+      </div>
+      <div>
+        <dt>Contact</dt>
+        <dd>[YOUR EMAIL] &middot; [YOUR PHONE]</dd>
+      </div>
+    </dl>
+  </div>
+
+  <p class="fine">
+    All figures in Ghana cedis and exclusive of VAT. Converted where relevant at
+    GH&#8373;11.6 to the US dollar.
+  </p>
+</div>
+
+<!-- ===================== 1. THE SITUATION ===================== -->
+<section>
+  <h2>Where Efe stands today</h2>
+  <p>
+    Every Efe order currently reaches a customer through somebody else. That
+    arrangement sells product, and it costs three things that do not appear on
+    an invoice:
+  </p>
+  <table>
+    <thead>
+      <tr>
+        <th>What is lost</th>
+        <th>Why it matters</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>The margin</td>
+        <td>The retail markup on every order stays with the reseller rather than with Efe.</td>
+      </tr>
+      <tr>
+        <td>The customer</td>
+        <td>Efe does not know who bought, what they bought, or how to reach them again. There is no list to market to and nothing to build repeat business on.</td>
+      </tr>
+      <tr>
+        <td>Control</td>
+        <td>Efe cannot run a promotion, change a price, launch a product or test an offer without asking someone else to do it.</td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ===================== 2. WHAT YOU GET ===================== -->
+<section>
+  <h2>What this delivers</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Component</th>
+        <th>What it does</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Online shop</td>
+        <td>The full storefront: catalogue, sizes, basket, checkout, mobile money and card. Efe's own channel, on Efe's own domain.</td>
+      </tr>
+      <tr>
+        <td>Back office</td>
+        <td>Orders, stock with a full movement history, prices, promotions, customers, first-party analytics, and a record of every change and who made it.</td>
+      </tr>
+      <tr>
+        <td>History import</td>
+        <td>Years of orders, customers and prices moved out of the current system in an afternoon, so nothing starts from zero.</td>
+      </tr>
+      <tr>
+        <td>WhatsApp agent</td>
+        <td>Answers customer questions, checks stock, quotes delivery and takes orders on the channel where Ghanaian beauty sales actually close.</td>
+      </tr>
+      <tr>
+        <td>Content agents</td>
+        <td>Drafts social posts, captions and product copy from your real ingredient lists. Nothing publishes without your approval.</td>
+      </tr>
+      <tr>
+        <td>Insight agent</td>
+        <td>Ask the shop a question in plain English. What is selling, what to restock, which customers have stopped buying.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="note" style="margin-top:5mm;">
+    <p>
+      <strong>Everything the AI says comes from Efe's own data.</strong> Product
+      facts come from your ingredient lists and price list, stock answers come
+      from the live system, and nothing is published without a person approving
+      it. That is the difference between a useful assistant and one that invents
+      a claim about a cosmetic.
+    </p>
+  </div>
+</section>
+
+<!-- ===================== 3. PRICE ===================== -->
+<section class="break">
+  <h2>What this costs, and what it costs elsewhere</h2>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Component</th>
+        <th class="num">Agency rate</th>
+        <th class="num">Your price</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Custom shop and back office</td>
+        <td class="num was">464,000 to 928,000</td>
+        <td class="num">22,000</td>
+      </tr>
+      <tr>
+        <td>WhatsApp sales and support agent</td>
+        <td class="num was">174,000 to 464,000</td>
+        <td class="num">12,000</td>
+      </tr>
+      <tr>
+        <td>Social content agents</td>
+        <td class="num was">116,000 to 290,000</td>
+        <td class="num">8,000</td>
+      </tr>
+      <tr>
+        <td>Business insight agent</td>
+        <td class="num was">116,000 to 232,000</td>
+        <td class="num">6,000</td>
+      </tr>
+      <tr class="total">
+        <td>Total build</td>
+        <td class="num">870,000+</td>
+        <td class="num">48,000</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <p class="fine" style="margin-top:3mm;">
+    Agency rates are converted from published 2026 pricing in the United States
+    and Europe. They are a fair measure of the work involved, not a claim about
+    what anyone in Accra charges.
+  </p>
+
+  <p style="margin-top:5mm;">
+    The closer comparison is what it would take to build this in-house. A senior
+    developer in Accra costs <strong>GH&#8373;15,000 to GH&#8373;20,800 a
+    month</strong>. Add a designer and somebody who can put an AI agent into
+    production and you are looking at a small team at roughly
+    <strong>GH&#8373;45,000 a month</strong>, over half a million cedis a year,
+    and you would still be recruiting six months from now.
+  </p>
+</section>
+
+<!-- ===================== 4. STAGES ===================== -->
+<section>
+  <h2>Paid in three stages, as each part starts working</h2>
+  <p>
+    Nothing is paid for before it exists. Each stage begins only once the one
+    before it is earning its keep, and the AI stages deliberately follow the
+    history import, because an agent with no sales data behind it is a
+    demonstration rather than a tool.
+  </p>
+
+  <div class="stages">
+    <div class="stage">
+      <span class="chip">Stage one, now</span>
+      <h3>Shop and back office</h3>
+      <p class="fig">GH&#8373;22,000</p>
+      <ul>
+        <li>Storefront, checkout, admin</li>
+        <li>History imported</li>
+        <li>Paid 40 / 30 / 30 on milestones</li>
+      </ul>
+    </div>
+    <div class="stage">
+      <span class="chip">Stage two, month three</span>
+      <h3>WhatsApp agent</h3>
+      <p class="fig">GH&#8373;12,000</p>
+      <ul>
+        <li>Questions, stock, delivery</li>
+        <li>Order taking and handover</li>
+        <li>Starts once real orders exist</li>
+      </ul>
+    </div>
+    <div class="stage">
+      <span class="chip">Stage three, month six</span>
+      <h3>Content and insight</h3>
+      <p class="fig">GH&#8373;14,000</p>
+      <ul>
+        <li>Social and product copy</li>
+        <li>Ask the business a question</li>
+        <li>Can move to year two</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== 5. YEAR ONE ===================== -->
+<section>
+  <h2>What year one comes to</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Line</th>
+        <th class="num">Monthly</th>
+        <th class="num">Year one</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td>Stages one and two</td><td class="num">-</td><td class="num">34,000</td></tr>
+      <tr><td>Care plan and hosting</td><td class="num">1,500</td><td class="num">18,000</td></tr>
+      <tr><td>Running costs, at cost</td><td class="num">~900</td><td class="num">~10,800</td></tr>
+      <tr class="total"><td>Total</td><td class="num">-</td><td class="num">~62,800</td></tr>
+    </tbody>
+  </table>
+
+  <div class="note" style="margin-top:5mm;">
+    <p>
+      <strong>Roughly three orders a day covers the first year.</strong> At an
+      average order of GH&#8373;120 and a 40% margin on a direct sale, about 92
+      orders a month pays for everything above. Everything past that is margin
+      Efe currently gives away.
+    </p>
+  </div>
+</section>
+
+<!-- ===================== 6. RUNNING COSTS ===================== -->
+<section class="break">
+  <h2>What it costs to run</h2>
+  <p>
+    This usually surprises people, so it is worth stating plainly: the AI is not
+    the expensive part. Models are billed by how much text they process, the
+    shop is not large, and replying to a customer who messaged you first is free
+    on WhatsApp for 24 hours.
+  </p>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Service</th>
+        <th>What it is for</th>
+        <th class="num">Per month</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>AI models</td>
+        <td>One account with access to hundreds of models, so routine replies use an inexpensive one and only the work that needs a stronger model gets it. Billed by use.</td>
+        <td class="num">30 to 420</td>
+      </tr>
+      <tr>
+        <td>WhatsApp Business</td>
+        <td>Replies inside a customer's 24-hour window are free. Only broadcasts and reminders are charged, per message.</td>
+        <td class="num">0 to 350</td>
+      </tr>
+      <tr>
+        <td>Hosting</td>
+        <td>The site itself, worldwide, scaling automatically with traffic.</td>
+        <td class="num">230</td>
+      </tr>
+      <tr>
+        <td>Database and backups</td>
+        <td>Orders, customers, stock and documents.</td>
+        <td class="num">0 to 290</td>
+      </tr>
+      <tr>
+        <td>Domain</td>
+        <td>Annual renewal, spread across the year.</td>
+        <td class="num">15</td>
+      </tr>
+      <tr class="total">
+        <td>Total</td>
+        <td>Passed through at cost, never marked up</td>
+        <td class="num">~275 to 1,305</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <p style="margin-top:4mm;">
+    For comparison, the storefront subscription Efe pays today is about
+    GH&#8373;520 a month for a shop and nothing else. The figure above covers the
+    shop, the back office, the database and every AI agent, and at the low end
+    it costs less.
+  </p>
+</section>
+
+<!-- ===================== 7. CARE PLAN ===================== -->
+<section>
+  <h2>What the monthly care plan covers</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Included</th>
+        <th class="num">Essential<br>1,500</th>
+        <th class="num">Standard<br>3,000</th>
+        <th class="num">Growth<br>6,000</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td>Hosting, domain, certificates</td><td class="num">Yes</td><td class="num">Yes</td><td class="num">Yes</td></tr>
+      <tr><td>Daily backups, uptime monitoring</td><td class="num">Yes</td><td class="num">Yes</td><td class="num">Yes</td></tr>
+      <tr><td>Security updates</td><td class="num">Yes</td><td class="num">Yes</td><td class="num">Yes</td></tr>
+      <tr><td>Fixing faults</td><td class="num">Yes</td><td class="num">Yes</td><td class="num">Yes</td></tr>
+      <tr><td>Price, stock and text changes</td><td class="num">10 / mo</td><td class="num">Unlimited</td><td class="num">Unlimited</td></tr>
+      <tr><td>Improvement hours</td><td class="num">None</td><td class="num">4 / mo</td><td class="num">10 / mo</td></tr>
+      <tr><td>Response time</td><td class="num">2 days</td><td class="num">1 day</td><td class="num">Same day</td></tr>
+      <tr><td>Performance review</td><td class="num">Annual</td><td class="num">Quarterly</td><td class="num">Monthly</td></tr>
+    </tbody>
+  </table>
+  <p class="fine" style="margin-top:3mm;">
+    Recommended starting tier: <strong>Essential</strong>. Moving up is a
+    one-line change whenever it is needed.
+  </p>
+  <p class="fine">
+    Not included at any tier: new features, new page designs, campaign builds,
+    third-party integrations, copywriting, photography, and paid advertising.
+    Each is quoted separately.
+  </p>
+</section>
+
+<!-- ===================== 8. TERMS ===================== -->
+<section>
+  <h2>Terms</h2>
+  <table>
+    <thead>
+      <tr><th>Item</th><th>Terms</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Pricing basis</td><td>This price is offered as a partnership rate. It holds on two conditions: a 24-month care plan commitment, and first refusal on digital work across affiliated companies during that period.</td></tr>
+      <tr><td>Payment</td><td>Each stage billed 40% on start, 30% at handover, 30% on completion. Care plan billed monthly in advance.</td></tr>
+      <tr><td>VAT</td><td>All figures exclusive of VAT and applicable levies, charged where required.</td></tr>
+      <tr><td>Running costs</td><td>Billed monthly at cost with no markup, against the actual invoices. A monthly ceiling is agreed in advance, with notice before it is reached.</td></tr>
+      <tr><td>Ownership</td><td>Efe holds a full licence to the platform for as long as the care plan is active. Outright ownership is available at a stated buyout figure.</td></tr>
+      <tr><td>Your data</td><td>Efe owns all of its data at all times, and can export orders, customers and the catalogue at any point, in a standard format.</td></tr>
+      <tr><td>Validity</td><td>This proposal holds for 30 days from the date on the cover.</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ===================== 9. NEXT ===================== -->
+<section>
+  <h2>What happens next</h2>
+  <ol class="steps">
+    <li>Confirm the stage one scope and sign.</li>
+    <li>Export orders, customers and the price list from the current system. A CSV is fine.</li>
+    <li>Stage one goes live, with the history already loaded.</li>
+    <li>Review after one month of real orders, then decide on stage two.</li>
+  </ol>
+
+  <div class="note" style="margin-top:5mm;">
+    <p>
+      Two things are needed before checkout can accept payment: the confirmed
+      retail price list, and Paystack account details for mobile money and card.
+      Neither blocks the build.
+    </p>
+  </div>
+</section>
+
+<footer class="doc">
+  <p>
+    Prepared 3 August 2026. Comparative market figures are drawn from published
+    2026 agency pricing and salary data, converted at GH&#8373;11.6 to the US
+    dollar. Running cost estimates assume current trading volumes and will be
+    reconciled against actual invoices each month. Break-even figures assume an
+    average order of GH&#8373;120 and a 40% margin on direct sales; both should
+    be confirmed against Efe's own numbers.
+  </p>
+</footer>
+
+</body>
+</html>

@@ -7,7 +7,7 @@
  *   over white: W = a·F + (1-a)·255
  * so  a = 1 - (W - B)/255  and  F = B/a.
  *
- * That would finally give the site a logo that sits on any surface — the single
+ * That would finally give the site a logo that sits on any surface, the single
  * biggest brand-asset gap in the project.
  *
  * If they are separate AI renders, the glyphs will not line up and the recovery
@@ -60,12 +60,12 @@ for (let i = 0; i < a.length; i++) {
 }
 
 const iou = union ? inter / union : 0;
-console.log(`mark pixels — black plate: ${a.reduce((s, v) => s + v, 0)}`);
-console.log(`mark pixels — white paper: ${b.reduce((s, v) => s + v, 0)}`);
+console.log(`mark pixels. Black plate: ${a.reduce((s, v) => s + v, 0)}`);
+console.log(`mark pixels. White paper: ${b.reduce((s, v) => s + v, 0)}`);
 console.log(`only on black: ${onlyA}   only on white: ${onlyB}`);
 console.log(`\nIoU = ${iou.toFixed(3)}`);
 console.log(
   iou > 0.9
-    ? "\nALIGNED — alpha recovery will work."
-    : "\nNOT ALIGNED — separate renders. Use each variant on its matching surface instead.",
+    ? "\nALIGNED, alpha recovery will work."
+    : "\nNOT ALIGNED, separate renders. Use each variant on its matching surface instead.",
 );

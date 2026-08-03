@@ -1,5 +1,5 @@
 /**
- * ⚠️ PLACEHOLDER CONTENT — NOT REAL CUSTOMER REVIEWS. DO NOT LAUNCH WITH THIS.
+ * ⚠️ PLACEHOLDER CONTENT, NOT REAL CUSTOMER REVIEWS. DO NOT LAUNCH WITH THIS.
  *
  * Efe has no collected reviews today: every product on the reseller shows
  * "0 reviews". Publishing invented testimonials attributed to named customers
@@ -8,7 +8,7 @@
  *
  * `PLACEHOLDER` below is read by the section component, which renders a visible
  * "sample content" marker whenever it is true. Delete this file's contents and
- * flip the flag when real reviews arrive — see docs/OPEN-QUESTIONS.md.
+ * flip the flag when real reviews arrive, see docs/OPEN-QUESTIONS.md.
  *
  * How to get real ones, cheaply: the products ship with a label; add a short
  * URL or QR to a one-question review form, and ask the stockists to collect
@@ -21,7 +21,7 @@ export type Testimonial = {
   quote: string;
   name: string;
   role: string;
-  /** Which product the review is about — links the quote to the catalogue. */
+  /** Which product the review is about, links the quote to the catalogue. */
   productSlug?: string;
   rating: number;
 };

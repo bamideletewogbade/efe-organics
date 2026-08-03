@@ -27,7 +27,7 @@ import { track } from "@/lib/analytics";
  * mirrored into component state. That is not a style preference: reading storage
  * in an effect and calling `setState` causes a cascading render on every mount,
  * and it means the cart briefly disagrees with itself between the two.
- * `useSyncExternalStore` is the API built for exactly this — an external,
+ * `useSyncExternalStore` is the API built for exactly this. An external,
  * mutable source that React needs to stay consistent with.
  *
  * The snapshot must be referentially stable between changes or React re-renders
@@ -40,7 +40,7 @@ import { track } from "@/lib/analytics";
  * resolve to names, prices and images with no fetch and no loading state. 42
  * SKUs is a few KB; this would be hydrated from an API at thousands.
  *
- * Prices ALWAYS come from that map, never from the stored line — see lib/cart.ts.
+ * Prices ALWAYS come from that map, never from the stored line, see lib/cart.ts.
  */
 
 type Snapshot = { lines: CartLine[]; loaded: boolean };
@@ -131,7 +131,7 @@ export function CartProvider({
 
   const value = useMemo<CartContextValue>(() => {
     // A slug no longer in the catalogue is dropped rather than rendered as a
-    // blank row — otherwise the basket holds a ghost line nobody can remove.
+    // blank row. Otherwise the basket holds a ghost line nobody can remove.
     const lines: ResolvedLine[] = raw
       .map((line) => {
         const product = catalogue[line.slug];
@@ -150,7 +150,7 @@ export function CartProvider({
        * Counted from RESOLVED lines, not the raw stored ones.
        *
        * Counting `raw` made the badge include slugs that are no longer in the
-       * catalogue — a basket holding a discontinued product reported "8 items"
+       * catalogue. A basket holding a discontinued product reported "8 items"
        * while the drawer showed 3, because the phantom line was counted but
        * never rendered. The badge must agree with what is on screen.
        */
@@ -166,7 +166,7 @@ export function CartProvider({
         mutate({ type: "add", slug, qty });
         setIsOpen(true);
         // Tracked here rather than in each button, so every route into the
-        // basket is counted — product page, grid card, and anything added later.
+        // basket is counted. Product page, grid card, and anything added later.
         const product = catalogue[slug];
         track("add_to_cart", {
           slug,

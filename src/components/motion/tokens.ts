@@ -1,7 +1,7 @@
 /**
  * Motion tokens shared by the Framer Motion components.
  *
- * These mirror the CSS custom properties in globals.css on purpose — the site
+ * These mirror the CSS custom properties in globals.css on purpose, the site
  * runs two motion systems and they must feel identical. CSS handles everything
  * below the fold (cheap, no JS); Framer Motion handles the nav and hero, where
  * we need gesture tracking, scroll interpolation and shared layout.
@@ -21,7 +21,7 @@ export const duration = {
   slow: 0.62,
 } as const;
 
-/** Spring for pointer-tracked motion — critically damped, no wobble. */
+/** Spring for pointer-tracked motion. Critically damped, no wobble. */
 export const pointerSpring = {
   type: "spring",
   stiffness: 150,

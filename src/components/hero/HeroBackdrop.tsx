@@ -6,7 +6,7 @@ import { useSyncExternalStore } from "react";
  * The hero's video backdrop.
  *
  * SOURCE: 66s of brand footage (heritage → traditional soap-making → product).
- * The loop is a 10.6s window starting at 14.6s — chosen because ffmpeg scene
+ * The loop is a 10.6s window starting at 14.6s, chosen because ffmpeg scene
  * detection showed it as the longest CONTINUOUS shot in the film. A loop with a
  * cut inside it reads as a glitch. The original's black flicker (three bursts
  * inside the first 0.78s) is trimmed away entirely.
@@ -15,7 +15,7 @@ import { useSyncExternalStore } from "react";
  * (1.9MB vs 1.3MB) because grain defeats it, so shipping WebM would have cost
  * users bandwidth for nothing.
  *
- * WHY IT IS NOT ALWAYS ON — three cases fall back to the poster:
+ * WHY IT IS NOT ALWAYS ON, three cases fall back to the poster:
  *
  * 1. **Save-Data or a 2G connection.** The audience is on Ghanaian mobile data.
  *    Pushing 1.3MB of decoration at someone on a metered connection to sell
@@ -39,8 +39,8 @@ const POSTER = "/video/hero-poster.jpg";
  *
  * An earlier version re-picked the crop whenever the viewport crossed 640px.
  * That was over-engineering, and testing it showed why: swapping `src` mid-
- * session downloads a SECOND 1.3MB file — on the connection this component
- * exists to be careful about — to gain framing that `object-cover` already
+ * session downloads a SECOND 1.3MB file, on the connection this component
+ * exists to be careful about, to gain framing that `object-cover` already
  * handles correctly at any aspect ratio. Rotating a phone would have cost a
  * megabyte for nothing.
  *
@@ -96,7 +96,7 @@ export function HeroBackdrop() {
       aria-hidden
       className="absolute inset-0 -z-10 overflow-hidden bg-forest-deep"
     >
-      {/* The poster is always painted, so there is never an empty rectangle —
+      {/* The poster is always painted, so there is never an empty rectangle,
           the fallback is the same picture, just not moving. */}
       <div
         className="absolute inset-0 bg-cover bg-center"

@@ -5,7 +5,7 @@ import type { ReactNode } from "react";
  *
  * Width comes from `--container` (88rem) rather than a Tailwind max-w step, so
  * the measure is defined once in the token layer. The gutter scales with the
- * viewport: 1rem on a phone, 2rem from `sm`, 3rem from `lg` — a fixed 1.25rem
+ * viewport: 1rem on a phone, 2rem from `sm`, 3rem from `lg`, a fixed 1.25rem
  * gutter looked cramped once the container went wide.
  *
  * `bleed` opts a section out of the measure entirely for full-width treatments

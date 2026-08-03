@@ -6,7 +6,7 @@
  * Written because "the site is full of dead links" was found by hand, which is
  * exactly the kind of thing that should not need a person. It walks every
  * internal href from the entry pages, follows them breadth-first, and reports
- * anything that is not 200 — along with which page linked to it, since a 404 is
+ * anything that is not 200. Along with which page linked to it, since a 404 is
  * useless without knowing where it came from.
  *
  * External links are checked for reachability but never crawled.
@@ -68,13 +68,13 @@ while (queue.length) {
       continue;
     }
 
-    if (!href.startsWith("/")) continue; // relative/anchor — skip
+    if (!href.startsWith("/")) continue; // relative/anchor, skip
     record(href, path);
     if (!seen.has(href)) queue.push(href);
   }
 }
 
-/* External links — HEAD only, and failures are warnings not errors: many hosts
+/* External links. HEAD only, and failures are warnings not errors: many hosts
    block HEAD from unknown agents, which is not the same as a broken link. */
 for (const href of external.keys()) {
   try {

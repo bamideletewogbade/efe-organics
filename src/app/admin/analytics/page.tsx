@@ -1,3 +1,4 @@
+import { PageHeader } from "@/components/admin/AdminUI";
 import { getFunnel, getTopProducts, getRecentAudit } from "@/db/queries/admin";
 
 export const dynamic = "force-dynamic";
@@ -24,11 +25,11 @@ export default async function AdminAnalyticsPage() {
 
   return (
     <div>
-      <h1 className="text-2xl">Analytics</h1>
-      <p className="mt-2 text-sm text-muted">
-        Last 7 days. First-party — no third-party trackers, no data leaving your
-        database.
-      </p>
+      <PageHeader
+        title="Analytics"
+        description="The last 7 days, measured on your own site. No third-party trackers, and no data leaving your database."
+        meta={top > 0 ? `${top} visitors this week` : undefined}
+      />
 
       <div className="mt-8 grid gap-8 xl:grid-cols-[1.3fr_1fr]">
         {/* ---- funnel ---- */}

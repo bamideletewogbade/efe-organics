@@ -6,11 +6,11 @@ import { Container } from "@/components/layout/Container";
 import { duration, easeSoft } from "@/components/motion/tokens";
 
 /**
- * "Where to buy" — Efe's answer to the reference site's partner-brands strip.
+ * "Where to buy". Efe's answer to the reference site's partner-brands strip.
  *
  * The inversion matters. Coloursbay lists the brands it carries, because it is
  * a retailer. Efe is the manufacturer, so the equivalent section lists the
- * channels that carry Efe — which turns a vanity logo wall into something with
+ * channels that carry Efe. Which turns a vanity logo wall into something with
  * a job: it reassures a buyer the brand is real and stocked, and it advertises
  * the stockist programme to anyone who might want to join.
  *
@@ -64,7 +64,7 @@ export function WhereToBuy() {
           <div>
             <p className="eyebrow text-accent-quiet">Where to buy</p>
             <h2 className="mt-3 text-3xl sm:text-4xl">
-              Stocked across Ghana — and looking for more
+              Stocked across Ghana, and looking for more
             </h2>
           </div>
           <a

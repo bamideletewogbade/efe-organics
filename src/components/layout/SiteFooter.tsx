@@ -12,7 +12,7 @@ export function SiteFooter() {
      * No top margin.
      *
      * `mt-24` used to sit here, which produced a band of page background between
-     * the last section and the footer — very visible when that section is also
+     * the last section and the footer, very visible when that section is also
      * dark, as on /about, where it read as a rendering fault rather than
      * spacing. Sections own their own bottom padding; the footer butts straight
      * up against whatever precedes it.
@@ -110,7 +110,7 @@ export function SiteFooter() {
       {/*
         Trust row. A shop footer's real job is answering the last three doubts
         before someone commits: can I pay how I pay, will it reach me, is this
-        thing real. Stated plainly rather than as badge images — no logos we do
+        thing real. Stated plainly rather than as badge images, no logos we do
         not have permission to use, and it stays legible at any size.
       */}
       <div className="border-t border-paper/10">

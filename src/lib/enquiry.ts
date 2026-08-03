@@ -2,7 +2,7 @@
  * Enquiry scripts.
  *
  * A conversation is defined as DATA, not markup, so the trade and general flows
- * are the same component with different scripts — and so a step can branch on an
+ * are the same component with different scripts. And so a step can branch on an
  * earlier answer without rewriting the UI.
  *
  * Design rules for writing a step:
@@ -18,7 +18,7 @@ export type StepKind = "choice" | "text" | "email" | "tel" | "long";
 
 export type EnquiryStep = {
   id: string;
-  /** What Efe "says". Keep it human — this is read as speech. */
+  /** What Efe "says". Keep it human, this is read as speech. */
   prompt: string;
   /** Optional supporting line under the prompt. */
   hint?: string;
@@ -28,7 +28,7 @@ export type EnquiryStep = {
   optional?: boolean;
   /**
    * Show this step only when an earlier answer matches. Declarative DATA, not a
-   * predicate function — the script is defined in a server component and handed
+   * predicate function. The script is defined in a server component and handed
    * to a client one, and functions cannot cross that boundary. A `when: () =>`
    * callback here failed the production build with "Functions cannot be passed
    * directly to Client Components", which dev mode never surfaced.
@@ -48,11 +48,11 @@ export type EnquiryScript = {
 
 export const TRADE_SCRIPT: EnquiryScript = {
   greeting:
-    "Let's work out what you need. Six quick questions — under a minute.",
+    "Let's work out what you need. Six quick questions. Under a minute.",
   steps: [
     {
       id: "business_type",
-      prompt: "First — what kind of business are you?",
+      prompt: "First, what kind of business are you?",
       kind: "choice",
       options: [
         "Shop or pharmacy",
@@ -66,13 +66,13 @@ export const TRADE_SCRIPT: EnquiryScript = {
     {
       id: "interest",
       prompt: "And what are you looking to buy?",
-      hint: "You can change your mind later — this just points us the right way.",
+      hint: "You can change your mind later. This just points us the right way.",
       kind: "choice",
       options: [
         "The retail range",
         "1L professional formats",
         "Raw black soap crumble",
-        "Not sure yet — advise me",
+        "Not sure yet, advise me",
       ],
     },
     {
@@ -128,7 +128,7 @@ export const TRADE_SCRIPT: EnquiryScript = {
     },
   ],
   closing:
-    "That's everything. We'll come back with pricing and terms — usually within a working day.",
+    "That's everything. We'll come back with pricing and terms. Usually within a working day.",
 };
 
 export const CONTACT_SCRIPT: EnquiryScript = {
@@ -158,7 +158,7 @@ export const CONTACT_SCRIPT: EnquiryScript = {
     },
     {
       id: "message",
-      prompt: "Go ahead — what would you like to say?",
+      prompt: "Go ahead. What would you like to say?",
       kind: "long",
       placeholder: "Type as much or as little as you like…",
     },
@@ -185,7 +185,7 @@ export const CONTACT_SCRIPT: EnquiryScript = {
   closing: "Thanks. We read everything and usually reply within a working day.",
 };
 
-/** Steps that apply given the answers so far — resolves `showIf` branches. */
+/** Steps that apply given the answers so far, resolves `showIf` branches. */
 export function visibleSteps(
   script: EnquiryScript,
   answers: Record<string, string>,
@@ -200,5 +200,5 @@ export function visibleSteps(
 
 /** Human-readable label for a step, used in the review list and the email. */
 export function labelFor(step: EnquiryStep): string {
-  return step.prompt.replace(/^(First — |And |Almost there\. )/, "").replace(/\?$/, "");
+  return step.prompt.replace(/^(First, |And |Almost there\. )/, "").replace(/\?$/, "");
 }

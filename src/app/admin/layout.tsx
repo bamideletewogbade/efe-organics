@@ -33,7 +33,7 @@ export default async function AdminLayout({
 
   /**
    * Defence in depth ONLY. The real gate is `src/proxy.ts`, which rewrites
-   * unauthenticated requests to /admin/locked before any page renders — a
+   * unauthenticated requests to /admin/locked before any page renders, a
    * layout cannot prevent its children from executing, so a check here alone
    * would leak the rendered page in the RSC payload. See proxy.ts for the
    * full account of that bug.
@@ -44,26 +44,39 @@ export default async function AdminLayout({
   if (!session.authenticated) return <AdminSignIn />;
 
   return (
-    <div className="flex min-h-svh flex-col bg-surface lg:flex-row">
-      <AdminNav devBypass={session.devBypass} />
+    /*
+      `data-chrome="admin"` is what switches headings off the display face. A
+      data attribute rather than a class so the rule in globals.css reads as a
+      statement about the chrome rather than yet another utility to remember to
+      apply, and so a stray `className` edit cannot quietly undo it.
+    */
+    <div
+      data-chrome="admin"
+      className="flex min-h-svh flex-col bg-surface lg:flex-row"
+    >
+      <AdminNav devBypass={session.devBypass} dbReady={dbReady} />
 
       <main className="min-w-0 flex-1">
+        {/*
+          The environment warnings moved into the sidebar. They were two stacked
+          full-width bars, roughly 100px on every load, repeating what the
+          operator already knew and pushing the actual work below the fold.
+          Mobile has no sidebar footer, so they still appear here on small
+          screens where vertical space is cheaper than a missing warning.
+        */}
         {!dbReady && (
-          <div className="border-b border-amber-500/30 bg-amber-500/10 px-6 py-3">
+          <div className="border-b border-[color-mix(in_oklab,var(--progress)_35%,transparent)] bg-[color-mix(in_oklab,var(--progress)_10%,transparent)] px-6 py-3 lg:hidden">
             <p className="text-sm text-strong">
               <span className="font-semibold">No database connected.</span>{" "}
-              Screens will render empty until{" "}
-              <code className="text-xs">DATABASE_URL</code> is set and{" "}
-              <code className="text-xs">npm run db:migrate</code> has run.
+              Screens stay empty until <code>DATABASE_URL</code> is set.
             </p>
           </div>
         )}
 
         {session.devBypass && (
-          <div className="border-b border-line bg-surface-sunken px-6 py-2.5">
+          <div className="border-b border-line bg-surface-sunken px-6 py-2.5 lg:hidden">
             <p className="text-xs text-muted">
-              Development mode — no <code>ADMIN_PASSWORD</code> set, so this
-              admin is unprotected. It locks itself in production.{" "}
+              No <code>ADMIN_PASSWORD</code> set, so this admin is unprotected.{" "}
               <Link href="/" className="underline underline-offset-4">
                 Back to shop
               </Link>

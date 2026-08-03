@@ -9,7 +9,7 @@ import { absolute } from "@/lib/seo";
  * Priorities reflect what we actually want ranked: collections are the pages
  * that match how people search ("african black soap ghana"), so they sit above
  * individual SKUs. `/shop` is included but the filtered `?category=` views are
- * not — they canonicalise to the collection pages instead of competing with them.
+ * not. They canonicalise to the collection pages instead of competing with them.
  *
  * The bulk trade SKU is included: it is a real, linked page on /partners and a
  * formulator searching for raw black soap should be able to find it.

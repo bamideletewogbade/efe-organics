@@ -7,6 +7,8 @@ import {
   createDiscountAction,
   toggleDiscountAction,
 } from "@/app/admin/actions";
+import { PageHeader } from "@/components/admin/AdminUI";
+import { ActionForm, SubmitButton } from "@/components/admin/Form";
 import { formatPrice } from "@/lib/money";
 
 export const dynamic = "force-dynamic";
@@ -34,9 +36,21 @@ export default async function AdminPromotionsPage() {
 
   return (
     <div>
-      <h1 className="text-2xl">Promotions</h1>
-      <p className="mt-2 text-sm text-muted">
-        Discounts are rules on a basket. Bundles are sets a customer buys.
+      <PageHeader
+        title="Promotions"
+        description="A discount is a rule applied to a basket. A bundle is a set a customer buys."
+        meta={`${discountRows.filter((d) => d.active).length} discounts running, ${bundleRows.filter((b) => b.active).length} bundles`}
+      />
+
+      {/*
+        Honest note, and it belongs on the screen rather than only in a commit
+        message: these can be created and switched on, but nothing applies them
+        at the basket yet. Showing a promotions screen that quietly does nothing
+        is worse than showing one that says so.
+      */}
+      <p className="mt-5 rounded-xl border border-[color-mix(in_oklab,var(--progress)_35%,transparent)] bg-[color-mix(in_oklab,var(--progress)_7%,transparent)] p-4 text-sm/6 text-strong">
+        Discounts and bundles can be set up here, but the basket does not apply
+        them yet. Nothing a customer sees changes until that is wired up.
       </p>
 
       <div className="mt-8 grid gap-8 xl:grid-cols-2">
@@ -44,8 +58,9 @@ export default async function AdminPromotionsPage() {
         <section>
           <h2 className="text-lg">Discounts</h2>
 
-          <form
+          <ActionForm
             action={createDiscountAction}
+            resetOnSuccess
             className="mt-4 grid gap-3 rounded-2xl border border-line bg-surface-sunken p-5 sm:grid-cols-2"
           >
             <label className="block sm:col-span-2">
@@ -109,13 +124,13 @@ export default async function AdminPromotionsPage() {
               without the customer doing anything.
             </p>
 
-            <button
-              type="submit"
-              className="rounded-full bg-forest px-5 py-2.5 text-sm font-semibold text-paper sm:col-span-2 sm:justify-self-start"
+            <SubmitButton
+              pendingLabel="Creating"
+              className="sm:col-span-2 sm:justify-self-start"
             >
               Create discount
-            </button>
-          </form>
+            </SubmitButton>
+          </ActionForm>
 
           <ul className="mt-4 grid gap-2">
             {discountRows.length === 0 && (
@@ -147,20 +162,21 @@ export default async function AdminPromotionsPage() {
                 >
                   {discount.active ? "Live" : "Off"}
                 </span>
-                <form action={toggleDiscountAction}>
+                <ActionForm action={toggleDiscountAction}>
                   <input type="hidden" name="discountId" value={discount.id} />
                   <input
                     type="hidden"
                     name="active"
                     value={String(!discount.active)}
                   />
-                  <button
-                    type="submit"
-                    className="rounded-lg border border-line px-3 py-1.5 text-xs font-semibold text-strong"
+                  <SubmitButton
+                    variant="quiet"
+                    pendingLabel="Switching"
+                    className="!px-3 !py-1.5 !text-xs"
                   >
                     {discount.active ? "Turn off" : "Turn on"}
-                  </button>
-                </form>
+                  </SubmitButton>
+                </ActionForm>
               </li>
             ))}
           </ul>
@@ -170,8 +186,9 @@ export default async function AdminPromotionsPage() {
         <section>
           <h2 className="text-lg">Bundles</h2>
 
-          <form
+          <ActionForm
             action={createBundleAction}
+            resetOnSuccess
             className="mt-4 grid gap-3 rounded-2xl border border-line bg-surface-sunken p-5 sm:grid-cols-2"
           >
             <label className="block">
@@ -227,13 +244,13 @@ export default async function AdminPromotionsPage() {
               Products get added to the bundle after it is created.
             </p>
 
-            <button
-              type="submit"
-              className="rounded-full bg-forest px-5 py-2.5 text-sm font-semibold text-paper sm:col-span-2 sm:justify-self-start"
+            <SubmitButton
+              pendingLabel="Creating"
+              className="sm:col-span-2 sm:justify-self-start"
             >
               Create bundle
-            </button>
-          </form>
+            </SubmitButton>
+          </ActionForm>
 
           <ul className="mt-4 grid gap-2">
             {bundleRows.length === 0 && (

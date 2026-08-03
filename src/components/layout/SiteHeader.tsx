@@ -32,7 +32,7 @@ type NavLink = {
  *
  * "Find Efe → Buy it / Sell it" failed on its own terms: the parent said
  * nothing, and the children were so short they became riddles. But renaming
- * them would have missed the real problem — **the site now sells directly.**
+ * them would have missed the real problem, **the site now sells directly.**
  * "Where to buy" was written when a reseller was the only way to get the
  * products. Offering it in the main nav of a shop that has its own checkout
  * asks the visitor to choose between buying here and buying somewhere else,
@@ -55,15 +55,15 @@ const LINKS: NavLink[] = [
 /**
  * Site header.
  *
- * Shares the reference site's utility layout — search, currency, wishlist,
- * account, cart — because that arrangement is what shoppers expect and there is
+ * Shares the reference site's utility layout. Search, currency, wishlist,
+ * account, cart. Because that arrangement is what shoppers expect and there is
  * no prize for being different about it. What is ours: a single gold pill that
  * slides between nav items on shared layout, a mega-menu that shows real
  * category counts rather than a plain list, and a bar that condenses on scroll
  * so the hero reads full-bleed.
  *
  * Nothing here is wired to a backend yet. Search, wishlist and cart are
- * presentational until Phase 2 — they are marked as such in the markup rather
+ * presentational until Phase 2. They are marked as such in the markup rather
  * than pretending to work.
  */
 export function SiteHeader({ categories = [] }: { categories?: NavCategory[] }) {
@@ -82,7 +82,7 @@ export function SiteHeader({ categories = [] }: { categories?: NavCategory[] }) 
   const marked = hovered ?? active;
 
   /**
-   * The bar only floats transparent where there is a dark hero behind it — the
+   * The bar only floats transparent where there is a dark hero behind it, the
    * home page. Everywhere else the page ground is paper, and a transparent bar
    * would render paper text on paper. So off-home it is always the solid plate.
    */
@@ -94,7 +94,7 @@ export function SiteHeader({ categories = [] }: { categories?: NavCategory[] }) 
        * No `border-b`.
        *
        * A bottom border sits OUTSIDE the animated height, so the header measured
-       * 97px while `--header-h` said 96px — and `.under-header` pulled the hero
+       * 97px while `--header-h` said 96px, and `.under-header` pulled the hero
        * up by exactly 96px, leaving a 1px line of paper background above the
        * dark hero. Small, but it read as a rendering fault at the very top of
        * the landing page.
@@ -106,7 +106,7 @@ export function SiteHeader({ categories = [] }: { categories?: NavCategory[] }) 
       className="sticky top-0 z-50"
       initial={false}
       animate={{
-        // Deep forest (#0d2c1d) — the anchor, matching the hero and footer.
+        // Deep forest (#0d2c1d). The anchor, matching the hero and footer.
         backgroundColor: floating ? "rgb(13 44 29 / 0)" : "rgb(13 44 29 / 0.94)",
         boxShadow: floating
           ? "0 1px 0 0 rgb(217 143 20 / 0)"
@@ -124,7 +124,7 @@ export function SiteHeader({ categories = [] }: { categories?: NavCategory[] }) 
           className="flex items-center gap-4"
           initial={false}
           /* 96/70 rather than 76/62. The monogram is 56px tall, which left it
-             sitting 10px off the top edge — visibly cramped against the browser
+             sitting 10px off the top edge, visibly cramped against the browser
              chrome. The bar now gives it real air, and still condenses on scroll
              so the hero is not permanently squeezed. */
           animate={{ height: condensed ? 70 : 96 }}
@@ -132,7 +132,7 @@ export function SiteHeader({ categories = [] }: { categories?: NavCategory[] }) 
         >
           <Link
             href="/"
-            aria-label={`${brand.name} — home`}
+            aria-label={`${brand.name} home`}
             className="shrink-0 transition-transform duration-200 active:scale-[0.97]"
             onClick={() => setMenuOpen(false)}
           >
@@ -140,7 +140,7 @@ export function SiteHeader({ categories = [] }: { categories?: NavCategory[] }) 
           </Link>
 
           {/* ---- primary nav ---- */}
-          {/* `ml-10` — the mark is ornate and needs breathing room, otherwise
+          {/* `ml-10`. The mark is ornate and needs breathing room, otherwise
               "Shop" crowds the descender of the monogram's swash. */}
           <nav aria-label="Primary" className="ml-10 hidden lg:block">
             <ul className="flex items-center">
@@ -215,7 +215,7 @@ export function SiteHeader({ categories = [] }: { categories?: NavCategory[] }) 
           <div className="ml-auto flex items-center gap-1 md:ml-0">
             {/* The GHS/flag chip was removed: it implied a currency switcher
                 that does not exist. Everything is priced in cedis and the site
-                serves Ghana — stating it in the header was noise pretending to
+                serves Ghana. Stating it in the header was noise pretending to
                 be a control. */}
             <ThemeToggle />
 
@@ -384,7 +384,7 @@ export function SiteHeader({ categories = [] }: { categories?: NavCategory[] }) 
  * not be told their basket is empty.
  *
  * The count animates on change (`key={count}`) so adding an item registers even
- * when the drawer is closed — for instance when adding from a grid card.
+ * when the drawer is closed. For instance when adding from a grid card.
  */
 function CartButton() {
   const { count, hydrated, open } = useCart();

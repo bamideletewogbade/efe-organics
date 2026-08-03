@@ -9,7 +9,7 @@
  *   scripts/out/reseller-catalogue.json   raw product records
  *   public/products/<slug>/<n>.<ext>      downloaded imagery
  *
- * IMPORTANT — the imagery is the RESELLER'S upload of Efe's products. It is
+ * IMPORTANT. The imagery is the RESELLER'S upload of Efe's products. It is
  * imported as a working placeholder set so the site can be built and reviewed.
  * Confirm ownership with Efe (or reshoot) before launch. See
  * docs/OPEN-QUESTIONS.md #7 and public/products/README.md.
@@ -42,7 +42,7 @@ async function getText(url) {
 /**
  * The flight payload lives inside JS string literals, so every quote in the
  * HTML arrives as `\"`. Unescape one level, left to right, before any brace
- * matching — otherwise a string-aware matcher never sees a closing quote and
+ * matching. Otherwise a string-aware matcher never sees a closing quote and
  * runs off the end of the document. `\n` and friends are left intact so the
  * result is still valid JSON.
  */
@@ -133,7 +133,7 @@ async function downloadImages(product) {
       await writeFile(abs, Buffer.from(await res.arrayBuffer()));
       local.push(rel);
     } catch (error) {
-      console.warn(`  ! image failed ${url} — ${error.message}`);
+      console.warn(`  ! image failed ${url}, ${error.message}`);
     }
   }
   return local;
@@ -153,11 +153,11 @@ while (queue.length) {
   try {
     html = await getText(`${ORIGIN}/shop/${slug}`);
   } catch (error) {
-    console.warn(`! ${slug} — ${error.message}`);
+    console.warn(`! ${slug}, ${error.message}`);
     continue;
   }
 
-  // Follow "You might also like" to reach SKUs missing from the shop index —
+  // Follow "You might also like" to reach SKUs missing from the shop index,
   // that is how the 250kg bulk crumble surfaces.
   for (const next of slugsIn(html)) {
     if (!seen.has(next)) {
@@ -170,7 +170,7 @@ while (queue.length) {
   const record = hit && parseJson(hit.raw);
 
   if (!record?.slug) {
-    console.warn(`? ${slug} — no product record`);
+    console.warn(`? ${slug}, no product record`);
     continue;
   }
   if (record.brand !== BRAND) {
@@ -180,7 +180,7 @@ while (queue.length) {
 
   const product = cleanProduct(record);
   console.log(
-    `+ ${product.slug} — ₵${product.price} — ${product.images.length} image(s)`,
+    `+ ${product.slug}, ₵${product.price}, ${product.images.length} image(s)`,
   );
   product.localImages = await downloadImages(product);
   products.push(product);

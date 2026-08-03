@@ -2,16 +2,16 @@
  * Metadata and JSON-LD builders.
  *
  * One module so every page describes itself the same way, and so the structured
- * data stays consistent with what is actually on the page — mismatched JSON-LD
+ * data stays consistent with what is actually on the page, mismatched JSON-LD
  * is worse than none, because it gets the site penalised rather than ignored.
  *
- * IMPORTANT — no `Offer` availability is claimed as purchasable yet. There is no
+ * IMPORTANT. No `Offer` availability is claimed as purchasable yet. There is no
  * checkout, and the prices are the reseller's rather than confirmed RRP
  * (docs/OPEN-QUESTIONS.md #1). Products are published with
  * `availability: InStoreOnly` and a `seller` pointing at the confirmed retail
  * channel, which is the honest description of how someone actually buys today.
  * Flip to `InStock` + a real `url` when Phase 2 checkout ships AND prices are
- * confirmed — not before.
+ * confirmed, not before.
  */
 
 import type { Metadata } from "next";
@@ -127,7 +127,7 @@ export function breadcrumbJsonLd(trail: Array<{ name: string; path: string }>) {
  * schema.org Product.
  *
  * `offers` deliberately describes in-store availability through the confirmed
- * retailer rather than a direct purchase — see the note at the top of this file.
+ * retailer rather than a direct purchase. See the note at the top of this file.
  * No `aggregateRating`: there are no reviews, and inventing them is exactly the
  * kind of thing that gets structured data flagged as spam.
  */

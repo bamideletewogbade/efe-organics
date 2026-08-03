@@ -7,7 +7,7 @@ import { duration, easeSoft } from "@/components/motion/tokens";
 import { brand } from "@/lib/brand";
 
 /**
- * Enquiry form — trade and general.
+ * Enquiry form, trade and general.
  *
  * **This does not submit anywhere yet.** There is no mail provider wired
  * (`capabilities.hasEmail` is false without RESEND_API_KEY), so rather than
@@ -41,10 +41,10 @@ export function EnquiryForm({
 
     const lines = [
       `Name: ${data.get("name")}`,
-      `Business: ${data.get("business") || "—"}`,
+      `Business: ${data.get("business") || "-"}`,
       `Email: ${data.get("email")}`,
-      `Phone: ${data.get("phone") || "—"}`,
-      `Location: ${data.get("location") || "—"}`,
+      `Phone: ${data.get("phone") || "-"}`,
+      `Location: ${data.get("location") || "-"}`,
       `Enquiry: ${data.get("subject")}`,
       "",
       String(data.get("message") ?? ""),
@@ -53,7 +53,7 @@ export function EnquiryForm({
     const href =
       `mailto:${brand.contact.email}` +
       `?subject=${encodeURIComponent(
-        `${kind === "trade" ? "Wholesale" : "Website"} enquiry — ${data.get("subject")}`,
+        `${kind === "trade" ? "Wholesale" : "Website"} enquiry. ${data.get("subject")}`,
       )}` +
       `&body=${encodeURIComponent(lines.join("\n"))}`;
 
@@ -127,7 +127,7 @@ export function EnquiryForm({
         </label>
       </div>
 
-      {/* Subject as chips — faster to answer on a phone than a select, and it
+      {/* Subject as chips. Faster to answer on a phone than a select, and it
           shows the range of what we actually supply. */}
       <fieldset className="mt-6">
         <legend className="mb-2.5 text-xs font-semibold text-strong">

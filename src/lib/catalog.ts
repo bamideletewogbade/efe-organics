@@ -59,12 +59,12 @@ export type Product = {
   line: ProductLine;
   /**
    * Size family. Products sharing a group are one buying decision with a size
-   * selector — "Lemon Blast 350ml / 500ml / 1L" is one product, not three.
+   * selector. "Lemon Blast 350ml / 500ml / 1L" is one product, not three.
    */
   group?: string;
   /** Raw material / bulk trade SKU. Hidden from the consumer shop. */
   wholesale?: boolean;
-  /** Pesewas. See lib/money.ts — never a float. */
+  /** Pesewas. See lib/money.ts, never a float. */
   priceMinor: number;
   /** Reseller RRP, when we undercut it. Drives the savings badge. */
   compareAtMinor?: number;
@@ -84,7 +84,7 @@ export type ProductGroup = {
   name: string;
   category: CategorySlug;
   line: ProductLine;
-  /** Cheapest variant — the one the card shows and links to. */
+  /** Cheapest variant. The one the card shows and links to. */
   lead: Product;
   variants: Product[];
 };
@@ -103,7 +103,7 @@ export function sizeLabel(product: Product): string | null {
 }
 
 /* -------------------------------------------------------------------------- */
-/* Readers — the whole public surface of the data layer.                       */
+/* Readers. The whole public surface of the data layer.                       */
 /* -------------------------------------------------------------------------- */
 
 export async function listProducts(options?: {
@@ -196,7 +196,7 @@ export async function listWholesale(): Promise<Product[]> {
 /**
  * Every distinct botanical the range actually contains, most-used first.
  *
- * Drawn from the imported ingredient lists — so the hero ticker is a statement
+ * Drawn from the imported ingredient lists, so the hero ticker is a statement
  * of fact about the catalogue, not decorative word salad. Water and the base
  * soap crumble are dropped: they appear in nearly everything and say nothing.
  */

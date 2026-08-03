@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { getDb } from "@/db/client";
 import { events } from "@/db/schema";
 import { logger } from "@/lib/logger";
+import { clientKey, rateLimit } from "@/lib/rate-limit";
 
 /**
  * First-party event ingest.
@@ -10,7 +11,7 @@ import { logger } from "@/lib/logger";
  * WHY OUR OWN AND NOT GA
  * Efe owns the data, it survives ad blockers (same-origin, no third-party
  * script), it needs no cookie banner beyond what a first-party id already
- * requires, and it can join directly to orders — which is the whole point.
+ * requires, and it can join directly to orders, which is the whole point.
  * A vendor cannot tell you that the customers who read the ingredients tab
  * convert twice as often; a table in your own database can.
  *
@@ -23,7 +24,7 @@ import { logger } from "@/lib/logger";
  * PRIVACY BY CONSTRUCTION
  * No IP is stored. No user agent string is stored. Country and a coarse device
  * class come from edge headers and stop there. The identifier is a first-party
- * random id the client generates — not a fingerprint, and nothing that can
+ * random id the client generates. Not a fingerprint, and nothing that can
  * re-identify someone across sites.
  *
  * Failures are swallowed with a 204. Analytics must never break a checkout.
@@ -64,8 +65,21 @@ function safeProps(input: unknown): Record<string, unknown> {
 }
 
 export async function POST(request: Request) {
+  /*
+    Generous, because this is a real browsing signal: a shopper moving through
+    the shop legitimately fires page views, product views and cart events, and
+    the client batches up to 20 at a time. 120 requests a minute is far beyond
+    any human session and still stops a loop filling the table.
+
+    Rejected the same way everything else here fails: 204, silently. A 429 would
+    make the analytics client retry, which is exactly the traffic being limited.
+  */
+  if (!rateLimit(clientKey(request, "events"), 120, 60_000).ok) {
+    return new NextResponse(null, { status: 204 });
+  }
+
   const db = getDb();
-  // No database configured — accept and discard, so the storefront behaves
+  // No database configured. Accept and discard, so the storefront behaves
   // identically whether or not analytics is switched on.
   if (!db) return new NextResponse(null, { status: 204 });
 

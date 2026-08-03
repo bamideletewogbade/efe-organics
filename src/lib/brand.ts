@@ -8,19 +8,27 @@ export const brand = {
   name: "Efe Organics",
   legalName: "Efe Organics™",
   tagline: "Life & Organics",
-  /** Deck cover line — used as the hero subhead. */
+  /** Deck cover line, used as the hero subhead. */
   promise: "Expanding horizons with nature in our everyday lives.",
   /** One-sentence description for metadata and social cards. */
   description:
     "Premium organic skin and hair care rooted in African tradition. Handcrafted African Black Soap, herbal hair care and natural body care, made in Ghana.",
 
-  /** The 2026 rebrand, straight from the deck. Used on /about. */
+  /**
+   * The 2026 rebrand. Used on /about.
+   *
+   * Rewritten from the deck's original wording, which leaned on the sort of
+   * phrasing every organic brand uses ("a bold step forward in our journey",
+   * "a celebration of heritage, purity and the natural world"). It reads as
+   * filler, and a shopper deciding between a GH₵15 bar and a competitor's does
+   * not need it. Every sentence here says something a customer could check.
+   */
   story: {
-    heading: "Our evolution",
+    heading: "How we got here",
     body: [
-      "In 2026 we rebranded from Efe Organic Cosmetics to Efe Organics — a bold step forward in our journey to serve a wider organics market.",
-      "Our mission is to manufacture, market and sell the finest organic skin and hair care products rooted deeply in African tradition. Every product we create is a celebration of heritage, purity and the natural world.",
-      "Quality, authenticity and sustainability are not just values — they are our foundation. We source ethically, formulate consciously, and deliver products that honour both the people who use them and the earth that provides them.",
+      "We changed our name from Efe Organic Cosmetics to Efe Organics in 2026. The range had grown past cosmetics into hair and body care, and the old name no longer covered it.",
+      "We manufacture, market and sell organic skin and hair care rooted in African tradition, from Accra.",
+      "Ingredients are sourced in Ghana and listed on the product pages, so you can read what is in something before you buy it.",
     ],
   },
 
@@ -60,7 +68,7 @@ export const brand = {
   /** Canonical origin. Update when the domain goes live. */
   url: "https://www.efeorganics.com",
 
-  /** Where the catalogue currently lives — credited until we take over sales. */
+  /** Where the catalogue currently lives, credited until we take over sales. */
   resellerUrl: "https://www.coloursbay.com",
 } as const;
 
@@ -69,6 +77,6 @@ export const logos = {
   horizontal: "/brand/logo-horizontal-leaf.jpg",
   /** Gold "Efe" monogram with leaf. Best on dark plates. */
   monogram: "/brand/logo-monogram-organics.jpg",
-  /** Circular gold badge — legacy "Organic Cosmetics" mark. Archive use only. */
+  /** Circular gold badge, legacy "Organic Cosmetics" mark. Archive use only. */
   badge: "/brand/logo-badge-cosmetics.jpg",
 } as const;

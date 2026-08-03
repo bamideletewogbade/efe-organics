@@ -1,8 +1,10 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
 
 import { adjustStockAction, setStockSettingsAction } from "@/app/admin/actions";
+import { ActionForm, SubmitButton } from "@/components/admin/Form";
 import type { AdminVariantRow } from "@/db/queries/admin";
 import { formatPrice } from "@/lib/money";
 
@@ -22,8 +24,8 @@ export function StockTable({ variants }: { variants: AdminVariantRow[] }) {
   const [open, setOpen] = useState<string | null>(null);
 
   return (
-    <div className="mt-6 overflow-hidden rounded-2xl border border-line">
-      <table className="w-full border-collapse text-sm">
+    <div className="mt-6 overflow-x-auto rounded-2xl border border-line">
+      <table className="w-full min-w-[46rem] border-collapse text-sm">
         <caption className="sr-only">
           Stock levels for every product size
         </caption>
@@ -60,9 +62,14 @@ export function StockTable({ variants }: { variants: AdminVariantRow[] }) {
                 className="border-b border-line last:border-b-0 hover:bg-surface-sunken/50"
               >
                 <td className="px-4 py-3">
-                  <span className="font-medium text-strong">
+                  {/* Counting a shelf and spotting a wrong price are the same
+                      trip, so the name goes to the product's editor. */}
+                  <Link
+                    href={`/admin/products/${variant.productId}`}
+                    className="font-medium text-strong underline-offset-4 hover:text-accent-quiet hover:underline"
+                  >
                     {variant.productName}
-                  </span>
+                  </Link>
                   {variant.channel === "trade" && (
                     <span className="ml-2 rounded-full bg-surface-sunken px-2 py-0.5 text-[0.65rem] text-muted">
                       trade
@@ -70,7 +77,7 @@ export function StockTable({ variants }: { variants: AdminVariantRow[] }) {
                   )}
                 </td>
                 <td className="px-4 py-3 text-muted">
-                  {variant.sizeLabel ?? "—"}
+                  {variant.sizeLabel ?? "-"}
                 </td>
                 <td className="stat px-4 py-3 text-right text-strong">
                   {formatPrice(variant.priceMinor)}
@@ -82,9 +89,9 @@ export function StockTable({ variants }: { variants: AdminVariantRow[] }) {
                     <span
                       className={`stat rounded-full px-2.5 py-1 ${
                         outOfStock
-                          ? "bg-red-500/10 text-red-600 dark:text-red-400"
+                          ? "bg-[color-mix(in_oklab,var(--blocked)_14%,transparent)] text-[var(--blocked)]"
                           : lowStock
-                            ? "bg-amber-500/10 text-amber-700 dark:text-amber-400"
+                            ? "bg-[color-mix(in_oklab,var(--progress)_16%,transparent)] text-[var(--progress)]"
                             : "text-strong"
                       }`}
                     >
@@ -95,7 +102,7 @@ export function StockTable({ variants }: { variants: AdminVariantRow[] }) {
                 <td className="px-4 py-3">
                   <div className="flex items-center justify-end gap-1.5">
                     {[-1, 1, 10].map((delta) => (
-                      <form key={delta} action={adjustStockAction}>
+                      <ActionForm key={delta} action={adjustStockAction}>
                         <input type="hidden" name="variantId" value={variant.id} />
                         <input type="hidden" name="delta" value={delta} />
                         <input
@@ -103,13 +110,14 @@ export function StockTable({ variants }: { variants: AdminVariantRow[] }) {
                           name="reason"
                           value={delta > 0 ? "restock" : "manual_adjustment"}
                         />
-                        <button
-                          type="submit"
-                          className="rounded-lg border border-line px-2.5 py-1 text-xs text-muted transition-colors hover:border-accent hover:text-strong"
+                        <SubmitButton
+                          variant="quiet"
+                          pendingLabel="…"
+                          className="!px-2.5 !py-1 !text-xs !text-muted hover:!text-strong"
                         >
                           {delta > 0 ? `+${delta}` : delta}
-                        </button>
-                      </form>
+                        </SubmitButton>
+                      </ActionForm>
                     ))}
                     <button
                       type="button"
@@ -125,8 +133,9 @@ export function StockTable({ variants }: { variants: AdminVariantRow[] }) {
 
                   {open === variant.id && (
                     <div className="mt-3 flex flex-col gap-3 rounded-xl bg-surface-sunken p-3 text-left">
-                      <form
+                      <ActionForm
                         action={adjustStockAction}
+                        resetOnSuccess
                         className="flex flex-wrap items-end gap-2"
                       >
                         <input type="hidden" name="variantId" value={variant.id} />
@@ -165,15 +174,12 @@ export function StockTable({ variants }: { variants: AdminVariantRow[] }) {
                             className="w-full rounded-lg border border-line bg-surface-raised px-2.5 py-1.5 text-xs"
                           />
                         </label>
-                        <button
-                          type="submit"
-                          className="rounded-lg bg-forest px-3 py-1.5 text-xs font-semibold text-paper"
-                        >
+                        <SubmitButton variant="small" pendingLabel="Applying">
                           Apply
-                        </button>
-                      </form>
+                        </SubmitButton>
+                      </ActionForm>
 
-                      <form
+                      <ActionForm
                         action={setStockSettingsAction}
                         className="flex flex-wrap items-end gap-3 border-t border-line pt-3"
                       >
@@ -198,13 +204,13 @@ export function StockTable({ variants }: { variants: AdminVariantRow[] }) {
                             className="w-20 rounded-lg border border-line bg-surface-raised px-2.5 py-1.5 text-xs"
                           />
                         </label>
-                        <button
-                          type="submit"
-                          className="rounded-lg border border-line px-3 py-1.5 text-xs font-semibold text-strong"
+                        <SubmitButton
+                          variant="quiet"
+                          className="!px-3 !py-1.5 !text-xs"
                         >
                           Save
-                        </button>
-                      </form>
+                        </SubmitButton>
+                      </ActionForm>
                     </div>
                   )}
                 </td>

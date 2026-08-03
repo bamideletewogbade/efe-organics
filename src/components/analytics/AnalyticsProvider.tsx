@@ -9,7 +9,7 @@ import { installFlushHandlers, track } from "@/lib/analytics";
  * Fires `page_view` on every route change and wires the flush handlers.
  *
  * `useSearchParams` forces a Suspense boundary in Next's App Router, otherwise
- * the whole tree opts out of static rendering — which would quietly turn 42
+ * the whole tree opts out of static rendering, which would quietly turn 42
  * prerendered product pages into server-rendered ones. The boundary keeps
  * analytics dynamic and the pages static.
  *

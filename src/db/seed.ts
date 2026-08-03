@@ -91,7 +91,7 @@ async function main() {
         name: productName,
         categoryId: categoryIds.get(lead.category) ?? null,
         line: lead.line,
-        // Imported SKUs are real and on sale — they go in active, not draft.
+        // Imported SKUs are real and on sale. They go in active, not draft.
         status: "active",
         blurb: lead.blurb ?? null,
         ingredients: lead.ingredients ?? null,
@@ -150,7 +150,7 @@ async function main() {
 
       for (const [imageIndex, url] of (sku.images ?? []).entries()) {
         // No natural key on images, so clear this product's set once and
-        // re-insert — cheaper and more correct than diffing URLs.
+        // re-insert, cheaper and more correct than diffing URLs.
         if (imageIndex === 0 && position === 0) {
           await db
             .delete(productImages)

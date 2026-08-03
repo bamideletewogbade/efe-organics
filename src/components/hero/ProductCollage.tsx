@@ -78,7 +78,7 @@ export function ProductCollage({ items }: { items: CollageItem[] }) {
        * Height-bounded, not aspect-driven.
        *
        * The tiles used to be fixed 4:5, so the block was as tall as its columns
-       * were wide — ~750px on a laptop — which made the hero overflow any
+       * were wide, ~750px on a laptop, which made the hero overflow any
        * viewport under about 900px no matter how much padding came out.
        *
        * Now the collage is capped in `svh` and the tiles divide whatever height
@@ -86,7 +86,7 @@ export function ProductCollage({ items }: { items: CollageItem[] }) {
        * to fit the hero.
        */
       /**
-       * The cap is tighter on phones because the hero STACKS there — copy and
+       * The cap is tighter on phones because the hero STACKS there, copy and
        * collage share one column instead of sitting side by side, so the collage
        * competes with the headline for the same vertical budget rather than
        * running alongside it. 34svh keeps all four products legible while
@@ -137,11 +137,11 @@ export function ProductCollage({ items }: { items: CollageItem[] }) {
                   transition={{
                     duration: 0.75,
                     ease: easeSoft,
-                    // Diagonal cascade — top-left first, bottom-right last.
+                    // Diagonal cascade. Top-left first, bottom-right last.
                     delay: 0.3 + columnIndex * 0.09 + rowIndex * 0.11,
                   }}
                   /* Each tile takes an equal share of the column's height.
-                     `min-h-0` is required — without it a flex child refuses to
+                     `min-h-0` is required, without it a flex child refuses to
                      shrink below its content and the cap is ignored. */
                   className="min-h-0 flex-1"
                 >
@@ -164,7 +164,7 @@ export function ProductCollage({ items }: { items: CollageItem[] }) {
                       </span>
                     )}
 
-                    {/* Name only surfaces on hover — the tiles should read as imagery
+                    {/* Name only surfaces on hover, the tiles should read as imagery
                   first, not as a product list. */}
                     <span className="pointer-events-none absolute inset-x-0 bottom-0 translate-y-full bg-gradient-to-t from-forest-deep/95 to-transparent px-3 pb-2.5 pt-8 text-xs text-paper transition-transform duration-300 ease-out group-hover:translate-y-0">
                       {item.name}

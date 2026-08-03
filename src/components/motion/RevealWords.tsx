@@ -7,7 +7,7 @@ import { duration, easeSoft, riseVariants } from "./tokens";
 /**
  * Headline reveal: each word sits behind its own clip mask and rises into place.
  *
- * Word-level rather than letter-level on purpose — letter-by-letter reads as a
+ * Word-level rather than letter-level on purpose, letter-by-letter reads as a
  * tech demo and makes a sentence harder to parse. Words keep the line readable
  * while the motion still registers.
  *

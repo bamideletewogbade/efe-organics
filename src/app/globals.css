@@ -3,7 +3,7 @@
 /* ---------------------------------------------------------------------------
    Efe Organics design tokens.
 
-   Components must never hardcode a hex value — reference these tokens. Anything
+   Components must never hardcode a hex value, reference these tokens. Anything
    that has to survive a theme flip goes through the SEMANTIC layer further down
    (`--surface`, `--text-strong`, `--accent`), not the raw palette here.
    --------------------------------------------------------------------------- */
@@ -11,49 +11,49 @@
 @theme {
   /* ---- Brand palette -----------------------------------------------------
      SUPERSEDED (29 Jul 2026). The palette used to be sampled from the monogram
-     with `scripts/sample-brand-palette.mjs` — black, gold and olive. Those
+     with `scripts/sample-brand-palette.mjs`. Black, gold and olive. Those
      values were accurate to the artwork and wrong for the business; see the
      note directly below. The sampler still exists and still works if the brand
      ever supplies new artwork worth measuring. ------------------------------ */
-  /* ---- DIRECTION B — "Market warmth" (29 Jul 2026) ----------------------
+  /* ---- DIRECTION B, "Market warmth" (29 Jul 2026) ----------------------
      The palette was previously measured from the monogram: gold foil on
-     near-black. That is the register of perfume and jewellery — scarcity and
+     near-black. That is the register of perfume and jewellery, scarcity and
      gifting. Efe sells GH₵15 bars in volume, in refill sizes, with savings
      badges. The environment was fighting the business.
 
      So the MARK keeps its gold; the SHOP does not inherit it. Gold is now
-     reserved for the logo, prices and premium moments — a signature, not a
+     reserved for the logo, prices and premium moments. A signature, not a
      ground.
 
      Anchor is a deep forest green: "organic" reads instantly and universally,
      and it is the one colour a soap brand can own without explaining. Action is
-     saffron — high contrast on BOTH light and dark grounds, which is what lets
+     saffron. High contrast on BOTH light and dark grounds, which is what lets
      one accent serve every button, badge and chip. Warm off-white ground,
      because the product photography is shot on marble and wood and a cold white
      makes it look grey. --------------------------------------------------- */
 
-  /* Grounds — warm, so photography sits naturally */
+  /* Grounds. Warm, so photography sits naturally */
   --color-shell: #faf7f0; /* page ground: warm off-white                */
   --color-shell-2: #f2ede1; /* sunken bands, image wells                  */
   --color-oat: #e6dfcd; /* borders, dividers on light                 */
 
-  /* Forest — the brand anchor */
+  /* Forest, the brand anchor */
   --color-forest: #14432c; /* deep anchor: headers, dark plates          */
   --color-forest-deep: #0d2c1d; /* deepest plate: hero floor, footer          */
   --color-forest-mid: #1d6340; /* raised dark surfaces                       */
   --color-forest-ink: #0a1f14; /* near-black green, body text on light       */
 
-  /* Saffron — the action colour. One accent, everywhere something is clickable */
+  /* Saffron, the action colour. One accent, everywhere something is clickable */
   --color-saffron: #d98f14; /* buttons, badges, active states             */
   --color-saffron-deep: #9c6206; /* passes AA as text on the light ground      */
   --color-saffron-light: #f6c56a; /* lifted for dark grounds                    */
 
-  /* Gold — the MARK only. Never a surface, never a button. */
+  /* Gold, the MARK only. Never a surface, never a button. */
   --color-gold: #c9a84c;
   --color-gold-light: #f0e5b9;
   --color-gold-deep: #7a5d27;
 
-  /* Leaf — kept for "organic/in-stock" semantics, not decoration */
+  /* Leaf. Kept for "organic/in-stock" semantics, not decoration */
   --color-leaf: #4e7a18;
   --color-leaf-light: #8fbb4e;
 
@@ -61,18 +61,22 @@
   --color-clay: #6b6154; /* muted text on light                        */
   --color-paper: #faf7f0; /* text on dark plates                        */
   /* ---- Typography --------------------------------------------------------
-     Fraunces was a high-contrast editorial serif — it made the site read as a
+     Fraunces was a high-contrast editorial serif, it made the site read as a
      magazine rather than a shop, which was half the "this doesn't feel like
      e-commerce" problem.
 
      Bricolage Grotesque is warm and slightly irregular: it has personality
      without the formality of a serif, and it holds up at product-name sizes
-     where Fraunces got fussy. Figtree carries body, labels and — crucially —
+     where Fraunces got fussy. Figtree carries body, labels and, crucially,
      prices: open, friendly, and its numerals are unambiguous at 12px, which is
      where a shop actually lives. ---------------------------------------- */
 
   --font-display: var(--font-bricolage), "Bricolage Grotesque", system-ui, sans-serif;
   --font-body: var(--font-figtree), ui-sans-serif, system-ui, sans-serif;
+
+  /* Identifiers only. See `.ref` below for what this is for and what it is not. */
+  --font-mono: var(--font-mono-jetbrains), ui-monospace, "SFMono-Regular",
+    "Cascadia Mono", monospace;
 
   /**
    * The site's one measure.
@@ -83,20 +87,20 @@
    * value now yields a shorter line and a denser grid. That density is the third
    * effect of browser zoom, reproduced deliberately.
    *
-   * Long-form TEXT is protected separately by `.measure` (68ch) — grids want the
+   * Long-form TEXT is protected separately by `.measure` (68ch), grids want the
    * whole screen, prose never does.
    */
   --container: 88rem;
 
   /* Un-condensed header height. Sections that sit behind the bar reference this
-     via `.under-header` — never a literal. Kept in px, not rem, so the root
+     via `.under-header`, never a literal. Kept in px, not rem, so the root
      type scale does not shift the offset out from under the header. */
   --header-h: 96px;
 
   /* Rhythm */
   --radius-card: 0.75rem;
 
-  /* Motion. One easing curve does almost everything — a soft expo-out that
+  /* Motion. One easing curve does almost everything, a soft expo-out that
      settles rather than bounces. Durations are deliberately short; this is a
      shop, not a showreel. See §6 of ARCHITECTURE.md. */
   --ease-soft: cubic-bezier(0.22, 1, 0.36, 1);
@@ -111,10 +115,10 @@
 
    Components reference these, NOT the raw palette above, for anything that has
    to survive a theme flip: page ground, card ground, body text, borders. The raw
-   brand colours stay available for things that are the same in both themes —
+   brand colours stay available for things that are the same in both themes,
    the gold on a price, the leaf on a badge, the dark hero plate.
 
-   Light is the DEFAULT, deliberately — it is not derived from the OS. A shop is
+   Light is the DEFAULT, deliberately, it is not derived from the OS. A shop is
    a light-ground product; the brand's cream is part of its identity, and a
    first-time visitor on a phone set to dark should still land on the intended
    look. Dark is opt-in via the header toggle and then persisted.
@@ -127,18 +131,30 @@
 
 :root,
 :root[data-theme="light"] {
-  --surface: #faf7f0; /* warm off-white — flatters the photography */
+  --surface: #faf7f0; /* warm off-white, flatters the photography */
   --surface-raised: #ffffff; /* cards, panels                             */
   --surface-sunken: #f2ede1; /* tinted bands, image wells                 */
-  --text-strong: #0a1f14; /* headings — near-black with a green bias   */
+  --text-strong: #0a1f14; /* headings, near-black with a green bias   */
   --text-body: #2c3a32; /* paragraphs                                */
-  --text-muted: #6b6154; /* captions, meta — warm clay                */
-  --line: #e6dfcd; /* borders, rules — oat                      */
+  --text-muted: #6b6154; /* captions, meta, warm clay                */
+  --line: #e6dfcd; /* borders, rules, oat                      */
   --accent: #14432c; /* forest. The anchor, and AA everywhere     */
   --accent-quiet: #9c6206; /* saffron darkened to AA on this ground     */
+
+  /**
+   * STATUS colours, deliberately separate from the brand accent.
+   *
+   * Saffron is what "you can click this" means on this site. If it also meant
+   * "warning", every button would look like an alert. So state gets its own
+   * three-note vocabulary, used only to say good / attention / problem, mostly
+   * in the admin, and on stock badges in the shop.
+   */
+  --live: #3f7a14; /* in stock, paid, active   */
+  --progress: #a8690a; /* low stock, pending      */
+  --blocked: #a3402c; /* out of stock, failed    */
 }
 
-/* Dark is a deep forest, not a neutral black — it belongs to the same family as
+/* Dark is a deep forest, not a neutral black, it belongs to the same family as
    the light theme's anchor, so switching themes feels like a lighting change
    rather than a different site. Both accents lift: forest is invisible on
    forest, so `--accent` becomes the saffron that reads on it. */
@@ -152,6 +168,11 @@
   --line: #23543a;
   --accent: #f6c56a; /* saffron, lifted to read on forest */
   --accent-quiet: #c9a84c; /* the mark's gold, legible here     */
+
+  /* Status lifts too, the light-theme values are unreadable on forest. */
+  --live: #8fbb4e;
+  --progress: #e0a83c;
+  --blocked: #e08a72;
 }
 
 /* Expose the semantic tokens to Tailwind as utilities: bg-surface, text-body,
@@ -183,7 +204,7 @@
   /**
    * Root type scale.
    *
-   * Everything in the design system is in `rem` — type, spacing, radii — so
+   * Everything in the design system is in `rem`, type, spacing, radii, so
    * moving the root size scales the whole layout proportionally, which is what
    * browser zoom does and why 125% "looked nicer". Doing it here instead means
    * we get that density at 100% zoom, and it stays responsive: a phone keeps
@@ -199,7 +220,7 @@
    *      feeling sparse.
    *
    * Raising the root gets 1 and 2. Point 3 needs a tighter measure, so the
-   * container caps lower than before — see `--container`. Bumping the font
+   * container caps lower than before, see `--container`. Bumping the font
    * alone would have produced big text in wide, empty rows, which is not what
    * felt good.
    */
@@ -218,7 +239,7 @@
   @media (min-width: 1024px) {
     html {
       /* 19px. 125% (20px) was the zoom level that read best in the browser, but
-         browser zoom also shrinks the viewport — an effect the container token
+         browser zoom also shrinks the viewport, an effect the container token
          reproduces separately. Doing BOTH at full strength overshot, so the type
          sits one step back at 118.75% and the density comes from `--container`. */
       font-size: 118.75%;
@@ -245,7 +266,7 @@
   /**
    * Dark plates (hero, page headers, the wholesale CTA, the footer) sit on a
    * fixed forest ground in BOTH themes. They must re-point the semantic tokens,
-   * not just set `text-paper` on the wrapper — because the heading rule above
+   * not just set `text-paper` on the wrapper, because the heading rule above
    * resolves `--text-strong`, which in the light theme is near-black. That is
    * exactly how the "Sell Efe Organics" heading ended up near-invisible on its
    * own dark band.
@@ -265,7 +286,7 @@
     color: var(--text-body);
   }
 
-  /* Display type carries the page. Heavier and tighter than the earlier pass —
+  /* Display type carries the page. Heavier and tighter than the earlier pass,
      600/-0.015em read as polite; 700/-0.03em reads as confident. Optical sizing
      is on, which is the whole point of a variable serif at display sizes. */
   h1,
@@ -281,6 +302,26 @@
 
   h1 {
     letter-spacing: -0.038em;
+  }
+
+  /**
+   * The admin does not use the display face.
+   *
+   * Bricolage is a personality typeface: warm, deliberately irregular, and
+   * exactly right on a hero where it is doing branding work. The back office has
+   * roughly forty headings and not one of them is a branding moment, so that
+   * same irregularity becomes texture in a screen people scan rather than read.
+   *
+   * Figtree at 700 with tighter tracking does the job the admin actually needs:
+   * a heading that is clearly a heading and then gets out of the way. The
+   * monogram in the sidebar carries the brand, which is where a tool should
+   * carry it.
+   */
+  [data-chrome="admin"] :is(h1, h2, h3, h4) {
+    font-family: var(--font-body);
+    font-weight: 700;
+    letter-spacing: -0.022em;
+    font-variation-settings: normal;
   }
 
   p {
@@ -317,7 +358,7 @@
    *
    * The header is `position: sticky`, so it occupies space in normal flow. Dark
    * page-opening sections need to start BEHIND it for the transparent-over-hero
-   * state to work — otherwise the paper-coloured nav renders on the paper page
+   * state to work. Otherwise the paper-coloured nav renders on the paper page
    * ground and disappears.
    *
    * This replaced `-mt-[76px] pt-[76px]` hardcoded in nine places. When the bar
@@ -341,7 +382,7 @@
    * `.hero-optional` marks content that may step out: the trust row, whose three
    * claims are repeated on /about and in the footer. Nothing unique is lost.
    *
-   * Height media queries, not width — this is a vertical-space problem, and a
+   * Height media queries, not width. This is a vertical-space problem, and a
    * wide-but-short window has it worse than a narrow tall phone.
    */
   @media (max-height: 860px) {
@@ -357,7 +398,7 @@
   }
 
   /**
-   * Second tier, for genuinely short windows (~640px and under — a 13" laptop
+   * Second tier, for genuinely short windows (~640px and under, a 13" laptop
    * with a large bookmarks bar, or a browser sharing the screen).
    *
    * The stats strip goes next. Those four numbers are real and worth showing,
@@ -393,14 +434,33 @@
   }
 
   /**
-   * Gilt — the headline highlight, and the clearest expression of the rebrand.
+   * Identifiers: order references, SKUs, anything read aloud or typed back.
+   *
+   * NOT for prices. `.stat` already gives prices tabular figures, and setting
+   * money in a monospace makes a shop look like a server log. The distinction is
+   * the point of having two classes: `.stat` is for quantities you compare down
+   * a column, `.ref` is for strings you have to transcribe correctly.
+   *
+   * The slightly open tracking is deliberate. A reference is scanned character
+   * by character rather than read as a word, and the extra space is what makes
+   * "EFE-4K2P9-A7QX" survive being read down a phone line.
+   */
+  .ref {
+    font-family: var(--font-mono);
+    font-weight: 500;
+    font-variant-ligatures: none;
+    letter-spacing: 0.02em;
+  }
+
+  /**
+   * Gilt. The headline highlight, and the clearest expression of the rebrand.
    *
    * This used to be a vivid green gradient. The mark is metallic gold leaf on
    * black, so the headline echoes the logo instead of competing with it: the
    * three stops are the artwork's own measured shadow → mid → highlight, which
    * is what makes it read as struck metal rather than a yellow fill.
    *
-   * Only ever on a dark plate. On paper the shadow stop is too low-contrast —
+   * Only ever on a dark plate. On paper the shadow stop is too low-contrast,
    * use `text-accent-quiet` there instead.
    */
   .text-gilt {
@@ -417,7 +477,7 @@
     color: transparent;
   }
 
-  /* Frosted panel on a dark ground — used by the hero's floating cards. */
+  /* Frosted panel on a dark ground, used by the hero's floating cards. */
   .glass {
     background-color: rgb(247 246 242 / 0.07);
     border: 1px solid rgb(247 246 242 / 0.13);
@@ -431,11 +491,11 @@
    Two rules govern everything here:
 
    1. Content is visible and usable with zero motion. Every animation is an
-      enhancement layered on top of a correct static page — nothing fades in
+      enhancement layered on top of a correct static page, nothing fades in
       from `opacity: 0` unless the browser has confirmed it can finish the job.
       That is why the scroll-driven reveals live inside `@supports`.
    2. Transform and opacity only. No animating width, height, top or colour of
-      large surfaces — those hit layout and paint on mid-range Android, which
+      large surfaces. Those hit layout and paint on mid-range Android, which
       is what this audience is browsing on.
    --------------------------------------------------------------------------- */
 
@@ -456,7 +516,7 @@
   animation: efe-rise var(--dur-slow) var(--ease-soft) both;
 }
 
-/* Stagger children of a load-in group. Capped at 6 — past that the last item
+/* Stagger children of a load-in group. Capped at 6, past that the last item
    waits long enough to read as broken rather than choreographed. */
 .enter-stagger > * {
   animation: efe-rise var(--dur-slow) var(--ease-soft) both;
@@ -482,7 +542,7 @@
     }
 
     /* Grid children reveal together as a block rather than each on its own
-       timeline — 20 cards firing individually reads as noise. */
+       timeline, 20 cards firing individually reads as noise. */
     .reveal-group > * {
       animation: efe-rise var(--dur-base) var(--ease-soft) both;
       animation-timeline: view();
@@ -493,14 +553,14 @@
 
 /* The header's condense-on-scroll used to live here as a scroll-driven CSS
    animation. It now runs in SiteHeader via Framer Motion, because the header
-   also needs a mobile panel and a shared-layout underline — one system owning
+   also needs a mobile panel and a shared-layout underline, one system owning
    that component is clearer than two. Kept out of CSS deliberately. */
 
 /* --- ingredient marquee ---------------------------------------------------- */
 
 /* Deliberately CSS and not Framer Motion. A linear infinite loop is exactly what
-   a CSS animation is for, it runs off the main thread, and — the deciding factor
-   — `animation-play-state: paused` lets it stop on hover so the names stay
+   a CSS animation is for, it runs off the main thread, and, the deciding factor
+. `animation-play-state: paused` lets it stop on hover so the names stay
    readable. Motion drives transforms from JS, where there is nothing to pause. */
 @keyframes efe-marquee {
   to {
@@ -527,7 +587,7 @@
 /* --- the leaf: the one deliberate flourish --------------------------------- */
 
 /* Draws the monogram leaf's outline once on load. It is the brand's motif, it
-   happens exactly once, and it is decorative — hidden from assistive tech. */
+   happens exactly once, and it is decorative, hidden from assistive tech. */
 @keyframes efe-leaf-draw {
   from { stroke-dashoffset: var(--leaf-length); }
   to { stroke-dashoffset: 0; }
@@ -648,7 +708,7 @@
 /* --- the off switch -------------------------------------------------------- */
 
 /* The base layer already flattens durations, but entrance animations use
-   `both` fill mode — so they must be cancelled outright, not just shortened,
+   `both` fill mode. So they must be cancelled outright, not just shortened,
    or the page can settle on the keyframe's starting opacity. */
 @media (prefers-reduced-motion: reduce) {
   .enter,

@@ -10,7 +10,7 @@
  * WHY TWO KEYS INSTEAD OF ONE TRANSPARENT FILE:
  * Compositing one foreground over two known backgrounds normally lets you solve
  * for alpha exactly. `check-logo-alignment.mjs` measured the two renders at
- * IoU 0.849 — they are separate generations, not one artwork on two grounds (the
+ * IoU 0.849. They are separate generations, not one artwork on two grounds (the
  * leaf differs), so that recovery would ghost. Instead each variant is keyed
  * against its OWN background. The result: two transparent PNGs whose anti-
  * aliased edges carry the tint of the surface they belong on, so fringing is
@@ -20,16 +20,16 @@
  *   mark-on-dark.png  → black/forest plates (hero, footer, chips)
  *
  * Keying works because the mark is high-chroma gold and green while both grounds
- * are near-neutral, so chroma alone separates them — no hand masking, and it
+ * are near-neutral, so chroma alone separates them. No hand masking, and it
  * re-runs if the brand sends new renders.
  *
  * Outputs (all committed):
  *   public/brand/mark-on-light.png   1024, transparent
  *   public/brand/mark-on-dark.png    1024, transparent
- *   src/app/icon.png                  512, on plate — Next serves as favicon
+ *   src/app/icon.png                  512, on plate, Next serves as favicon
  *   src/app/apple-icon.png            180, on plate
  *
- * A vector original would still be better — see docs/OPEN-QUESTIONS.md #9.
+ * A vector original would still be better, see docs/OPEN-QUESTIONS.md #9.
  */
 
 import { mkdir } from "node:fs/promises";
@@ -50,14 +50,14 @@ const LIGHT_SRC = join(ROOT, "public", "brand", "efe-monogram-gold-light.jpg");
  * only job here is to exclude the plate's outer vignette without touching art.
  *
  * ORGANICS overlaps the glyph's bounding box, so it cannot be cropped away
- * without cutting the descender swash — it stays, and reads as fine texture at
+ * without cutting the descender swash. It stays, and reads as fine texture at
  * favicon sizes.
  */
 const GLYPH = { left: 0.04, top: 0.12, width: 0.92, height: 0.78 };
 
 /** Chroma at which a pixel is fully part of the mark. */
 const CHROMA_SOLID = 55;
-/** Below this it is background. Between the two, alpha ramps — soft edges. */
+/** Below this it is background. Between the two, alpha ramps, soft edges. */
 const CHROMA_EDGE = 14;
 
 async function boxFor(file) {
@@ -110,7 +110,7 @@ async function writeTransparent(src, outPath) {
   await sharp(buffer, { raw: { width, height, channels: 4 } })
     // Trim the empty margin the fixed crop leaves, so the PNG's bounds are the
     // mark's bounds and layout needn't compensate for padding.
-    // Trim to the ink, then scale by HEIGHT only — no forced square. Padding
+    // Trim to the ink, then scale by HEIGHT only, no forced square. Padding
     // baked into the file would make the header logo impossible to align, and
     // the natural aspect is what `next/image` needs to reserve correct space.
     .trim({ threshold: 1 })
@@ -125,7 +125,7 @@ async function writeTransparent(src, outPath) {
 }
 
 /**
- * Favicon keeps the plate — a keyed mark disappears on a dark browser tab.
+ * Favicon keeps the plate. A keyed mark disappears on a dark browser tab.
  *
  * Built from the trimmed transparent mark composited back onto the plate colour,
  * so the ink fills the tile properly. Cropping the JPEG directly leaves the

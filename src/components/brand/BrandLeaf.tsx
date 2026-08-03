@@ -4,7 +4,7 @@
  * This is the page's one deliberate flourish: on load the outline and veins
  * draw themselves in, then a faint fill settles behind them. It happens once,
  * on the hero only, and it is the brand's own motif rather than a generic
- * decoration. Purely decorative — hidden from assistive technology.
+ * decoration. Purely decorative, hidden from assistive technology.
  *
  * Motion lives in globals.css (`.leaf-draw` / `.leaf-fill`) and is cancelled
  * outright under `prefers-reduced-motion`.

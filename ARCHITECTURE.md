@@ -1,9 +1,9 @@
-# Efe Organics — Architecture
+# Efe Organics: Architecture
 
 > Source of truth for how this app is structured. Read this before building; update it when
 > a structural decision changes.
 
-**Product:** the direct-to-consumer home of Efe Organics™ ("Life & Organics") — an Accra-based
+**Product:** the direct-to-consumer home of Efe Organics™ ("Life & Organics"), an Accra-based
 manufacturer of organic African Black Soap skin and hair care. Today the catalogue lives only on
 a third-party reseller (coloursbay.com). This is the brand's own storefront.
 
@@ -20,8 +20,8 @@ projects on 3210/3220.
 | Framework | **Next 16** (App Router, Turbopack) | House standard; RSC-first, good SEO for a commerce site |
 | UI | **React 19** + TypeScript (strict) | House standard |
 | Styling | **Tailwind v4** (CSS-first `@theme`) + design tokens in `globals.css` | No JS config file; tokens are the single source of brand truth |
-| Data | **Postgres + Drizzle ORM** (`src/db/`), static catalogue as fallback | Own the backend — see §7 |
-| Payments | **Paystack** (Ghana MoMo — MTN/Telecel — + cards) | Same provider as the AI 360 wallet; MoMo is non-negotiable for GH |
+| Data | **Postgres + Drizzle ORM** (`src/db/`), static catalogue as fallback | Own the backend, see §7 |
+| Payments | **Paystack** (Ghana MoMo, MTN/Telecel, + cards) | Same provider as the AI 360 wallet; MoMo is non-negotiable for GH |
 | Auth (admin) | Clerk, deferred to Phase 3 | Not needed until the admin studio exists |
 | AI | Server-side gateway route, provider-agnostic (OpenRouter) | Same pattern as AI 360 Lab: keys never touch the browser |
 | Social | **Blotato** REST API (`api.blotato.com`) | The owner already uses it; we publish into it rather than rebuild scheduling |
@@ -45,7 +45,7 @@ src/
       shop/                 # catalogue index (filter by category)
         [slug]/             # product detail
       collections/[category]/
-      stockists/            # where to buy — outlet locator
+      stockists/            # where to buy, outlet locator
       partners/             # become a stockist / reseller application
       contact/
     (studio)/               # Phase 3: signed-in admin. Isolated route group.
@@ -59,12 +59,12 @@ src/
     layout/                 # SiteHeader, SiteFooter, Container, Section
     commerce/               # ProductCard, PriceTag, CategoryNav, AddToCart
     ui/                     # primitives (Button, Badge, Field)
-    brand/                  # Wordmark, BrandLeaf — the drawn marks (see §4)
+    brand/                  # Wordmark, BrandLeaf, the drawn marks (see §4)
   lib/
-    brand.ts                # name, tagline, contact, socials, legal — no hardcoded strings in JSX
+    brand.ts                # name, tagline, contact, socials, legal, no hardcoded strings in JSX
     catalog.ts              # types + the repository interface. Hand-written.
-    catalog.data.ts         # GENERATED — 42 real SKUs. Never hand-edit (see §5)
-    money.ts                # GHS formatting — cedis, no floating point
+    catalog.data.ts         # GENERATED, 42 real SKUs. Never hand-edit (see §5)
+    money.ts                # GHS formatting. Cedis, no floating point
     env.ts                  # typed env + `has*` capability flags (graceful degradation)
     seo.ts                  # metadata + JSON-LD builders
   proxy.ts                  # Next 16 middleware (Phase 3)
@@ -73,14 +73,14 @@ scripts/
   curation.mjs              # reseller slug → our taxonomy. The editorial layer.
   generate-catalog.mjs      # scrape + curation → src/lib/catalog.data.ts
 public/
-  brand/                    # supplied logo lockups — JPEGs on black (see §4)
+  brand/                    # supplied logo lockups, JPEGs on black (see §4)
   products/<slug>/          # imported product imagery + README on rights
 ```
 
 **Route groups carry the layout split.** `(marketing)` is public, cached, and SEO-heavy;
 `(studio)` is private, dynamic, and never crawled. They share tokens, not chrome.
 
-> Phase 0 note: the groups are not yet materialised — every route today is public, so `page.tsx`
+> Phase 0 note: the groups are not yet materialised. Every route today is public, so `page.tsx`
 > sits at the app root and the header/footer live in the root layout. The `(marketing)` /
 > `(studio)` split lands with the admin studio in Phase 3, when the chrome actually diverges.
 
@@ -93,7 +93,7 @@ public/
    build, and demo with an **empty `.env.local`**. (Same rule that made AI 360 Lab demoable.)
 2. **Secrets are server-only.** No key ever reaches the client. AI and Blotato calls go through
    `app/api/*` route handlers. Nothing sensitive gets a `NEXT_PUBLIC_` prefix.
-3. **One data seam.** Pages never reach for a data source directly — they call the repository in
+3. **One data seam.** Pages never reach for a data source directly, they call the repository in
    `lib/catalog.ts`. Swapping static → Postgres must not touch a single page component.
 4. **Tokens, not hex.** No raw colour values in components. Everything resolves to a
    `--efe-*` custom property defined in `globals.css`.
@@ -106,13 +106,13 @@ public/
 
 ## 4. Design system
 
-### Palette — rebuilt from the 2026 monogram (27 July 2026)
+### Palette: rebuilt from the 2026 monogram (27 July 2026)
 
 The palette is **measured from the new logo artwork**, not chosen alongside it. The brand deck's
 slide-12 palette (forest `#254336`, sage, cream) predates the monogram and has been retired: it
 described a different, greener brand.
 
-Sampling `efe-monogram-gold.jpg` and its white-paper twin gives the real values — a **gold** that
+Sampling `efe-monogram-gold.jpg` and its white-paper twin gives the real values, a **gold** that
 runs `#7a5d27 → #c9a84c → #f0e5b9` from shadow to highlight, an **olive** tea leaf at `#607a1b`
 (yellow-toned and deep, nothing like grass green), a **plate** at `#0d0d0e`, and **paper** at
 `#f7f6f2`.
@@ -126,7 +126,7 @@ runs `#7a5d27 → #c9a84c → #f0e5b9` from shadow to highlight, an **olive** te
 | `--color-gold-deep` | `#7a5d27` | Measured shadow. Gradient stop; AA on paper |
 | `--color-gold-light` | `#f0e5b9` | Measured highlight. Gradient stop only |
 | `--color-olive` | `#607a1b` | The measured tea leaf. Accent on light grounds |
-| `--color-olive-light` | `#a3c164` | Lifted olive — the only one readable on obsidian |
+| `--color-olive-light` | `#a3c164` | Lifted olive, the only one readable on obsidian |
 | `--color-paper` | `#f7f6f2` | Page ground, and text on dark plates |
 
 **Two corrections this replaced, both worth remembering:**
@@ -134,13 +134,13 @@ runs `#7a5d27 → #c9a84c → #f0e5b9` from shadow to highlight, an **olive** te
 1. **The green was wrong.** The accent was `#3fcc33`, a vivid grass green picked to make the page
    feel "alive". The logo's leaf is an olive. Neon green beside metallic gold reads as a sports
    brand, and it was fighting the mark on every screen it shared.
-2. **The dark was wrong.** Grounds were forest green (`#08170f`–`#254336`). The monogram sits on
-   near-neutral black, and gold on green-black goes muddy — gold needs a neutral ground to read
+2. **The dark was wrong.** Grounds were forest green (`#08170f`-`#254336`). The monogram sits on
+   near-neutral black, and gold on green-black goes muddy, gold needs a neutral ground to read
    as metal.
 
 **Dominance:** paper ~55%, obsidian ~30%, olive ~10%, gold ~5%. Gold is a detail, never a field.
 
-**Contrast is verified, not assumed.** Every semantic pair passes WCAG AA in both themes —
+**Contrast is verified, not assumed.** Every semantic pair passes WCAG AA in both themes,
 lowest is 5.05 (muted on paper, light) and 6.83 (muted on obsidian, dark). `--color-olive`
 deliberately never appears as text on obsidian; `--color-olive-light` is its dark-ground twin,
 and `.on-dark` swaps them automatically.
@@ -150,24 +150,24 @@ and `.on-dark` swaps them automatically.
 The deck specifies **Recoleta** for headings and display, a clean sans for body.
 Recoleta is a commercial licence the brand does not yet hold, so:
 
-- `--font-display` ships as **Fraunces** (Google, free) — the closest warm high-contrast serif.
+- `--font-display` ships as **Fraunces** (Google, free), the closest warm high-contrast serif.
 - Swap in Recoleta by dropping the webfont into `src/app/fonts/` and changing one `next/font`
   declaration in `layout.tsx`. Nothing else changes.
 - `--font-body` is **DM Sans**.
 
-### Logo assets — a real constraint
+### Logo assets: a real constraint
 
 All three supplied lockups are **JPEGs on a black plate**. There is no transparent PNG or SVG.
 Placing one on the cream header renders a black rectangle, and `mix-blend-multiply` does not
 save it. So:
 
-- **Light surfaces** use `components/brand/Wordmark.tsx` — the name set in the display face
+- **Light surfaces** use `components/brand/Wordmark.tsx`, the name set in the display face
   beside a drawn leaf. Typographic, scalable, correct.
 - **Dark surfaces** (hero, footer) can use the supplied rasters, where the black plate is
   invisible against forest.
 - Replace `Wordmark` the moment a transparent wordmark asset exists.
 
-Note the **circular gold badge** ("Efe · EST. 2012") is *not* a legacy mark — it is the badge
+Note the **circular gold badge** ("Efe · EST. 2012") is *not* a legacy mark, it is the badge
 printed on current product labels. Treat it as the packaging mark, distinct from the web
 wordmark.
 
@@ -185,14 +185,14 @@ Two hard rules:
 
 1. **The page is complete with zero motion.** Nothing starts at `opacity: 0` unless the browser
    has confirmed via `@supports` that it can finish the animation. This is why scroll reveals sit
-   inside `@supports (animation-timeline: view())` — Safari and Firefox get a fully visible page
+   inside `@supports (animation-timeline: view())`. Safari and Firefox get a fully visible page
    rather than blank sections. Getting this backwards ships an invisible website.
 2. **Transform and opacity only.** No animating width, height, colour or shadow across large
-   surfaces — the audience is on mid-range Android over mobile data.
+   surfaces. The audience is on mid-range Android over mobile data.
 
 | Class | What it does | Cost |
 |---|---|---|
-| `.enter` / `.enter-stagger` | One-shot entrance on load, children staggered 60–440ms | CSS only |
+| `.enter` / `.enter-stagger` | One-shot entrance on load, children staggered 60-440ms | CSS only |
 | `.reveal` / `.reveal-group` | Scroll-linked reveal via `animation-timeline: view()` | CSS only, no observer |
 | `.header-condense` | Header gains tint + hairline over the first 90px via `animation-timeline: scroll()` | CSS only |
 | `.card-lift` | 4px lift, plus cross-fade to a second product photograph | CSS only |
@@ -214,17 +214,17 @@ split is on capability, not preference:
 
 **The rule:** reach for CSS first. Import `motion` only when the interaction needs gesture
 tracking, scroll interpolation, shared layout, or exit animation. "It would be tidier in JS" is
-not a reason — the marquee is CSS precisely because `animation-play-state: paused` gives
+not a reason. The marquee is CSS precisely because `animation-play-state: paused` gives
 pause-on-hover for free, which a JS-driven transform cannot.
 
 Shared tokens live in `components/motion/tokens.ts` and **mirror the CSS custom properties on
-purpose** — two systems, one feel. Change a curve in one, change it in the other.
+purpose**. Two systems, one feel. Change a curve in one, change it in the other.
 
 Timings: `--dur-fast` 180ms (feedback), `--dur-base` 320ms (transitions), `--dur-slow` 620ms
-(entrances). One easing curve — `--ease-soft`, a soft expo-out that settles rather than bounces.
+(entrances). One easing curve. `--ease-soft`, a soft expo-out that settles rather than bounces.
 
 `prefers-reduced-motion: reduce` cancels every entrance outright (`animation: none`, forced
-`opacity: 1`). Shortening the duration is not sufficient — the `both` fill mode would otherwise
+`opacity: 1`). Shortening the duration is not sufficient, the `both` fill mode would otherwise
 leave elements stuck on the starting keyframe.
 
 ---
@@ -244,8 +244,8 @@ coloursbay.com  ──scrape-reseller.mjs──►  scripts/out/reseller-catalog
                                           src/lib/catalog.data.ts  (committed)
 ```
 
-**The split matters.** The scrape owns *facts* — names, prices, descriptions, ingredients,
-how-to-use, imagery. `curation.mjs` owns *meaning* — category, product line, size, variant
+**The split matters.** The scrape owns *facts*. Names, prices, descriptions, ingredients,
+how-to-use, imagery. `curation.mjs` owns *meaning*. Category, product line, size, variant
 grouping, and our own slugs. They are separate files because the reseller's own taxonomy is
 unusable: 22 products sit in `bodycare` (including every black soap bath) while
 `african-black-soap` holds 2, and it carries both `bodycare` and `body-care` as distinct slugs.
@@ -254,7 +254,7 @@ The generated file is **committed** so the site builds with no network access. R
 scripts to refresh; never hand-edit `catalog.data.ts`.
 
 The reseller is a Next.js app, so each product page embeds its record in the RSC flight payload.
-The scraper brace-matches `"product":{…}` out of the HTML — and must unescape one level first,
+The scraper brace-matches `"product":{…}` out of the HTML. And must unescape one level first,
 because every quote arrives as `\"` and a string-aware matcher otherwise runs off the end of the
 document.
 
@@ -267,7 +267,7 @@ type Product = {
   baseName?: string         // name with the size stripped, for grouped display
   category: CategorySlug    // 'black-soap' | 'hair-care' | 'body-care' | ...
   line: 'flagship' | 'supporting'
-  group?: string            // size family — see below
+  group?: string            // size family, see below
   wholesale?: boolean       // bulk trade SKU, hidden from the consumer shop
   priceMinor: number        // pesewas
   compareAtMinor?: number   // reseller RRP, for the savings badge
@@ -290,7 +290,7 @@ sitemaps and admin.
 
 **One SKU is not a consumer product.** `african-black-soap-crumble-250kg` is raw soap crumble at
 GH₵13,750 a quarter-tonne, sold to formulators and wholesalers. It is flagged `wholesale` and
-excluded from every consumer reader by default — it belongs on the trade page, not the shop.
+excluded from every consumer reader by default. It belongs on the trade page, not the shop.
 
 ### Caveats carried in the data
 
@@ -304,15 +304,15 @@ excluded from every consumer reader by default — it belongs on the trade page,
 
 | Phase | Scope | State |
 |---|---|---|
-| **0 — Foundation** | Tokens, fonts, shell, brand/env/catalog libs, home page | **this commit** |
-| 1 — Catalogue | Shop index, filters, product detail, collections, SEO + JSON-LD | next |
-| 2 — Commerce | Cart, Paystack checkout (MoMo + card), order email, delivery zones | |
-| 3 — Studio | Clerk auth, product CRUD, order dashboard, stockist directory admin | |
-| 4 — AI marketing studio | Copywriter, image generation, campaign briefs → Blotato publish | |
-| 5 — Channel tools | Stockist portal (reorder, price list, marketing kit), WhatsApp catalogue sync | |
+| **0. Foundation** | Tokens, fonts, shell, brand/env/catalog libs, home page | **this commit** |
+| 1. Catalogue | Shop index, filters, product detail, collections, SEO + JSON-LD | next |
+| 2. Commerce | Cart, Paystack checkout (MoMo + card), order email, delivery zones | |
+| 3. Studio | Clerk auth, product CRUD, order dashboard, stockist directory admin | |
+| 4. AI marketing studio | Copywriter, image generation, campaign briefs → Blotato publish | |
+| 5. Channel tools | Stockist portal (reorder, price list, marketing kit), WhatsApp catalogue sync | |
 
-Phases 4–5 are specified in `docs/EFE-ORGANICS-AI-TRANSFORMATION.md` (the strategy document).
-Nothing in phases 0–3 may depend on an AI key existing.
+Phases 4-5 are specified in `docs/EFE-ORGANICS-AI-TRANSFORMATION.md` (the strategy document).
+Nothing in phases 0-3 may depend on an AI key existing.
 
 ---
 
@@ -323,8 +323,8 @@ storefront headless against Ecwid, which the owner already uses. Own-it won on a
 business argument, not a technical one: the platform fee is recurring and
 permanent, and the agency can bill for a system Efe keeps.
 
-That decision means this project has to actually replace an e-commerce admin —
-catalogue, stock, pricing rules, orders, customers, analytics — so the schema was
+That decision means this project has to actually replace an e-commerce admin,
+catalogue, stock, pricing rules, orders, customers, analytics, so the schema was
 designed against that bar, not against "a website with some products".
 
 ### Stack
@@ -337,7 +337,7 @@ able to read the migration matters more than ORM ergonomics.
 ### The reshape that made it worth doing
 
 The imported catalogue was 42 flat rows where a "product" was really a SKU, with
-a `group` string tying sizes together — which is why the storefront needed a hack
+a `group` string tying sizes together. Which is why the storefront needed a hack
 to show "Lemon Blast 350ml / 500ml / 1L" as one card.
 
 The schema separates **product** (the shelf entry) from **variant** (the sellable
@@ -352,7 +352,7 @@ per-size stock, per-size discounts, and per-size reporting.
 2. **Product ≠ variant.** Price and stock live on the variant, only.
 3. **Orders snapshot their lines.** An order copies name and price at purchase
    time. Joining to live products would silently rewrite history the first time
-   someone edits a price — the most common e-commerce data bug there is.
+   someone edits a price. The most common e-commerce data bug there is.
 4. **Nothing hard-deletes.** Products archive, orders cancel, discounts expire.
 5. **Every mutation is attributable** via `audit_log`.
 
@@ -361,10 +361,10 @@ per-size stock, per-size discounts, and per-size reporting.
 | Group | Tables |
 |---|---|
 | Catalogue | `categories`, `products`, `variants`, `product_images` |
-| Inventory | `stock_ledger` — every movement with a reason, so "where did 20 bars go" is answerable |
+| Inventory | `stock_ledger`. Every movement with a reason, so "where did 20 bars go" is answerable |
 | Pricing | `discounts`, `bundles`, `bundle_items` |
 | Commerce | `customers`, `orders`, `order_items` |
-| Analytics | `events` — first-party, one wide table |
+| Analytics | `events`. First-party, one wide table |
 | Admin | `admin_users`, `audit_log` |
 
 **Discounts and bundles are separate on purpose.** A discount is a *rule* applied
@@ -375,14 +375,14 @@ Conflating them makes both harder to reason about.
 constantly and a migration should not be the price of tracking something new.
 The fields queried in every report (name, session, time, path) are promoted out
 of `props` for indexing. `anonymousId` is a first-party cookie, not a
-fingerprint — no third-party script, so it survives ad blockers and is far easier
+fingerprint. No third-party script, so it survives ad blockers and is far easier
 to justify under privacy law.
 
 ### Graceful degradation still holds
 
 `getDb()` returns **null** when `DATABASE_URL` is absent, and the catalogue falls
 back to the committed static file. The site runs, builds and demos with an empty
-`.env.local` — verified: there is no `.env.local` in the repo today and the build
+`.env.local`. Verified: there is no `.env.local` in the repo today and the build
 passes with all 42 product pages prerendered. `requireDb()` is used only where a
 database genuinely is the point (admin writes, order placement).
 
@@ -401,7 +401,7 @@ npm run db:seed       # static catalogue → products + variants (idempotent)
 npm run db:studio     # browse the data
 ```
 
-`db:push` exists for local iteration and must never touch production — it applies
+`db:push` exists for local iteration and must never touch production, it applies
 an inferred diff, which is how columns get silently dropped.
 
 ### Logging
@@ -409,7 +409,7 @@ an inferred diff, which is how columns get silently dropped.
 `src/lib/logger.ts`. JSON in production (queryable), readable lines in
 development. `logger.child()` binds context once so a failed checkout can be read
 end to end by filtering on one value. **Sensitive keys are redacted at the
-boundary** — phone, email, address, tokens — so a careless `logger.info({
+boundary**, phone, email, address, tokens, so a careless `logger.info({
 customer })` cannot turn the log store into a copy of the customer database.
 
 ### Not built yet

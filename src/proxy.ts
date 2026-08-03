@@ -3,7 +3,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { ADMIN_COOKIE, evaluateGate } from "@/lib/admin-token";
 
 /**
- * Next 16 middleware — note the filename: `proxy.ts`, not `middleware.ts`.
+ * Next 16 middleware. Note the filename: `proxy.ts`, not `middleware.ts`.
  *
  * THIS IS THE ADMIN GATE. It exists because a layout guard is not one.
  *
@@ -13,14 +13,14 @@ import { ADMIN_COOKIE, evaluateGate } from "@/lib/admin-token";
  * node, so the page component executes and its output is serialised into the
  * RSC payload regardless of what the layout decides to display. Fetching a
  * "locked" /admin/orders returned a page that visibly said "Admin locked" while
- * carrying the orders table in its flight data — with a live database that is
+ * carrying the orders table in its flight data, with a live database that is
  * customer names and order totals shipped to an unauthenticated request.
  *
  * Middleware runs BEFORE any of that. It is the only layer that can stop the
  * work from happening rather than hide the result.
  *
  * The layout check stays as defence in depth, and every server action re-checks
- * independently — an action id is a public endpoint and middleware does not
+ * independently. An action id is a public endpoint and middleware does not
  * cover a direct POST to one.
  */
 export async function proxy(request: NextRequest) {

@@ -1,0 +1,666 @@
+{
+  "studio": [
+    {
+      "src": "/products/acne-blemish-cleanser-1l/1.png",
+      "dir": "acne-blemish-cleanser-1l",
+      "file": "1.png",
+      "width": 1153,
+      "height": 2048,
+      "kind": "studio",
+      "minBright": 232,
+      "spread": 6
+    },
+    {
+      "src": "/products/acne-blemish-cleanser-1l/3.png",
+      "dir": "acne-blemish-cleanser-1l",
+      "file": "3.png",
+      "width": 1153,
+      "height": 2048,
+      "kind": "studio",
+      "minBright": 235,
+      "spread": 9
+    },
+    {
+      "src": "/products/acne-blemish-cleanser-350ml/1.png",
+      "dir": "acne-blemish-cleanser-350ml",
+      "file": "1.png",
+      "width": 1153,
+      "height": 2048,
+      "kind": "studio",
+      "minBright": 228,
+      "spread": 13
+    },
+    {
+      "src": "/products/acne-blemish-cleanser-350ml/2.png",
+      "dir": "acne-blemish-cleanser-350ml",
+      "file": "2.png",
+      "width": 1153,
+      "height": 2048,
+      "kind": "studio",
+      "minBright": 233,
+      "spread": 10
+    },
+    {
+      "src": "/products/african-black-soap-bar/1.png",
+      "dir": "african-black-soap-bar",
+      "file": "1.png",
+      "width": 2048,
+      "height": 2048,
+      "kind": "studio",
+      "minBright": 222,
+      "spread": 18
+    },
+    {
+      "src": "/products/anti-dandruff-shampoo-1l/1.png",
+      "dir": "anti-dandruff-shampoo-1l",
+      "file": "1.png",
+      "width": 1153,
+      "height": 2048,
+      "kind": "studio",
+      "minBright": 240,
+      "spread": 7
+    },
+    {
+      "src": "/products/anti-dandruff-shampoo-1l/2.png",
+      "dir": "anti-dandruff-shampoo-1l",
+      "file": "2.png",
+      "width": 768,
+      "height": 1364,
+      "kind": "studio",
+      "minBright": 237,
+      "spread": 10
+    },
+    {
+      "src": "/products/anti-dandruff-shampoo-350ml/1.png",
+      "dir": "anti-dandruff-shampoo-350ml",
+      "file": "1.png",
+      "width": 1153,
+      "height": 2048,
+      "kind": "studio",
+      "minBright": 238,
+      "spread": 4
+    },
+    {
+      "src": "/products/anti-dandruff-shampoo-350ml/2.png",
+      "dir": "anti-dandruff-shampoo-350ml",
+      "file": "2.png",
+      "width": 768,
+      "height": 1364,
+      "kind": "studio",
+      "minBright": 241,
+      "spread": 4
+    },
+    {
+      "src": "/products/anti-dandruff-shampoo-500ml/1.png",
+      "dir": "anti-dandruff-shampoo-500ml",
+      "file": "1.png",
+      "width": 1153,
+      "height": 2048,
+      "kind": "studio",
+      "minBright": 233,
+      "spread": 8
+    },
+    {
+      "src": "/products/anti-dandruff-shampoo-500ml/2.png",
+      "dir": "anti-dandruff-shampoo-500ml",
+      "file": "2.png",
+      "width": 768,
+      "height": 1364,
+      "kind": "studio",
+      "minBright": 235,
+      "spread": 12
+    },
+    {
+      "src": "/products/blossom-350ml/1.png",
+      "dir": "blossom-350ml",
+      "file": "1.png",
+      "width": 1792,
+      "height": 2380,
+      "kind": "studio",
+      "minBright": 237,
+      "spread": 9
+    },
+    {
+      "src": "/products/carrot-face-body-oil-100ml/1.png",
+      "dir": "carrot-face-body-oil-100ml",
+      "file": "1.png",
+      "width": 1536,
+      "height": 2048,
+      "kind": "studio",
+      "minBright": 233,
+      "spread": 5
+    },
+    {
+      "src": "/products/cool-herbal-350ml/1.png",
+      "dir": "cool-herbal-350ml",
+      "file": "1.png",
+      "width": 1216,
+      "height": 2048,
+      "kind": "studio",
+      "minBright": 238,
+      "spread": 4
+    },
+    {
+      "src": "/products/gentle-aloe-milk-1l/1.png",
+      "dir": "gentle-aloe-milk-1l",
+      "file": "1.png",
+      "width": 940,
+      "height": 1512,
+      "kind": "studio",
+      "minBright": 242,
+      "spread": 5
+    },
+    {
+      "src": "/products/gentle-aloe-milk-350ml/1.png",
+      "dir": "gentle-aloe-milk-350ml",
+      "file": "1.png",
+      "width": 1153,
+      "height": 2048,
+      "kind": "studio",
+      "minBright": 238,
+      "spread": 3
+    },
+    {
+      "src": "/products/green-herbal-deep-conditioner/1.png",
+      "dir": "green-herbal-deep-conditioner",
+      "file": "1.png",
+      "width": 1100,
+      "height": 1218,
+      "kind": "studio",
+      "minBright": 255,
+      "spread": 0
+    },
+    {
+      "src": "/products/green-herbal-hair-food/1.png",
+      "dir": "green-herbal-hair-food",
+      "file": "1.png",
+      "width": 896,
+      "height": 1195,
+      "kind": "studio",
+      "minBright": 235,
+      "spread": 12
+    },
+    {
+      "src": "/products/green-herbal-leave-in-conditioner/1.png",
+      "dir": "green-herbal-leave-in-conditioner",
+      "file": "1.png",
+      "width": 1153,
+      "height": 2048,
+      "kind": "studio",
+      "minBright": 233,
+      "spread": 2
+    },
+    {
+      "src": "/products/green-herbal-leave-in-conditioner/2.png",
+      "dir": "green-herbal-leave-in-conditioner",
+      "file": "2.png",
+      "width": 768,
+      "height": 1364,
+      "kind": "studio",
+      "minBright": 244,
+      "spread": 2
+    },
+    {
+      "src": "/products/green-herbal-rice-water-spray/2.jpg",
+      "dir": "green-herbal-rice-water-spray",
+      "file": "2.jpg",
+      "width": 800,
+      "height": 800,
+      "kind": "studio",
+      "minBright": 255,
+      "spread": 0
+    },
+    {
+      "src": "/products/green-herbal-scalp-oil-120ml/1.png",
+      "dir": "green-herbal-scalp-oil-120ml",
+      "file": "1.png",
+      "width": 1153,
+      "height": 2048,
+      "kind": "studio",
+      "minBright": 241,
+      "spread": 4
+    },
+    {
+      "src": "/products/green-herbal-scalp-oil-120ml/3.png",
+      "dir": "green-herbal-scalp-oil-120ml",
+      "file": "3.png",
+      "width": 768,
+      "height": 1364,
+      "kind": "studio",
+      "minBright": 245,
+      "spread": 3
+    },
+    {
+      "src": "/products/herbal-hair-shampoo-1l/1.png",
+      "dir": "herbal-hair-shampoo-1l",
+      "file": "1.png",
+      "width": 1153,
+      "height": 2048,
+      "kind": "studio",
+      "minBright": 249,
+      "spread": 0
+    },
+    {
+      "src": "/products/herbal-hair-shampoo-1l/2.png",
+      "dir": "herbal-hair-shampoo-1l",
+      "file": "2.png",
+      "width": 768,
+      "height": 1364,
+      "kind": "studio",
+      "minBright": 243,
+      "spread": 7
+    },
+    {
+      "src": "/products/herbal-hair-shampoo-350ml/1.png",
+      "dir": "herbal-hair-shampoo-350ml",
+      "file": "1.png",
+      "width": 1153,
+      "height": 2048,
+      "kind": "studio",
+      "minBright": 237,
+      "spread": 7
+    },
+    {
+      "src": "/products/herbal-hair-shampoo-350ml/2.png",
+      "dir": "herbal-hair-shampoo-350ml",
+      "file": "2.png",
+      "width": 768,
+      "height": 1364,
+      "kind": "studio",
+      "minBright": 245,
+      "spread": 5
+    },
+    {
+      "src": "/products/honey-goat-milk-2-1l/1.png",
+      "dir": "honey-goat-milk-2-1l",
+      "file": "1.png",
+      "width": 1792,
+      "height": 2392,
+      "kind": "studio",
+      "minBright": 250,
+      "spread": 0
+    },
+    {
+      "src": "/products/lemon-blast-2-1l/1.png",
+      "dir": "lemon-blast-2-1l",
+      "file": "1.png",
+      "width": 1792,
+      "height": 2380,
+      "kind": "studio",
+      "minBright": 243,
+      "spread": 6
+    },
+    {
+      "src": "/products/lemon-blast-3-500ml/1.png",
+      "dir": "lemon-blast-3-500ml",
+      "file": "1.png",
+      "width": 1465,
+      "height": 2230,
+      "kind": "studio",
+      "minBright": 248,
+      "spread": 4
+    },
+    {
+      "src": "/products/lemon-blast-gel-350ml/1.png",
+      "dir": "lemon-blast-gel-350ml",
+      "file": "1.png",
+      "width": 1465,
+      "height": 2230,
+      "kind": "studio",
+      "minBright": 248,
+      "spread": 4
+    },
+    {
+      "src": "/products/organic-gentle-glow-1l/1.png",
+      "dir": "organic-gentle-glow-1l",
+      "file": "1.png",
+      "width": 1153,
+      "height": 2048,
+      "kind": "studio",
+      "minBright": 240,
+      "spread": 1
+    },
+    {
+      "src": "/products/organic-gentle-glow-1l/3.png",
+      "dir": "organic-gentle-glow-1l",
+      "file": "3.png",
+      "width": 768,
+      "height": 1364,
+      "kind": "studio",
+      "minBright": 239,
+      "spread": 9
+    },
+    {
+      "src": "/products/organic-gentle-glow-350ml/2.png",
+      "dir": "organic-gentle-glow-350ml",
+      "file": "2.png",
+      "width": 768,
+      "height": 1364,
+      "kind": "studio",
+      "minBright": 237,
+      "spread": 9
+    },
+    {
+      "src": "/products/rose-roselle-glow-lotion/1.png",
+      "dir": "rose-roselle-glow-lotion",
+      "file": "1.png",
+      "width": 1536,
+      "height": 2730,
+      "kind": "studio",
+      "minBright": 237,
+      "spread": 13
+    },
+    {
+      "src": "/products/rose-roselle-glow-lotion/2.png",
+      "dir": "rose-roselle-glow-lotion",
+      "file": "2.png",
+      "width": 768,
+      "height": 1364,
+      "kind": "studio",
+      "minBright": 248,
+      "spread": 3
+    },
+    {
+      "src": "/products/soothing-lavender-milk-1l/1.png",
+      "dir": "soothing-lavender-milk-1l",
+      "file": "1.png",
+      "width": 1214,
+      "height": 2048,
+      "kind": "studio",
+      "minBright": 240,
+      "spread": 3
+    },
+    {
+      "src": "/products/soothing-lavender-milk-350ml/1.png",
+      "dir": "soothing-lavender-milk-350ml",
+      "file": "1.png",
+      "width": 1133,
+      "height": 1494,
+      "kind": "studio",
+      "minBright": 255,
+      "spread": 0
+    },
+    {
+      "src": "/products/sweet-lavender-350ml/1.png",
+      "dir": "sweet-lavender-350ml",
+      "file": "1.png",
+      "width": 1628,
+      "height": 2354,
+      "kind": "studio",
+      "minBright": 243,
+      "spread": 9
+    },
+    {
+      "src": "/products/tropical-sunrise-2-1l/1.jpeg",
+      "dir": "tropical-sunrise-2-1l",
+      "file": "1.jpeg",
+      "width": 1410,
+      "height": 2048,
+      "kind": "studio",
+      "minBright": 235,
+      "spread": 5
+    },
+    {
+      "src": "/products/tropical-sunrise-350ml/1.jpg",
+      "dir": "tropical-sunrise-350ml",
+      "file": "1.jpg",
+      "width": 1542,
+      "height": 2048,
+      "kind": "studio",
+      "minBright": 236,
+      "spread": 7
+    }
+  ],
+  "lifestyle": [
+    {
+      "src": "/products/acne-blemish-cleanser-1l/2.jpeg",
+      "dir": "acne-blemish-cleanser-1l",
+      "file": "2.jpeg",
+      "width": 1022,
+      "height": 1550,
+      "kind": "lifestyle",
+      "minBright": 133,
+      "spread": 81
+    },
+    {
+      "src": "/products/blossom-2-1l/1.jpg",
+      "dir": "blossom-2-1l",
+      "file": "1.jpg",
+      "width": 1065,
+      "height": 1600,
+      "kind": "lifestyle",
+      "minBright": 196,
+      "spread": 31
+    },
+    {
+      "src": "/products/carrot-aloe-glow-butter/1.png",
+      "dir": "carrot-aloe-glow-butter",
+      "file": "1.png",
+      "width": 2048,
+      "height": 2048,
+      "kind": "lifestyle",
+      "minBright": 64,
+      "spread": 167
+    },
+    {
+      "src": "/products/cool-herbal-2-1l/1.jpeg",
+      "dir": "cool-herbal-2-1l",
+      "file": "1.jpeg",
+      "width": 844,
+      "height": 1280,
+      "kind": "lifestyle",
+      "minBright": 91,
+      "spread": 60
+    },
+    {
+      "src": "/products/cool-herbal-2-1l/2.jpeg",
+      "dir": "cool-herbal-2-1l",
+      "file": "2.jpeg",
+      "width": 855,
+      "height": 1280,
+      "kind": "lifestyle",
+      "minBright": 86,
+      "spread": 122
+    },
+    {
+      "src": "/products/cool-herbal-2-1l/3.jpeg",
+      "dir": "cool-herbal-2-1l",
+      "file": "3.jpeg",
+      "width": 844,
+      "height": 1280,
+      "kind": "lifestyle",
+      "minBright": 91,
+      "spread": 60
+    },
+    {
+      "src": "/products/green-herbal-rice-water-spray/1.jpg",
+      "dir": "green-herbal-rice-water-spray",
+      "file": "1.jpg",
+      "width": 893,
+      "height": 1600,
+      "kind": "lifestyle",
+      "minBright": 154,
+      "spread": 18
+    },
+    {
+      "src": "/products/green-herbal-scalp-oil-120ml/2.jpeg",
+      "dir": "green-herbal-scalp-oil-120ml",
+      "file": "2.jpeg",
+      "width": 893,
+      "height": 1600,
+      "kind": "lifestyle",
+      "minBright": 40,
+      "spread": 126
+    },
+    {
+      "src": "/products/green-herbal-twist-curl-custard/1.jpeg",
+      "dir": "green-herbal-twist-curl-custard",
+      "file": "1.jpeg",
+      "width": 963,
+      "height": 1280,
+      "kind": "lifestyle",
+      "minBright": 114,
+      "spread": 75
+    },
+    {
+      "src": "/products/green-herbal-wash-out-conditioner/1.jpeg",
+      "dir": "green-herbal-wash-out-conditioner",
+      "file": "1.jpeg",
+      "width": 893,
+      "height": 1600,
+      "kind": "lifestyle",
+      "minBright": 117,
+      "spread": 74
+    },
+    {
+      "src": "/products/green-herbal-wash-out-conditioner/2.jpeg",
+      "dir": "green-herbal-wash-out-conditioner",
+      "file": "2.jpeg",
+      "width": 963,
+      "height": 1280,
+      "kind": "lifestyle",
+      "minBright": 12,
+      "spread": 169
+    },
+    {
+      "src": "/products/herbal-hair-shampoo-500ml/1.jpeg",
+      "dir": "herbal-hair-shampoo-500ml",
+      "file": "1.jpeg",
+      "width": 893,
+      "height": 1600,
+      "kind": "lifestyle",
+      "minBright": 122,
+      "spread": 97
+    },
+    {
+      "src": "/products/herbal-hair-shampoo-500ml/2.jpg",
+      "dir": "herbal-hair-shampoo-500ml",
+      "file": "2.jpg",
+      "width": 853,
+      "height": 1280,
+      "kind": "lifestyle",
+      "minBright": 220,
+      "spread": 26
+    },
+    {
+      "src": "/products/organic-body-butter/1.png",
+      "dir": "organic-body-butter",
+      "file": "1.png",
+      "width": 2048,
+      "height": 2048,
+      "kind": "lifestyle",
+      "minBright": 27,
+      "spread": 159
+    },
+    {
+      "src": "/products/organic-gentle-glow-1l/2.jpeg",
+      "dir": "organic-gentle-glow-1l",
+      "file": "2.jpeg",
+      "width": 1063,
+      "height": 1600,
+      "kind": "lifestyle",
+      "minBright": 25,
+      "spread": 97
+    },
+    {
+      "src": "/products/organic-gentle-glow-350ml/1.png",
+      "dir": "organic-gentle-glow-350ml",
+      "file": "1.png",
+      "width": 2000,
+      "height": 2000,
+      "kind": "lifestyle",
+      "minBright": 190,
+      "spread": 53
+    },
+    {
+      "src": "/products/pure-african-black-soap-crumble-250kgs/1.jpg",
+      "dir": "pure-african-black-soap-crumble-250kgs",
+      "file": "1.jpg",
+      "width": 756,
+      "height": 756,
+      "kind": "lifestyle",
+      "minBright": 149,
+      "spread": 57
+    },
+    {
+      "src": "/products/pure-african-black-soap-crumble-250kgs/2.jpg",
+      "dir": "pure-african-black-soap-crumble-250kgs",
+      "file": "2.jpg",
+      "width": 756,
+      "height": 756,
+      "kind": "lifestyle",
+      "minBright": 114,
+      "spread": 66
+    },
+    {
+      "src": "/products/pure-african-black-soap-crumble-250kgs/3.png",
+      "dir": "pure-african-black-soap-crumble-250kgs",
+      "file": "3.png",
+      "width": 1600,
+      "height": 1600,
+      "kind": "lifestyle",
+      "minBright": 129,
+      "spread": 67
+    },
+    {
+      "src": "/products/pure-shea-butter-250g/1.png",
+      "dir": "pure-shea-butter-250g",
+      "file": "1.png",
+      "width": 2048,
+      "height": 2048,
+      "kind": "lifestyle",
+      "minBright": 43,
+      "spread": 179
+    },
+    {
+      "src": "/products/shea-avoco-body-lotion/1.png",
+      "dir": "shea-avoco-body-lotion",
+      "file": "1.png",
+      "width": 2048,
+      "height": 2048,
+      "kind": "lifestyle",
+      "minBright": 141,
+      "spread": 98
+    },
+    {
+      "src": "/products/sweet-lavender-2-1l/1.jpeg",
+      "dir": "sweet-lavender-2-1l",
+      "file": "1.jpeg",
+      "width": 893,
+      "height": 1600,
+      "kind": "lifestyle",
+      "minBright": 157,
+      "spread": 93
+    },
+    {
+      "src": "/products/tropical-sunrise-2-1l/2.png",
+      "dir": "tropical-sunrise-2-1l",
+      "file": "2.png",
+      "width": 1660,
+      "height": 2213,
+      "kind": "lifestyle",
+      "minBright": 138,
+      "spread": 67
+    },
+    {
+      "src": "/products/tropical-sunrise-350ml/2.png",
+      "dir": "tropical-sunrise-350ml",
+      "file": "2.png",
+      "width": 1660,
+      "height": 2213,
+      "kind": "lifestyle",
+      "minBright": 91,
+      "spread": 117
+    },
+    {
+      "src": "/products/unscented-2-1l/1.jpeg",
+      "dir": "unscented-2-1l",
+      "file": "1.jpeg",
+      "width": 1064,
+      "height": 1600,
+      "kind": "lifestyle",
+      "minBright": 156,
+      "spread": 71
+    }
+  ]
+}

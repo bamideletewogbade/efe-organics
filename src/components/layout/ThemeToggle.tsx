@@ -10,7 +10,7 @@ type Theme = "light" | "dark";
 export const THEME_STORAGE_KEY = "efe-theme";
 
 /**
- * The theme store is the DOM itself — `<html data-theme>`.
+ * The theme store is the DOM itself, `<html data-theme>`.
  *
  * The blocking script in layout.tsx stamps that attribute before first paint,
  * so by the time React runs the answer already exists. Reading it via
@@ -19,7 +19,7 @@ export const THEME_STORAGE_KEY = "efe-theme";
  * effect causes).
  *
  * `getServerSnapshot` returns null because the server genuinely cannot know the
- * viewer's OS preference — the button renders a placeholder until hydration.
+ * viewer's OS preference, the button renders a placeholder until hydration.
  */
 let listeners: Array<() => void> = [];
 
@@ -88,7 +88,7 @@ export function ThemeToggle() {
         className="block"
       >
         {dark ? (
-          /* Sun — click to go light. */
+          /* Sun, click to go light. */
           <svg
             viewBox="0 0 20 20"
             aria-hidden
@@ -102,7 +102,7 @@ export function ThemeToggle() {
             <path d="M10 2v1.6M10 16.4V18M2 10h1.6M16.4 10H18M4.5 4.5l1.1 1.1M14.4 14.4l1.1 1.1M15.5 4.5l-1.1 1.1M5.6 14.4l-1.1 1.1" />
           </svg>
         ) : (
-          /* Moon — click to go dark. */
+          /* Moon, click to go dark. */
           <svg
             viewBox="0 0 20 20"
             aria-hidden

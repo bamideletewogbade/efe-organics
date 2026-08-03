@@ -10,8 +10,8 @@ import { PLACEHOLDER, TESTIMONIALS } from "@/lib/testimonials";
  * Testimonials.
  *
  * The design is finished; the CONTENT is not, and the component is honest about
- * that. Efe has no collected reviews — every product on the reseller shows zero
- * — so `PLACEHOLDER` in lib/testimonials.ts is true and the section renders a
+ * that. Efe has no collected reviews, and every product on the reseller shows
+ * zero, so `PLACEHOLDER` in lib/testimonials.ts is true and the section renders a
  * visible "sample content" marker. Invented reviews attributed to customers of
  * a real business are fabricated social proof, and shipping them quietly would
  * be worse than shipping nothing.
@@ -23,7 +23,7 @@ export function Testimonials() {
 
   return (
     <section className="on-dark relative overflow-hidden bg-forest-deep py-24">
-      {/* One soft leaf bloom, static — this section is about the words. */}
+      {/* One soft leaf bloom, static. This section is about the words. */}
       <div
         aria-hidden
         className="pointer-events-none absolute left-1/2 top-0 h-96 w-[46rem] -translate-x-1/2 rounded-full bg-[radial-gradient(circle,var(--color-saffron-light)_0%,transparent_70%)] opacity-[0.10] blur-3xl"
@@ -40,7 +40,7 @@ export function Testimonials() {
 
           {PLACEHOLDER && (
             <p className="rounded-full border border-gold/40 bg-gold/10 px-3.5 py-1.5 text-xs text-gold">
-              Sample content — real reviews not yet collected
+              Sample content, real reviews not yet collected
             </p>
           )}
         </div>

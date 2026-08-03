@@ -14,25 +14,82 @@
  * A correct parser is about sixty lines. Adding a dependency to the bundle for
  * that, when the project has kept its dependency list to five, is a bad trade.
  *
- * NOT HANDLED, DELIBERATELY: encodings other than UTF-8, and semicolon
- * delimiters. Both are worth adding the day an export actually arrives that
- * needs them, and guessing at them now would be untested code.
+ * DELIMITERS ARE DETECTED, NOT ASSUMED.
+ *
+ * This used to assume a comma and say so. Then the Ecwid export dialog turned
+ * out to offer semicolon, comma AND tab, with the choice remembered per store,
+ * so whichever one Alberta happened to pick is the one we get. A semicolon file
+ * parsed as comma-delimited yields exactly one enormous column per row: no
+ * error, no crash, just an import screen that says it found one field and looks
+ * like our bug rather than a settings mismatch.
+ *
+ * Semicolon files are also what Excel writes in any locale that uses a comma as
+ * the decimal separator, which is most of Europe, so this is not an Ecwid
+ * quirk so much as the normal state of spreadsheets in the wild.
+ *
+ * NOT HANDLED, DELIBERATELY: encodings other than UTF-8. Worth adding the day an
+ * export actually arrives that needs it; guessing now would be untested code.
  */
+
+export type Delimiter = "," | ";" | "\t" | "|";
 
 export type CsvTable = {
   headers: string[];
   rows: string[][];
   /** Rows whose column count did not match the header. Usually a malformed file. */
   ragged: number;
+  /** Which delimiter was used, so the UI can say what it decided. */
+  delimiter: Delimiter;
 };
+
+/**
+ * Works out the delimiter from the header line.
+ *
+ * Counts candidates OUTSIDE quoted sections only. A header like
+ * `"Name, first",Email` contains two commas but is two columns, and counting
+ * naively would pick comma for the wrong reason or reject it for the wrong one.
+ *
+ * The header is enough: it is one line, it is always present, and unlike the
+ * body it cannot contain a free-text address full of stray semicolons.
+ */
+export function detectDelimiter(input: string): Delimiter {
+  const text = stripBom(input);
+  const end = text.search(/\r?\n/);
+  const header = end === -1 ? text : text.slice(0, end);
+
+  const counts: Record<Delimiter, number> = { ",": 0, ";": 0, "\t": 0, "|": 0 };
+  let quoted = false;
+
+  for (let i = 0; i < header.length; i++) {
+    const char = header[i];
+    if (char === '"') {
+      if (quoted && header[i + 1] === '"') {
+        i++;
+        continue;
+      }
+      quoted = !quoted;
+      continue;
+    }
+    if (quoted) continue;
+    if (char in counts) counts[char as Delimiter]++;
+  }
+
+  // Comma wins ties: it is the most common and the safest default for a
+  // single-column file where every count is zero.
+  const ranked = (Object.keys(counts) as Delimiter[]).sort(
+    (a, b) => counts[b] - counts[a] || (a === "," ? -1 : 1),
+  );
+  return counts[ranked[0]] > 0 ? ranked[0] : ",";
+}
 
 /** Strips a UTF-8 byte order mark, which Excel writes and which breaks the first header. */
 function stripBom(text: string): string {
   return text.charCodeAt(0) === 0xfeff ? text.slice(1) : text;
 }
 
-export function parseCsv(input: string): CsvTable {
+export function parseCsv(input: string, forced?: Delimiter): CsvTable {
   const text = stripBom(input);
+  const delimiter = forced ?? detectDelimiter(input);
   const rows: string[][] = [];
   let row: string[] = [];
   let field = "";
@@ -75,7 +132,7 @@ export function parseCsv(input: string): CsvTable {
       i++;
       continue;
     }
-    if (char === ",") {
+    if (char === delimiter) {
       endField();
       i++;
       continue;
@@ -109,7 +166,64 @@ export function parseCsv(input: string): CsvTable {
     return out.map((cell) => cell.trim());
   });
 
-  return { headers, rows: normalised, ragged };
+  return { headers, rows: normalised, ragged, delimiter };
+}
+
+/* -------------------------------------------------------------------------- */
+/* Writing                                                                    */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * Escapes one value for CSV output.
+ *
+ * A field is quoted when it contains the delimiter, a quote or a newline, and
+ * embedded quotes are doubled. That is the whole of RFC 4180's writing rules and
+ * skipping any of it produces files that break on re-import, which matters here
+ * because the point of an export is that somebody can read it back.
+ *
+ * Leading `=`, `+`, `-` and `@` are prefixed with a single quote. Excel treats
+ * those as the start of a formula, so a product literally named `=SUM(A1:A9)`,
+ * or more realistically a note pasted from somewhere, becomes executable content
+ * in the recipient's spreadsheet. This is CSV injection and it is the one
+ * genuine security concern in generating a download.
+ */
+function escapeCell(value: unknown, delimiter: Delimiter): string {
+  if (value === null || value === undefined) return "";
+
+  let text = value instanceof Date ? value.toISOString() : String(value);
+  if (/^[=+\-@\t\r]/.test(text)) text = `'${text}`;
+
+  const needsQuotes =
+    text.includes(delimiter) ||
+    text.includes('"') ||
+    text.includes("\n") ||
+    text.includes("\r");
+
+  return needsQuotes ? `"${text.replace(/"/g, '""')}"` : text;
+}
+
+/**
+ * Builds a CSV file from rows of objects.
+ *
+ * Written with a BOM and CRLF line endings. Both are concessions to Excel, which
+ * is what the file will actually be opened in: without the BOM it mangles the
+ * cedi sign and any accented name, and without CRLF some versions run the whole
+ * file onto one line.
+ */
+export function toCsv<T extends Record<string, unknown>>(
+  rows: T[],
+  columns: Array<{ key: keyof T & string; header: string }>,
+  delimiter: Delimiter = ",",
+): string {
+  const lines = [
+    columns.map((column) => escapeCell(column.header, delimiter)).join(delimiter),
+    ...rows.map((row) =>
+      columns
+        .map((column) => escapeCell(row[column.key], delimiter))
+        .join(delimiter),
+    ),
+  ];
+  return `﻿${lines.join("\r\n")}\r\n`;
 }
 
 /* -------------------------------------------------------------------------- */

@@ -8,10 +8,17 @@ import { Wordmark } from "@/components/brand/Wordmark";
 /**
  * Admin sign-in.
  *
- * The error message is deliberately vague ("that password is not right") and
- * identical for every failure. A form that distinguishes causes is a form that
- * helps an attacker narrow the search.
+ * The error message is deliberately vague and identical for every failure:
+ * wrong password, unknown address, and deactivated account all read the same.
+ * A form that distinguishes them tells an attacker which addresses are real.
+ *
+ * The email field is optional in practice. Accounts sign in with both; the
+ * shared bootstrap password works with the email left blank, which is what
+ * somebody setting the shop up for the first time will do.
  */
+const field =
+  "w-full rounded-xl border border-paper/15 bg-forest-deep px-4 py-3 text-sm text-paper transition-colors placeholder:text-paper/30 focus:border-gold focus:outline-none";
+
 export function AdminSignIn() {
   const [state, action, pending] = useActionState(signInAction, {});
 
@@ -39,15 +46,28 @@ export function AdminSignIn() {
 
         <label className="mt-7 block">
           <span className="mb-1.5 block text-xs font-semibold text-paper/80">
+            Email
+          </span>
+          <input
+            name="email"
+            type="email"
+            autoFocus
+            autoComplete="username"
+            placeholder="you@efeorganics.com"
+            className={field}
+          />
+        </label>
+
+        <label className="mt-4 block">
+          <span className="mb-1.5 block text-xs font-semibold text-paper/80">
             Password
           </span>
           <input
             name="password"
             type="password"
             required
-            autoFocus
             autoComplete="current-password"
-            className="w-full rounded-xl border border-paper/15 bg-forest-deep px-4 py-3 text-sm text-paper transition-colors focus:border-gold focus:outline-none"
+            className={field}
           />
         </label>
 
@@ -66,6 +86,11 @@ export function AdminSignIn() {
         >
           {pending ? "Checking…" : "Sign in"}
         </button>
+
+        <p className="mt-4 text-center text-[0.68rem]/5 text-paper/40">
+          Setting up for the first time? Leave the email blank and use the
+          shared password, then create your own account in Settings.
+        </p>
       </form>
     </main>
   );

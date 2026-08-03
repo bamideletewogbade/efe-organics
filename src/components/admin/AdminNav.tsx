@@ -52,6 +52,7 @@ const GROUPS: Array<{ label: string; links: Array<{ href: string; label: string;
       { href: "/admin/analytics", label: "Analytics" },
       { href: "/admin/documents", label: "Documents" },
       { href: "/admin/import", label: "Import" },
+      { href: "/admin/export", label: "Export" },
     ],
   },
 ];

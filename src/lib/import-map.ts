@@ -17,6 +17,20 @@
  * Confidence is reported rather than hidden. A mapping the code is unsure about
  * should look unsure, because the failure mode of a silent wrong guess is a
  * year of sales history landing in the wrong column.
+ *
+ * THE ALIASES BELOW ARE DRAWN FROM REAL SYSTEMS.
+ *
+ * Ecwid's own field names come from its REST API reference, which is the only
+ * authoritative list, since the CSV export lets a store owner choose which
+ * columns to include and the help centre does not enumerate them. So the aliases
+ * cover both the API spellings (`orderNumber`, `createDate`, `billingPerson`)
+ * and the human-readable headers the export dialog produces. Shopify and
+ * WooCommerce spellings are in there too, because a business that has moved once
+ * usually has files from more than one system in a folder somewhere.
+ *
+ * Coloursbay is the reseller, not a platform, and has no documented export at
+ * all. Nothing here is written for it specifically. It is handled the same way
+ * any unknown spreadsheet is: guess, show the guess, let a human fix it.
  */
 
 export type ImportEntity = "orders" | "customers" | "products";
@@ -48,79 +62,79 @@ export const SCHEMAS: Record<
         label: "Order number",
         hint: "The reference the old system used. Keeps a second import from duplicating everything.",
         required: true,
-        aliases: ["order number", "order id", "order #", "invoice", "reference", "order"],
+        aliases: ["order number", "ordernumber", "order id", "order #", "invoice", "vendor order number", "reference", "order"],
       },
       {
         key: "placedAt",
         label: "Order date",
         required: true,
-        aliases: ["date placed", "order date", "created", "date", "placed"],
+        aliases: ["date placed", "order date", "createdate", "create date", "created date", "created at", "paid at", "created", "date", "placed"],
       },
       {
         key: "totalMinor",
         label: "Order total",
         required: true,
-        aliases: ["order total", "total", "grand total", "amount"],
+        aliases: ["order total", "total", "grand total", "total cost", "amount"],
       },
       {
         key: "subtotalMinor",
         label: "Subtotal",
         hint: "Before delivery. Worked out from the total if missing.",
-        aliases: ["subtotal", "sub total", "items total", "goods"],
+        aliases: ["subtotal", "sub total", "items total", "lineitems subtotal", "goods"],
       },
       {
         key: "deliveryMinor",
         label: "Delivery charge",
         // Specific first. "shipping" alone would otherwise claim "Shipping City".
-        aliases: ["shipping cost", "delivery cost", "shipping", "delivery", "freight"],
+        aliases: ["shipping cost", "delivery cost", "shipping rate", "shipping total", "shipping", "delivery", "freight"],
       },
       {
         key: "discountMinor",
         label: "Discount",
-        aliases: ["discount", "coupon", "reduction"],
+        aliases: ["discount", "discount coupon", "coupon discount", "coupon", "reduction"],
       },
       {
         key: "customerName",
         label: "Customer name",
-        aliases: ["customer name", "billing name", "name", "customer", "full name"],
+        aliases: ["customer name", "billing name", "billing person", "shipping name", "billing full name", "name", "customer", "full name"],
       },
       {
         key: "customerEmail",
         label: "Customer email",
         hint: "Links orders to one customer record. Without it every order is a stranger.",
-        aliases: ["email", "customer email", "e-mail", "billing email"],
+        aliases: ["customer email", "billing email", "email", "e-mail", "contact email"],
       },
       {
         key: "customerPhone",
         label: "Customer phone",
-        aliases: ["phone", "mobile", "telephone", "contact", "whatsapp"],
+        aliases: ["customer phone", "billing phone", "shipping phone", "phone", "mobile", "telephone", "whatsapp"],
       },
       {
         key: "town",
         label: "Town or city",
-        aliases: ["city", "town", "shipping city", "billing city"],
+        aliases: ["shipping city", "billing city", "city", "town"],
       },
       {
         key: "region",
         label: "Region",
-        aliases: ["region", "state", "province", "shipping state"],
+        aliases: ["shipping state or province", "shipping state", "billing state", "region", "state", "province"],
       },
       {
         key: "address",
         label: "Address",
-        aliases: ["address", "street", "shipping address", "address line 1"],
+        aliases: ["shipping street", "shipping address", "billing street", "address line 1", "address", "street"],
       },
       {
         key: "status",
         label: "Status",
         hint: "Anything that reads as paid, shipped or delivered is treated as a completed sale.",
-        aliases: ["status", "order status", "fulfillment", "payment status"],
+        aliases: ["fulfillment status", "payment status", "order status", "status", "fulfillment"],
       },
       {
         key: "itemsText",
         label: "What was bought",
         hint: "Free text is fine. Kept as a note on the order.",
-        aliases: ["items", "products", "line items", "item name", "product name", "sku"],
+        aliases: ["item name", "line items", "product name", "items", "products", "sku"],
       },
     ],
   },
@@ -262,9 +276,28 @@ function mapTo(headers: string[], entity: ImportEntity): Detection {
   */
   const coverage = headers.length ? taken.size / headers.length : 0;
 
-  // Missing a required column is disqualifying rather than merely costly, so a
-  // partial match can never outscore a complete one on coverage alone.
-  const confidence = complete < 1 ? complete * 0.35 * coverage : 0.5 + 0.5 * coverage;
+  /*
+    COVERAGE LEADS, COMPLETENESS WEIGHTS IT.
+
+    This used to treat a missing required column as near-disqualifying
+    (`complete * 0.35 * coverage`), which broke on a real Shopify export.
+    Shopify names its order-number column `Name`, so the required order number
+    went unmapped, the orders schema was penalised down to 0.21, and the file
+    was classified as a CUSTOMER LIST at 0.58 while explaining two of its twelve
+    columns. Importing a year of sales as contacts is the exact silent failure
+    this scoring exists to prevent.
+
+    The signal was inverted. The strongest evidence about what a file IS comes
+    from how much of it a schema can explain: eleven of twelve columns is an
+    order export whatever its first column is called. Completeness still matters,
+    it just scales coverage instead of overriding it, so a complete match beats
+    an incomplete one at equal coverage and a far broader match wins on merit.
+
+    The unmapped required field is not ignored. It is reported, and the mapping
+    form asks a human to point at it, which is the right place to resolve a
+    genuinely ambiguous header rather than guessing.
+  */
+  const confidence = coverage * (0.35 + 0.65 * complete);
 
   return { entity, mapping, confidence };
 }

@@ -220,6 +220,149 @@ export type DashboardSummary = {
   addToCartWeek: number;
 };
 
+/**
+ * Everything the overview needs beyond the headline counts.
+ *
+ * WHY THIS EXISTS SEPARATELY
+ *
+ * The dashboard was eleven numbers, and on a shop that has not sold anything
+ * yet, nine of them are zero. A screen of zeros teaches nothing and looks
+ * broken even when it is working perfectly.
+ *
+ * These queries answer the questions a shop owner actually opens the back
+ * office with: what is running out, what is the catalogue worth, has anything
+ * moved, and who has been changing things. Those have real answers on day one,
+ * before a single order exists.
+ */
+export type DashboardDetail = {
+  /** Fourteen days of order counts and revenue, oldest first. Drives the chart. */
+  daily: Array<{ day: string; orders: number; revenueMinor: number }>;
+  /** Named items that need restocking, not just a count. */
+  lowStock: Array<{
+    variantId: string;
+    name: string;
+    sizeLabel: string | null;
+    stockQty: number;
+    threshold: number;
+  }>;
+  /** Retail value of everything on the shelf. */
+  stockValueMinor: number;
+  /** Sellable variants with stock, for the health bar. */
+  healthy: number;
+  /**
+   * How many variants have stock tracking switched on.
+   *
+   * Zero is the state after a fresh seed, because the imported catalogue carries
+   * an in-stock boolean and no counts, and inventing quantities for a real
+   * business would be worse than admitting there are none. The dashboard needs
+   * to know so it can say "tracking is off" instead of showing a GH₵0.00 shelf
+   * value, which reads as a broken query.
+   */
+  tracked: number;
+  /** Most recent changes, so the shop has a heartbeat even with no sales. */
+  activity: Array<{
+    action: string;
+    entity: string;
+    actorEmail: string | null;
+    createdAt: Date;
+  }>;
+};
+
+export async function getDashboardDetail(days = 14): Promise<DashboardDetail> {
+  const db = getDb();
+  const empty: DashboardDetail = {
+    daily: [],
+    lowStock: [],
+    stockValueMinor: 0,
+    healthy: 0,
+    tracked: 0,
+    activity: [],
+  };
+  if (!db) return empty;
+
+  const since = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
+  const sinceSql = sql`${since.toISOString()}::timestamptz`;
+
+  try {
+    const [dailyRows, lowRows, valueRows, activityRows] = await Promise.all([
+      /*
+        `generate_series` rather than grouping the orders table.
+
+        Grouping only returns days that HAD orders, so a chart built from it
+        silently closes the gaps and a quiet week looks like a busy one. The
+        series produces every day in the window and left-joins the counts, so
+        zero days are visibly zero.
+      */
+      db.execute(sql`
+        select
+          to_char(d.day, 'YYYY-MM-DD') as day,
+          coalesce(count(o.id), 0)::int as orders,
+          coalesce(sum(o.total_minor) filter (where o.payment_status = 'paid'), 0)::bigint as revenue
+        from generate_series(${sinceSql}, now(), interval '1 day') as d(day)
+        left join orders o on date_trunc('day', o.placed_at) = date_trunc('day', d.day)
+        group by d.day
+        order by d.day asc
+      `),
+      db
+        .select({
+          variantId: variants.id,
+          name: products.name,
+          sizeLabel: variants.sizeLabel,
+          stockQty: variants.stockQty,
+          threshold: variants.lowStockThreshold,
+        })
+        .from(variants)
+        .innerJoin(products, eq(products.id, variants.productId))
+        .where(
+          and(
+            isNull(variants.archivedAt),
+            eq(variants.trackStock, true),
+            lte(variants.stockQty, variants.lowStockThreshold),
+          ),
+        )
+        .orderBy(variants.stockQty)
+        .limit(8),
+      db
+        .select({
+          value: sql<number>`coalesce(sum(${variants.priceMinor} * greatest(${variants.stockQty}, 0)), 0)`,
+          healthy: sql<number>`count(*) filter (where ${variants.trackStock} and ${variants.stockQty} > ${variants.lowStockThreshold})`,
+          tracked: sql<number>`count(*) filter (where ${variants.trackStock})`,
+        })
+        .from(variants)
+        .where(isNull(variants.archivedAt)),
+      db
+        .select({
+          action: auditLog.action,
+          entity: auditLog.entity,
+          actorEmail: auditLog.actorEmail,
+          createdAt: auditLog.createdAt,
+        })
+        .from(auditLog)
+        .orderBy(desc(auditLog.createdAt))
+        .limit(8),
+    ]);
+
+    return {
+      daily: (dailyRows as unknown as Array<Record<string, unknown>>).map(
+        (row) => ({
+          day: String(row.day),
+          orders: Number(row.orders ?? 0),
+          revenueMinor: Number(row.revenue ?? 0),
+        }),
+      ),
+      lowStock: lowRows,
+      stockValueMinor: Number(valueRows[0]?.value ?? 0),
+      healthy: Number(valueRows[0]?.healthy ?? 0),
+      tracked: Number(valueRows[0]?.tracked ?? 0),
+      activity: activityRows,
+    };
+  } catch (error) {
+    // A dashboard panel is never worth taking the page down for.
+    log.error("getDashboardDetail", { error: String(error) });
+    return empty;
+  }
+}
+
 export async function getDashboardSummary(): Promise<DashboardSummary> {
   const db = getDb();
   const empty: DashboardSummary = {
@@ -242,6 +385,21 @@ export async function getDashboardSummary(): Promise<DashboardSummary> {
   const now = new Date();
   const dayAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
   const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+
+  /*
+    ISO strings, explicitly cast, for anything going into a RAW `sql` fragment.
+
+    Drizzle's typed operators (`gte(events.occurredAt, weekAgo)` below) know the
+    column is a timestamp and serialise the Date for the driver. A raw template
+    does not: the value goes straight to postgres.js, which throws
+    "The string argument must be ... Received an instance of Date" and takes the
+    whole dashboard down with it.
+
+    This only shows up against a real database, which is exactly why it survived
+    until the connection string existed.
+  */
+  const dayAgoSql = sql`${dayAgo.toISOString()}::timestamptz`;
+  const weekAgoSql = sql`${weekAgo.toISOString()}::timestamptz`;
 
   return log.time("getDashboardSummary", async () => {
     const [
@@ -268,10 +426,10 @@ export async function getDashboardSummary(): Promise<DashboardSummary> {
         .where(isNull(variants.archivedAt)),
       db
         .select({
-          today: sql<number>`count(*) filter (where ${orders.placedAt} >= ${dayAgo})`,
-          week: sql<number>`count(*) filter (where ${orders.placedAt} >= ${weekAgo})`,
+          today: sql<number>`count(*) filter (where ${orders.placedAt} >= ${dayAgoSql})`,
+          week: sql<number>`count(*) filter (where ${orders.placedAt} >= ${weekAgoSql})`,
           // Revenue counts only orders that were actually paid.
-          revenue: sql<number>`coalesce(sum(${orders.totalMinor}) filter (where ${orders.placedAt} >= ${weekAgo} and ${orders.paymentStatus} = 'paid'), 0)`,
+          revenue: sql<number>`coalesce(sum(${orders.totalMinor}) filter (where ${orders.placedAt} >= ${weekAgoSql} and ${orders.paymentStatus} = 'paid'), 0)`,
         })
         .from(orders),
       db

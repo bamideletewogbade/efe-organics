@@ -19,7 +19,7 @@
  * when orders are persisted.
  */
 
-import type { Product } from "./catalog";
+import type { Product } from "./catalog.types";
 
 export const REGIONS = [
   "Greater Accra",

@@ -430,6 +430,7 @@ export const orders = pgTable(
 
     discountId: uuid("discount_id").references(() => discounts.id),
     paystackReference: varchar("paystack_reference", { length: 120 }),
+    momoReference: varchar("momo_reference", { length: 120 }),
 
     /**
      * Set when the order came from a spreadsheet rather than the checkout.
@@ -734,3 +735,67 @@ export const auditLog = pgTable(
     index("audit_time_idx").on(table.createdAt),
   ],
 );
+
+export const stockistTier = pgEnum("stockist_tier", [
+  "bronze",
+  "silver",
+  "gold",
+  "vip",
+]);
+
+export const stockistStatus = pgEnum("stockist_status", [
+  "pending",
+  "approved",
+  "declined",
+]);
+
+export const stockists = pgTable(
+  "stockists",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    businessName: varchar("business_name", { length: 240 }).notNull(),
+    contactName: varchar("contact_name", { length: 200 }).notNull(),
+    email: varchar("email", { length: 240 }).notNull(),
+    phone: varchar("phone", { length: 40 }).notNull(),
+    businessType: varchar("business_type", { length: 80 })
+      .notNull()
+      .default("retail_shop"),
+    tier: stockistTier("tier").notNull().default("bronze"),
+    status: stockistStatus("status").notNull().default("pending"),
+    region: varchar("region", { length: 80 }),
+    town: varchar("town", { length: 120 }),
+    address: text("address"),
+    notes: text("notes"),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (table) => [
+    uniqueIndex("stockists_email_idx").on(table.email),
+    index("stockists_status_idx").on(table.status),
+  ],
+);
+
+export const wholesaleInquiries = pgTable(
+  "wholesale_inquiries",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    stockistId: uuid("stockist_id").references(() => stockists.id),
+    businessName: varchar("business_name", { length: 240 }).notNull(),
+    contactName: varchar("contact_name", { length: 200 }).notNull(),
+    email: varchar("email", { length: 240 }).notNull(),
+    phone: varchar("phone", { length: 40 }).notNull(),
+    interest: varchar("interest", { length: 160 }).notNull(),
+    estimatedVolume: varchar("estimated_volume", { length: 120 }),
+    status: varchar("status", { length: 48 }).notNull().default("new"),
+    message: text("message"),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (table) => [index("inquiries_email_idx").on(table.email)],
+);
+

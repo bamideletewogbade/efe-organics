@@ -17,7 +17,7 @@ import {
   CART_STORAGE_KEY,
   type CartLine,
 } from "@/lib/cart";
-import type { Product } from "@/lib/catalog";
+import type { Product } from "@/lib/catalog.types";
 import { track } from "@/lib/analytics";
 
 /**

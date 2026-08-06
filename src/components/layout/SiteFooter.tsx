@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { brand } from "@/lib/brand";
+import { POLICIES } from "@/lib/legal";
 import { CATEGORIES } from "@/lib/catalog";
 import { Container } from "./Container";
 
@@ -79,6 +80,28 @@ export function SiteFooter() {
                 Contact
               </Link>
             </li>
+          </ul>
+
+          {/*
+            Policies belong in the footer, not the nav. A shopper looks for them
+            here, and a shop that takes money is expected to have them findable
+            from every page. Generated from lib/legal so adding a fifth policy
+            does not require remembering to link it.
+          */}
+          <h2 className="mt-7 text-xs uppercase tracking-widest text-gold">
+            Policies
+          </h2>
+          <ul className="mt-4 space-y-2 text-sm text-paper/80">
+            {POLICIES.map((policy) => (
+              <li key={policy.slug}>
+                <Link
+                  href={`/policies/${policy.slug}`}
+                  className="hover:text-gold"
+                >
+                  {policy.title}
+                </Link>
+              </li>
+            ))}
           </ul>
 
           {/* Social lives under Company rather than as its own column: three

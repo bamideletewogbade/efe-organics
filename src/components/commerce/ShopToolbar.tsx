@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { motion, useReducedMotion } from "motion/react";
 
-import type { CategorySlug } from "@/lib/catalog";
+import type { CategorySlug } from "@/lib/catalog.types";
 import type { SortKey } from "@/lib/shop";
 import { SORTS } from "@/lib/shop";
 

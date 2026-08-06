@@ -6,7 +6,7 @@
  * hand-edited parameter degrades to the default rather than throwing.
  */
 
-import { CATEGORIES, type CategorySlug, type ProductGroup } from "./catalog";
+import { CATEGORIES, type CategorySlug, type ProductGroup } from "./catalog.types";
 
 export const SORTS = [
   { key: "featured", label: "Featured" },

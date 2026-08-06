@@ -1,0 +1,293 @@
+<!doctype html>
+<html lang="en-GH">
+<head>
+<meta charset="utf-8">
+<title>Invoice EFE-001</title>
+<style>
+  /*
+    Everything you need to change is in the HTML below, marked with EDIT.
+    Nothing here needs touching unless you want to change the look.
+
+    To make a PDF: open in a browser, Ctrl+P, then "Save as PDF".
+  */
+  @page { size: A4; margin: 16mm 15mm; }
+
+  :root {
+    --forest: #14432c;
+    --gold: #9a7d2e;
+    --ink: #16191a;
+    --soft: #4a504a;
+    --muted: #71766f;
+    --rule: #ddd9cd;
+    --wash: #f5f3ec;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    /*
+      "Segoe UI" sits in the stack purely as a glyph fallback. Georgia has no
+      cedi sign, so GH₵ in body text rendered as a stray C. Font fallback is
+      per-glyph, so the prose stays Georgia and only ₵ comes from elsewhere.
+    */
+    font-family: Georgia, "Segoe UI", "Times New Roman", serif;
+    font-size: 10.5pt;
+    line-height: 1.55;
+    color: var(--ink);
+    background: #fff;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  h1, h2, th, .sans { font-family: "Segoe UI", Arial, sans-serif; }
+
+  .num {
+    font-family: "Segoe UI", Arial, sans-serif;
+    font-variant-numeric: tabular-nums lining;
+    font-feature-settings: "tnum" 1, "lnum" 1;
+    white-space: nowrap;
+  }
+
+  header.top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12mm;
+    padding-bottom: 6mm;
+    border-bottom: 2pt solid var(--forest);
+  }
+  header.top h1 {
+    margin: 0;
+    font-size: 22pt;
+    letter-spacing: -0.02em;
+    color: var(--forest);
+  }
+  .from { font-size: 9.5pt; color: var(--soft); }
+  .from strong { display: block; font-size: 11pt; color: var(--ink); }
+
+  .meta {
+    text-align: right;
+    font-size: 9.5pt;
+    color: var(--soft);
+    min-width: 52mm;
+  }
+  /*
+    Flex rather than an inline-block with min-width. The block sits in a
+    right-aligned column, so the label's text hugged the right edge of its own
+    box and ran straight into the value: "CurrencyGhana cedis".
+  */
+  .meta div {
+    display: flex;
+    justify-content: flex-end;
+    gap: 4mm;
+    margin-bottom: 1.5mm;
+  }
+  .meta span.label { color: var(--muted); }
+
+  section.parties {
+    display: flex;
+    gap: 12mm;
+    margin: 7mm 0 8mm;
+  }
+  section.parties > div { flex: 1; }
+  .label-sm {
+    font-family: "Segoe UI", Arial, sans-serif;
+    font-size: 7.5pt;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 2mm;
+  }
+
+  table { width: 100%; border-collapse: collapse; }
+  thead th {
+    font-size: 8pt;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+    text-align: left;
+    padding: 0 0 2mm;
+    border-bottom: 1pt solid var(--forest);
+  }
+  thead th.r, td.r { text-align: right; }
+  tbody td {
+    padding: 3.5mm 0;
+    border-bottom: 0.5pt solid var(--rule);
+    vertical-align: top;
+  }
+  tbody td .desc { color: var(--soft); font-size: 9.5pt; display: block; margin-top: 1mm; }
+
+  .totals { margin-top: 5mm; margin-left: auto; width: 78mm; }
+  .totals div {
+    display: flex;
+    justify-content: space-between;
+    padding: 2mm 0;
+    font-size: 10pt;
+  }
+  .totals div.grand {
+    margin-top: 1mm;
+    padding: 3.5mm 4mm;
+    background: var(--forest);
+    color: #fff;
+    font-weight: 700;
+    font-size: 12pt;
+  }
+  .totals div.grand .num { color: #f2d99a; }
+
+  .pay {
+    margin-top: 9mm;
+    padding: 5mm 6mm;
+    background: var(--wash);
+    border-left: 2pt solid var(--gold);
+  }
+  .pay h2 { margin: 0 0 3mm; font-size: 11pt; }
+  .pay dl { margin: 0; display: grid; grid-template-columns: 34mm 1fr; gap: 1.5mm 4mm; font-size: 10pt; }
+  .pay dt { color: var(--muted); }
+  .pay dd { margin: 0; }
+
+  .note { margin-top: 7mm; font-size: 9pt; color: var(--soft); }
+  .note p { margin: 0 0 2mm; }
+
+  footer.doc {
+    margin-top: 10mm;
+    padding-top: 3mm;
+    border-top: 0.5pt solid var(--rule);
+    font-size: 8pt;
+    color: var(--muted);
+  }
+
+  /* Marks a value you should replace. Prints as ordinary text. */
+  .edit { background: #fff6d6; padding: 0 1mm; }
+  /* On the dark total plate the highlight fights the background. */
+  .grand .edit { background: rgba(255,255,255,0.14); }
+  @media print { .edit, .grand .edit { background: transparent; } }
+</style>
+</head>
+<body>
+
+<!-- ============================================================
+     EDIT: your details, the invoice number and the dates
+     ============================================================ -->
+<header class="top">
+  <div class="from">
+    <h1>Invoice</h1>
+    <strong class="edit">[YOUR NAME OR BUSINESS]</strong>
+    <span class="edit">[YOUR ADDRESS]</span><br>
+    <span class="edit">[YOUR EMAIL]</span><br>
+    <span class="edit">[YOUR PHONE]</span>
+  </div>
+
+  <div class="meta">
+    <div><span class="label">Invoice number</span><span class="num edit">EFE-001</span></div>
+    <div><span class="label">Date issued</span><span class="num edit">3 August 2026</span></div>
+    <div><span class="label">Payment due</span><span class="num edit">17 August 2026</span></div>
+    <div><span class="label">Currency</span><span class="num">Ghana cedis</span></div>
+  </div>
+</header>
+
+<!-- ============================================================
+     EDIT: who it goes to
+     ============================================================ -->
+<section class="parties">
+  <div>
+    <p class="label-sm">Billed to</p>
+    <strong>Efe Organics&trade;</strong><br>
+    <span class="edit">[ATTENTION: Alberta, and her role]</span><br>
+    Accra, Ghana<br>
+    <span class="edit">[HER EMAIL]</span>
+  </div>
+  <div>
+    <p class="label-sm">For</p>
+    Digital transformation, stage one<br>
+    Online shop and back office
+  </div>
+</section>
+
+<!-- ============================================================
+     EDIT: the lines.
+
+     This is set up as the FIRST MILESTONE of stage one: 40% on start,
+     per the proposal. Stage one is GH₵22,000 in total, so 40% is
+     GH₵8,800. Change the percentage, the amount, or swap in different
+     lines entirely if you are billing for something else.
+
+     If you are invoicing the whole of stage one at once, delete the
+     second line and put 22,000.00 in the first.
+     ============================================================ -->
+<table>
+  <thead>
+    <tr>
+      <th>Item</th>
+      <th class="r">Amount (GH&#8373;)</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>
+        <strong>Stage one, first milestone (40%)</strong>
+        <span class="desc">
+          Online shop, checkout and full back office: orders, stock with
+          movement history, products and pricing, promotions, customers,
+          first-party analytics and an audit trail. Deployed and running.
+        </span>
+      </td>
+      <td class="r num edit">8,800.00</td>
+    </tr>
+    <tr>
+      <td>
+        <span class="desc" style="margin-top:0">
+          Stage one total is GH&#8373;22,000.00. Remaining: 30% at handover,
+          30% on completion.
+        </span>
+      </td>
+      <td class="r num" style="color:var(--muted)"></td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="totals">
+  <div><span>Subtotal</span><span class="num edit">8,800.00</span></div>
+  <div><span>VAT and levies</span><span class="num">Not charged</span></div>
+  <div class="grand"><span>Total due</span><span class="num edit">GH&#8373;8,800.00</span></div>
+</div>
+
+<!-- ============================================================
+     EDIT: how she pays you
+     ============================================================ -->
+<div class="pay">
+  <h2>How to pay</h2>
+  <dl>
+    <dt>Mobile money</dt>
+    <dd class="edit">[NETWORK, NUMBER, REGISTERED NAME]</dd>
+
+    <dt>Bank transfer</dt>
+    <dd class="edit">[BANK, ACCOUNT NAME, ACCOUNT NUMBER, BRANCH]</dd>
+
+    <dt>Reference</dt>
+    <dd class="num edit">EFE-001</dd>
+  </dl>
+</div>
+
+<div class="note">
+  <p>
+    Amounts are in Ghana cedis. This invoice is exclusive of VAT and applicable
+    levies, which are not being charged.
+  </p>
+  <p>
+    Monthly running costs, hosting and the database, are billed separately at
+    cost against the actual invoices, with no markup.
+  </p>
+  <p>
+    Terms as agreed in the proposal dated 3 August 2026.
+  </p>
+</div>
+
+<footer class="doc">
+  Thank you. Questions about this invoice: <span class="edit">[YOUR EMAIL]</span>
+</footer>
+
+</body>
+</html>

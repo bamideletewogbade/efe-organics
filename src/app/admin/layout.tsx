@@ -2,6 +2,9 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 import { AdminNav } from "@/components/admin/AdminNav";
+import { AdminAiDrawer } from "@/components/admin/AdminAiDrawer";
+import { askShopAction } from "@/app/admin/ai-actions";
+import { capabilities } from "@/lib/env";
 import { getAdminSession } from "@/lib/admin-auth";
 import { getDb } from "@/db/client";
 import { AdminSignIn } from "@/components/admin/AdminSignIn";
@@ -56,7 +59,7 @@ export default async function AdminLayout({
     >
       <AdminNav devBypass={session.devBypass} dbReady={dbReady} />
 
-      <main className="min-w-0 flex-1">
+      <main className="min-w-0 flex-1 relative">
         {/*
           The environment warnings moved into the sidebar. They were two stacked
           full-width bars, roughly 100px on every load, repeating what the
@@ -85,6 +88,9 @@ export default async function AdminLayout({
         )}
 
         <div className="p-6 lg:p-8">{children}</div>
+
+        {/* Global floating AI Copilot Drawer */}
+        <AdminAiDrawer askAction={askShopAction} hasAi={capabilities.hasAI} />
       </main>
     </div>
   );

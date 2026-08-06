@@ -1,54 +1,50 @@
 /**
- * ⚠️ PLACEHOLDER CONTENT, NOT REAL CUSTOMER REVIEWS. DO NOT LAUNCH WITH THIS.
+ * Customer reviews. There are none, and that is the honest state.
  *
- * Efe has no collected reviews today: every product on the reseller shows
- * "0 reviews". Publishing invented testimonials attributed to named customers
- * would be fabricating social proof about a real business, so these exist only
- * to build and review the component against realistic text.
+ * WHAT WAS HERE, AND WHY IT IS GONE
  *
- * `PLACEHOLDER` below is read by the section component, which renders a visible
- * "sample content" marker whenever it is true. Delete this file's contents and
- * flip the flag when real reviews arrive, see docs/OPEN-QUESTIONS.md.
+ * Three written-to-design quotes with star ratings. They were clearly marked as
+ * placeholders in this file and the component rendered a "sample content" label
+ * next to them. Then the domain went live and they became three invented
+ * customer reviews on the homepage of a trading business.
  *
- * How to get real ones, cheaply: the products ship with a label; add a short
- * URL or QR to a one-question review form, and ask the stockists to collect
- * them too. That is a Phase 2 task, not a blocker for the design.
+ * The label did not save it. A shopper reads the quote and forms a belief; they
+ * do not read the disclaimer and discount it. Fabricated reviews are unlawful
+ * under consumer protection rules in essentially every market Efe would sell
+ * into, and the risk sits with Efe, not with whoever wrote the placeholder.
+ *
+ * So the array is empty and stays empty until real reviews exist. The homepage
+ * now runs `IngredientProof` instead, which makes a stronger argument out of
+ * something entirely true.
+ *
+ * HOW TO FILL THIS PROPERLY
+ *
+ * 1. Put a short link or QR on the product label and on the order confirmation.
+ * 2. Ask the stockists to pass on what customers tell them, with a name.
+ * 3. Get explicit permission to publish the name before publishing it.
+ *
+ * Then add them below. The type is ready and nothing else needs changing.
  */
-
-export const PLACEHOLDER = true;
 
 export type Testimonial = {
   quote: string;
+  /** Real name, published with permission. Never invented, never "A. Customer". */
   name: string;
   role: string;
   /** Which product the review is about, links the quote to the catalogue. */
   productSlug?: string;
   rating: number;
+  /** When it was given. Reviews without a date read as stock photography. */
+  collectedAt: string;
 };
 
-export const TESTIMONIALS: Testimonial[] = [
-  {
-    quote:
-      "I switched from a medicated wash to the black soap bath and my skin settled within a fortnight. The lemon one is the only thing my whole household agrees on.",
-    name: "Sample review",
-    role: "Replace before launch",
-    productSlug: "lemon-blast-black-soap-bath-500ml",
-    rating: 5,
-  },
-  {
-    quote:
-      "I run a small salon in Osu and I buy the one-litre shampoo. It works out far cheaper than the imported brands and my clients ask what I am using.",
-    name: "Sample review",
-    role: "Replace before launch",
-    productSlug: "herbal-hair-shampoo-1l",
-    rating: 5,
-  },
-  {
-    quote:
-      "The hair food and the scalp oil together have done more for my edges in three months than anything else I have tried. Worth the price.",
-    name: "Sample review",
-    role: "Replace before launch",
-    productSlug: "green-herbal-hair-food-250g",
-    rating: 4,
-  },
-];
+/**
+ * Empty on purpose. See above.
+ *
+ * If you are adding the first one: it must be something a real person actually
+ * said about a product they actually bought, and they must know it is going on
+ * the website.
+ */
+export const TESTIMONIALS: Testimonial[] = [];
+
+export const HAS_REVIEWS = TESTIMONIALS.length > 0;

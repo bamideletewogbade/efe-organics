@@ -16,6 +16,7 @@ import {
   type OrderLine,
   type Region,
 } from "@/lib/checkout";
+import { getDeliveryQuote } from "@/lib/delivery";
 import { formatPrice } from "@/lib/money";
 
 /**
@@ -59,6 +60,11 @@ export function CheckoutForm({ paystackReady }: { paystackReady: boolean }) {
     whatsappUrl: string | null;
     emailed: boolean;
   } | null>(null);
+
+  const [selectedRegion, setSelectedRegion] = useState<Region>("Greater Accra");
+  const [selectedTown, setSelectedTown] = useState("");
+
+  const activeQuote = getDeliveryQuote(selectedRegion, selectedTown);
 
   const field =
     "w-full rounded-xl border border-line bg-surface-raised px-4 py-3 text-sm text-body transition-colors placeholder:text-muted/60 focus:border-accent focus:outline-none";
@@ -133,6 +139,24 @@ export function CheckoutForm({ paystackReady }: { paystackReady: boolean }) {
           whatsappUrl: result.whatsappUrl ?? null,
           emailed: Boolean(result.confirmationEmailed),
         });
+
+        if (paystackReady) {
+          try {
+            const payRes = await fetch("/api/paystack/initialize", {
+              method: "POST",
+              headers: { "content-type": "application/json" },
+              body: JSON.stringify({ reference }),
+            });
+            const payData = await payRes.json();
+            if (payData.ok && payData.authorizationUrl) {
+              clear();
+              window.location.href = payData.authorizationUrl;
+              return;
+            }
+          } catch {
+            // Fall through to confirmation summary if Paystack fails
+          }
+        }
       }
     } catch {
       // Network failure. Fall through to the local handoff below.
@@ -392,7 +416,8 @@ export function CheckoutForm({ paystackReady }: { paystackReady: boolean }) {
             <select
               name="region"
               required
-              defaultValue="Greater Accra"
+              value={selectedRegion}
+              onChange={(e) => setSelectedRegion(e.target.value as Region)}
               className={field}
             >
               {REGIONS.map((region) => (
@@ -410,6 +435,9 @@ export function CheckoutForm({ paystackReady }: { paystackReady: boolean }) {
             <input
               name="town"
               required
+              value={selectedTown}
+              onChange={(e) => setSelectedTown(e.target.value)}
+              placeholder="e.g. East Legon, Spintex, Kumasi"
               autoComplete="address-level2"
               className={field}
             />
@@ -473,8 +501,18 @@ export function CheckoutForm({ paystackReady }: { paystackReady: boolean }) {
               </dd>
             </div>
             <div className="flex justify-between">
-              <dt className="text-muted">Delivery</dt>
-              <dd className="text-muted">Confirmed with you</dd>
+              <dt className="text-muted">
+                Delivery <span className="text-xs font-normal">({activeQuote.name})</span>
+              </dt>
+              <dd className="stat font-medium text-strong">
+                {formatPrice(activeQuote.rateMinor)}
+              </dd>
+            </div>
+            <div className="flex justify-between border-t border-line pt-3 font-semibold text-strong">
+              <dt>Estimated Total</dt>
+              <dd className="stat text-base text-[var(--color-gold-deep)]">
+                {formatPrice(subtotalMinor + activeQuote.rateMinor)}
+              </dd>
             </div>
           </dl>
 

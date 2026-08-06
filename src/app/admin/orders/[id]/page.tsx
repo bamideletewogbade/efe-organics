@@ -4,9 +4,13 @@ import { notFound } from "next/navigation";
 import {
   setDeliveryFeeAction,
   setOrderStatusAction,
+  setMoMoPaymentAction,
 } from "@/app/admin/actions";
 import { Card, PageHeader, Pill } from "@/components/admin/AdminUI";
 import { ActionForm, SubmitButton } from "@/components/admin/Form";
+import { analyzeOrderCustomerAction } from "@/app/admin/ai-actions";
+import { OrderAiAnalyst } from "@/components/admin/OrderAiAnalyst";
+import { WhatsAppDispatch } from "@/components/admin/WhatsAppDispatch";
 import { getAdminOrder } from "@/db/queries/admin";
 import { formatPrice } from "@/lib/money";
 
@@ -198,17 +202,19 @@ export default async function AdminOrderPage({
               )}
             </dl>
 
-            {order.deliveryPhone && (
-              <a
-                href={`https://wa.me/${order.deliveryPhone.replace(/\D/g, "")}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="mt-5 inline-flex rounded-full border border-line px-4 py-2 text-sm font-semibold text-strong transition-colors hover:border-accent/50"
-              >
-                Message on WhatsApp
-              </a>
-            )}
+            <WhatsAppDispatch
+              order={{
+                reference: order.reference,
+                customerName: order.deliveryName,
+                deliveryPhone: order.deliveryPhone,
+                deliveryTown: order.deliveryTown,
+                totalMinor: order.totalMinor,
+                status: order.status,
+              }}
+            />
           </Card>
+
+          <OrderAiAnalyst orderId={order.id} action={analyzeOrderCustomerAction} />
         </div>
 
         {/* ---- what to do next ---- */}
@@ -262,6 +268,36 @@ export default async function AdminOrderPage({
                 {quoted ? "Update total" : "Set delivery and confirm"}
               </SubmitButton>
             </ActionForm>
+          </Card>
+
+          <Card>
+            <h2 className="font-semibold text-strong">Mobile Money (MoMo) Payment</h2>
+            <p className="mt-1.5 text-xs/5 text-muted">
+              Record customer's MoMo transfer transaction ID to mark as paid.
+            </p>
+            <ActionForm action={setMoMoPaymentAction} className="mt-4 grid gap-3">
+              <input type="hidden" name="orderId" value={order.id} />
+              <label className="block">
+                <span className="mb-1 block text-xs font-semibold text-strong">
+                  MoMo Transaction Ref / ID
+                </span>
+                <input
+                  name="momoReference"
+                  defaultValue={order.momoReference ?? ""}
+                  placeholder="e.g. 29481039481"
+                  required
+                  className="w-full rounded-lg border border-line bg-surface-raised px-3 py-2 text-sm"
+                />
+              </label>
+              <SubmitButton pendingLabel="Saving MoMo Ref">
+                Save & Mark Paid
+              </SubmitButton>
+            </ActionForm>
+            {order.momoReference && (
+              <p className="mt-2 text-xs font-medium text-[var(--live)]">
+                Recorded MoMo Ref: {order.momoReference}
+              </p>
+            )}
           </Card>
 
           <Card>

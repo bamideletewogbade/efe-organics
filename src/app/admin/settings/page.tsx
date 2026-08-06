@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { Card, PageHeader, Pill } from "@/components/admin/AdminUI";
 import { ActionForm, SubmitButton } from "@/components/admin/Form";
 import {
@@ -48,6 +49,14 @@ export default async function AdminSettingsPage() {
           quoted > 0
             ? `${quoted} of ${REGIONS.length} regions have an agreed rate`
             : "No delivery rates set yet, so every order is quoted by hand"
+        }
+        action={
+          <Link
+            href="/admin/settings/users"
+            className="inline-flex items-center gap-2 rounded-full border border-line px-5 py-2.5 text-sm font-semibold text-strong transition-colors hover:border-accent/50"
+          >
+            Who can get in &rarr;
+          </Link>
         }
       />
 

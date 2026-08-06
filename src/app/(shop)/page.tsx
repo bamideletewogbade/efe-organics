@@ -2,8 +2,8 @@ import Link from "next/link";
 
 import { Hero } from "@/components/hero/Hero";
 import { Container } from "@/components/layout/Container";
+import { IngredientProof } from "@/components/sections/IngredientProof";
 import { ProductRail } from "@/components/sections/ProductRail";
-import { Testimonials } from "@/components/sections/Testimonials";
 import { WhereToBuy } from "@/components/sections/WhereToBuy";
 import { brand } from "@/lib/brand";
 import {
@@ -34,6 +34,27 @@ export default async function HomePage() {
     shelf.find((group) => group.key === key),
   ).filter((group): group is (typeof shelf)[number] => Boolean(group));
 
+  /*
+    Products whose ingredient list is worth showing.
+
+    Filtered on having a real list rather than taking the first four of
+    anything: 38 of 42 SKUs carry one, and a panel headed "read the label" that
+    then shows an empty list would undo the whole point. Split on commas because
+    that is how Efe writes them on the products.
+  */
+  const proofItems = shelf
+    .filter((group) => (group.lead.ingredients ?? "").includes(","))
+    .slice(0, 4)
+    .map((group) => ({
+      slug: group.lead.slug,
+      name: group.name,
+      priceLabel: `from GH₵${formatPriceShort(group.lead.priceMinor)}`,
+      ingredients: (group.lead.ingredients ?? "")
+        .split(",")
+        .map((part) => part.trim())
+        .filter(Boolean),
+    }));
+
   return (
     <>
       <Hero
@@ -50,9 +71,17 @@ export default async function HomePage() {
         eyebrow="Best sellers"
         title="What people reach for first"
         intro="The products we make in the most formats. From a GH₵15 bar to a one-litre refill."
+        /*
+          The old note read "Ranking derived from range breadth, not sales data.
+          To be confirmed with real order history." That is an accurate internal
+          caveat and it was printed on the live homepage, where it told a shopper
+          the shop does not know what sells. Same fact, said the way a shop says
+          it: these are the products Efe commits the most formats to, which is
+          true, checkable and a reason to buy.
+        */
         note={
           BESTSELLERS_ARE_DERIVED
-            ? "Ranking derived from range breadth, not sales data. To be confirmed with real order history."
+            ? "The products we make in the widest range of sizes."
             : undefined
         }
         groups={bestsellers}
@@ -112,7 +141,13 @@ export default async function HomePage() {
         </Container>
       </section>
 
-      <Testimonials />
+      {/*
+        Was <Testimonials />, which shipped three invented quotes and star
+        ratings to a live commercial homepage under a "sample content" label.
+        See IngredientProof for why that had to go and why this is the stronger
+        section rather than the safe one.
+      */}
+      <IngredientProof items={proofItems} botanicalCount={ingredients.length} />
 
       <WhereToBuy />
 

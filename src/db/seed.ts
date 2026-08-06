@@ -27,7 +27,16 @@ import { CATEGORIES } from "@/lib/catalog";
 import { PRODUCTS } from "@/lib/catalog.data";
 import { logger } from "@/lib/logger";
 import { requireDb } from "./client";
-import { categories, productImages, products, variants } from "./schema";
+import {
+  categories,
+  customers,
+  orderItems,
+  orders,
+  productImages,
+  products,
+  stockLedger,
+  variants,
+} from "./schema";
 
 const log = logger.child({ script: "seed" });
 
@@ -172,6 +181,119 @@ async function main() {
     variants: variantCount,
     images: imageCount,
   });
+
+  /* ---- sample orders & customers for end-to-end testing ---- */
+  const sampleCustomer = {
+    email: "abena.owusu@gmail.com",
+    name: "Abena Owusu",
+    phone: "0244123456",
+  };
+
+  const [customerRow] = await db
+    .insert(customers)
+    .values(sampleCustomer)
+    .onConflictDoUpdate({
+      target: customers.email,
+      set: { name: sampleCustomer.name, phone: sampleCustomer.phone },
+    })
+    .returning({ id: customers.id });
+
+  // Get first 2 variants for line items
+  const allVariants = await db
+    .select({
+      id: variants.id,
+      priceMinor: variants.priceMinor,
+      sizeLabel: variants.sizeLabel,
+      productName: products.name,
+      productSlug: products.slug,
+    })
+    .from(variants)
+    .innerJoin(products, eq(variants.productId, products.id))
+    .limit(2);
+
+  if (allVariants.length > 0) {
+    const v1 = allVariants[0];
+    const v2 = allVariants[1] ?? v1;
+
+    const seedOrders = [
+      {
+        reference: "EFE-8K92-PSTK",
+        status: "paid" as const,
+        paymentStatus: "paid" as const,
+        subtotalMinor: v1.priceMinor + v2.priceMinor,
+        deliveryMinor: 2500, // GH₵25.00 East Legon
+        totalMinor: v1.priceMinor + v2.priceMinor + 2500,
+        deliveryName: "Abena Owusu",
+        deliveryPhone: "0244123456",
+        deliveryEmail: "abena.owusu@gmail.com",
+        deliveryRegion: "Greater Accra",
+        deliveryTown: "East Legon",
+        deliveryAddress: "Block B, Boundary Road",
+        momoReference: "MTN-9948271048",
+        paystackReference: "pstk_live_9948271",
+        customerNote: "Please leave package with security gate if not home.",
+      },
+      {
+        reference: "EFE-3M14-MOMO",
+        status: "confirmed" as const,
+        paymentStatus: "unpaid" as const,
+        subtotalMinor: v1.priceMinor * 2,
+        deliveryMinor: 3000, // GH₵30.00 Spintex
+        totalMinor: v1.priceMinor * 2 + 3000,
+        deliveryName: "Kofi Mensah",
+        deliveryPhone: "0551987654",
+        deliveryEmail: "kofi.mensah@yahoo.com",
+        deliveryRegion: "Greater Accra",
+        deliveryTown: "Spintex",
+        deliveryAddress: "Spintex Coastal Estate",
+        momoReference: "TELECEL-88234",
+        customerNote: "Paid via Telecel Cash.",
+      },
+    ];
+
+    for (const ord of seedOrders) {
+      const [orderRow] = await db
+        .insert(orders)
+        .values({
+          ...ord,
+          customerId: customerRow.id,
+        })
+        .onConflictDoUpdate({
+          target: orders.reference,
+          set: { status: ord.status, paymentStatus: ord.paymentStatus },
+        })
+        .returning({ id: orders.id });
+
+      // Insert line items
+      await db
+        .insert(orderItems)
+        .values([
+          {
+            orderId: orderRow.id,
+            variantId: v1.id,
+            nameSnapshot: v1.productName,
+            sizeSnapshot: v1.sizeLabel,
+            slugSnapshot: v1.productSlug,
+            unitPriceMinor: v1.priceMinor,
+            quantity: 1,
+            lineTotalMinor: v1.priceMinor,
+          },
+          {
+            orderId: orderRow.id,
+            variantId: v2.id,
+            nameSnapshot: v2.productName,
+            sizeSnapshot: v2.sizeLabel,
+            slugSnapshot: v2.productSlug,
+            unitPriceMinor: v2.priceMinor,
+            quantity: 1,
+            lineTotalMinor: v2.priceMinor,
+          },
+        ]);
+    }
+    log.info("sample orders seeded for end-to-end testing", {
+      count: seedOrders.length,
+    });
+  }
 }
 
 main()
@@ -183,3 +305,4 @@ main()
     log.error("seed failed", { error });
     process.exit(1);
   });
+

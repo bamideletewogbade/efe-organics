@@ -1,4 +1,6 @@
 import { Empty, PageHeader, Pill } from "@/components/admin/AdminUI";
+import { forecastStockRestockAction } from "@/app/admin/ai-actions";
+import { StockForecastPanel } from "@/components/admin/StockForecastPanel";
 import { listAdminVariants } from "@/db/queries/admin";
 import { StockTable } from "@/components/admin/StockTable";
 
@@ -22,7 +24,7 @@ export default async function AdminStockPage() {
   const untracked = variants.filter((v) => !v.trackStock).length;
 
   return (
-    <div>
+    <div className="space-y-6">
       <PageHeader
         title="Stock"
         description="Every sellable size. Adjust with a reason so the history stays honest."
@@ -44,6 +46,8 @@ export default async function AdminStockPage() {
           ) : undefined
         }
       />
+
+      <StockForecastPanel action={forecastStockRestockAction} />
 
       {variants.length === 0 ? (
         <Empty

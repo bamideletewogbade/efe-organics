@@ -17,6 +17,7 @@ import {
   productImages,
   products,
   stockLedger,
+  stockists,
   variants,
 } from "@/db/schema";
 import type { ActionState } from "@/lib/action-state";
@@ -465,6 +466,88 @@ export async function saveProductAction(
       status === "active"
         ? "Saved and live on the shop"
         : `Saved as ${status === "draft" ? "a draft" : "archived"}`,
+  };
+}
+
+/** Creates a brand new product and its initial size variant. */
+export async function createProductAction(
+  _prev: ActionState,
+  formData: FormData,
+): Promise<ActionState> {
+  await assertAdmin();
+  const db = requireDb();
+
+  const name = String(formData.get("name") ?? "").trim();
+  if (!name) return { error: "A product needs a name." };
+
+  const status = String(formData.get("status") ?? "draft") as
+    | "draft"
+    | "active"
+    | "archived";
+  const line = String(formData.get("line") ?? "supporting") as
+    | "flagship"
+    | "supporting";
+  const categoryId = String(formData.get("categoryId") ?? "") || null;
+
+  const text = (key: string) => String(formData.get(key) ?? "").trim() || null;
+
+  // Generate base slug
+  let slug = name
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)/g, "");
+  if (!slug) slug = `product-${Date.now()}`;
+
+  // Check unique slug
+  const existing = await db
+    .select({ id: products.id })
+    .from(products)
+    .where(eq(products.slug, slug));
+  if (existing.length > 0) {
+    slug = `${slug}-${Math.random().toString(36).substring(2, 6)}`;
+  }
+
+  const [newProduct] = await db
+    .insert(products)
+    .values({
+      name,
+      slug,
+      status,
+      line,
+      categoryId,
+      blurb: text("blurb"),
+      description: text("description"),
+      ingredients: text("ingredients"),
+      howToUse: text("howToUse"),
+      isBestSeller: formData.get("isBestSeller") === "on",
+      isNew: formData.get("isNew") === "on",
+    })
+    .returning();
+
+  if (!newProduct) return { error: "Failed to create product." };
+
+  // Create initial variant size
+  const sizeLabel = text("sizeLabel") || "Standard";
+  const rawPrice = parseFloat(String(formData.get("price") ?? "0"));
+  const priceMinor = Math.round((isNaN(rawPrice) ? 0 : rawPrice) * 100);
+  const variantSlug = `${slug}-${sizeLabel.toLowerCase().replace(/[^a-z0-9]/g, "")}`;
+
+  await db.insert(variants).values({
+    productId: newProduct.id,
+    slug: variantSlug,
+    sizeLabel,
+    priceMinor,
+    stockQty: 0,
+    trackStock: false,
+  });
+
+  await audit("product.create", "product", newProduct.id, { name, slug });
+  log.info("product created", { productId: newProduct.id, name, slug });
+
+  revalidatePath("/admin/products");
+  return {
+    ok: true,
+    message: "Product created successfully",
   };
 }
 
@@ -997,3 +1080,206 @@ export async function setOrderStatusAction(
     message: status === "paid" ? "Marked paid" : `Moved to ${status}`,
   };
 }
+
+/** Record manual Mobile Money payment transaction reference. */
+export async function setMoMoPaymentAction(
+  _prev: ActionState,
+  formData: FormData,
+): Promise<ActionState> {
+  await assertAdmin();
+  const db = requireDb();
+
+  const orderId = String(formData.get("orderId") ?? "");
+  const momoReference = String(formData.get("momoReference") ?? "").trim();
+  if (!orderId || !momoReference) {
+    return { error: "Enter the Mobile Money transaction reference." };
+  }
+
+  const [existing] = await db
+    .select({ reference: orders.reference, status: orders.status })
+    .from(orders)
+    .where(eq(orders.id, orderId));
+
+  if (!existing) return { error: "Order not found." };
+
+  const updateData: Record<string, unknown> = {
+    momoReference,
+    paymentStatus: "paid",
+    updatedAt: new Date(),
+  };
+
+  if (existing.status === "pending" || existing.status === "confirmed") {
+    updateData.status = "paid";
+  }
+
+  await db.update(orders).set(updateData).where(eq(orders.id, orderId));
+
+  await audit("order.momo_payment", "order", orderId, { momoReference });
+  log.info("MoMo reference saved", { orderId, momoReference });
+
+  revalidatePath(`/admin/orders/${orderId}`);
+  revalidatePath("/admin/orders");
+  revalidatePath("/admin");
+
+  return {
+    ok: true,
+    message: `Mobile Money payment reference saved (${momoReference})`,
+  };
+}
+
+/** Bulk updates prices and stock for multiple variant SKUs. */
+export async function bulkUpdateVariantsAction(
+  _prev: ActionState,
+  formData: FormData,
+): Promise<ActionState> {
+  await assertAdmin();
+  const db = requireDb();
+
+  const variantIds = formData.getAll("variantId").map(String);
+  if (!variantIds.length) return { error: "No variants to update." };
+
+  let count = 0;
+  for (const vId of variantIds) {
+    const rawPrice = formData.get(`price_${vId}`);
+    const rawCompare = formData.get(`compareAt_${vId}`);
+    const rawStock = formData.get(`stock_${vId}`);
+
+    if (rawPrice !== null) {
+      const priceMinor = Math.round(parseFloat(String(rawPrice)) * 100);
+      const compareAtMinor =
+        rawCompare && String(rawCompare).trim() !== ""
+          ? Math.round(parseFloat(String(rawCompare)) * 100)
+          : null;
+
+      const updatePayload: Record<string, unknown> = {
+        priceMinor: isNaN(priceMinor) ? 0 : priceMinor,
+        compareAtMinor:
+          compareAtMinor !== null && !isNaN(compareAtMinor)
+            ? compareAtMinor
+            : null,
+      };
+
+      if (rawStock !== null) {
+        const stockQty = parseInt(String(rawStock), 10);
+        if (!isNaN(stockQty)) {
+          updatePayload.stockQty = stockQty;
+        }
+      }
+
+      await db.update(variants).set(updatePayload).where(eq(variants.id, vId));
+      count++;
+    }
+  }
+
+  await audit("catalog.bulk_update", "variants", "bulk", { updated: count });
+  log.info("bulk variants updated", { count });
+
+  revalidatePath("/admin/products");
+  revalidatePath("/admin/stock");
+  revalidatePath("/admin/products/bulk");
+
+  return {
+    ok: true,
+    message: `Updated ${count} variant sizes successfully`,
+  };
+}
+
+/** Updates a stockist's approval status and assigned tier. */
+export async function setStockistStatusAction(
+  _prev: ActionState,
+  formData: FormData,
+): Promise<ActionState> {
+  await assertAdmin();
+  const db = requireDb();
+
+  const stockistId = String(formData.get("stockistId") ?? "");
+  const status = String(formData.get("status") ?? "pending") as
+    | "pending"
+    | "approved"
+    | "declined";
+  const tier = String(formData.get("tier") ?? "bronze") as
+    | "bronze"
+    | "silver"
+    | "gold"
+    | "vip";
+
+  if (!stockistId) return { error: "No stockist selected." };
+
+  await db
+    .update(stockists)
+    .set({ status, tier, updatedAt: new Date() })
+    .where(eq(stockists.id, stockistId));
+
+  await audit("stockist.update", "stockist", stockistId, { status, tier });
+  log.info("stockist updated", { stockistId, status, tier });
+
+  revalidatePath("/admin/stockists");
+  return {
+    ok: true,
+    message: `Stockist updated: ${status} (${tier} tier)`,
+  };
+}
+
+/** Mints a custom B2B wholesale order quote/invoice. */
+export async function createB2BInvoiceAction(
+  _prev: ActionState,
+  formData: FormData,
+): Promise<ActionState> {
+  await assertAdmin();
+  const db = requireDb();
+
+  const businessName = String(formData.get("businessName") ?? "").trim();
+  const email = String(formData.get("email") ?? "").trim();
+  const phone = String(formData.get("phone") ?? "").trim();
+  const region = String(formData.get("region") ?? "Greater Accra").trim();
+  const town = String(formData.get("town") ?? "Accra").trim();
+  const rawAmount = parseFloat(String(formData.get("amount") ?? "0"));
+  const discountPercent = parseFloat(String(formData.get("discount") ?? "0"));
+  const notes = String(formData.get("notes") ?? "").trim();
+
+  if (!businessName || !email || isNaN(rawAmount) || rawAmount <= 0) {
+    return { error: "Enter valid business name, email, and invoice amount." };
+  }
+
+  const baseMinor = Math.round(rawAmount * 100);
+  const discountMinor = Math.round((baseMinor * (discountPercent || 0)) / 100);
+  const totalMinor = Math.max(0, baseMinor - discountMinor);
+
+  const reference = `B2B-${Math.random().toString(36).substring(2, 6).toUpperCase()}-${Date.now().toString().slice(-4)}`;
+
+  const [newOrder] = await db
+    .insert(orders)
+    .values({
+      reference,
+      status: "confirmed",
+      paymentStatus: "unpaid",
+      subtotalMinor: baseMinor,
+      discountMinor,
+      totalMinor,
+      deliveryName: businessName,
+      deliveryPhone: phone,
+      deliveryEmail: email,
+      deliveryRegion: region,
+      deliveryTown: town,
+      customerNote: notes,
+      internalNote: `B2B Wholesale Invoice (${discountPercent}% tier discount applied)`,
+    })
+    .returning({ id: orders.id, reference: orders.reference });
+
+  await audit("order.b2b_invoice", "order", newOrder.id, {
+    reference,
+    businessName,
+    totalMinor,
+  });
+  log.info("B2B Invoice created", { reference, businessName, totalMinor });
+
+  revalidatePath("/admin/orders");
+  revalidatePath("/admin/stockists");
+
+  return {
+    ok: true,
+    message: `B2B Invoice #${newOrder.reference} created successfully!`,
+  };
+}
+
+

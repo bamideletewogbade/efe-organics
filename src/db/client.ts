@@ -60,6 +60,37 @@ export function getDb(): Db | null {
     prepare: false,
   });
 
+  // Ensure DB columns & tables introduced in newer schema revisions exist
+  sql`
+    ALTER TABLE orders ADD COLUMN IF NOT EXISTS momo_reference VARCHAR(120);
+    ALTER TABLE orders ADD COLUMN IF NOT EXISTS paystack_reference VARCHAR(120);
+    ALTER TABLE orders ADD COLUMN IF NOT EXISTS delivery_region VARCHAR(80);
+    ALTER TABLE orders ADD COLUMN IF NOT EXISTS delivery_town VARCHAR(120);
+
+    CREATE TABLE IF NOT EXISTS admin_users (
+      id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+      email VARCHAR(240) UNIQUE NOT NULL,
+      name VARCHAR(200),
+      role VARCHAR(32) NOT NULL DEFAULT 'staff',
+      password_hash TEXT,
+      must_change_password BOOLEAN NOT NULL DEFAULT false,
+      active BOOLEAN NOT NULL DEFAULT true,
+      last_seen_at TIMESTAMPTZ,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    );
+
+    CREATE TABLE IF NOT EXISTS audit_log (
+      id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+      actor_id UUID REFERENCES admin_users(id),
+      actor_email VARCHAR(240),
+      action VARCHAR(64) NOT NULL,
+      entity VARCHAR(64) NOT NULL,
+      entity_id VARCHAR(64),
+      changes JSONB,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    );
+  `.catch(() => {});
+
   globalForDb.__efeSql = sql;
   globalForDb.__efeDb = drizzle(sql, { schema });
   return globalForDb.__efeDb;

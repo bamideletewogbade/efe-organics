@@ -5,8 +5,8 @@ import Link from "next/link";
 import { motion, useReducedMotion } from "motion/react";
 
 import { duration, easeSoft } from "@/components/motion/tokens";
-import type { ProductGroup } from "@/lib/catalog";
-import { sizeLabel } from "@/lib/catalog";
+import type { ProductGroup } from "@/lib/catalog.types";
+import { sizeLabel } from "@/lib/catalog.types";
 import { discountPercent, formatPrice } from "@/lib/money";
 
 /**

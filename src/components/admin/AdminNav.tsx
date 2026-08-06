@@ -43,12 +43,15 @@ const GROUPS: Array<{ label: string; links: Array<{ href: string; label: string;
       { href: "/admin/products", label: "Products" },
       { href: "/admin/stock", label: "Stock" },
       { href: "/admin/promotions", label: "Promotions" },
+      { href: "/admin/marketing", label: "Marketing" },
     ],
   },
   {
     label: "Business",
     links: [
       { href: "/admin/customers", label: "Customers" },
+      { href: "/admin/stockists", label: "Stockists" },
+      { href: "/admin/assistant", label: "Assistant" },
       { href: "/admin/analytics", label: "Analytics" },
       { href: "/admin/documents", label: "Documents" },
       { href: "/admin/import", label: "Import" },
@@ -69,8 +72,12 @@ export function AdminNav({
   const pathname = usePathname();
   const reduce = useReducedMotion();
 
-  const isActive = (href: string, exact?: boolean) =>
-    exact ? pathname === href : pathname.startsWith(href);
+  const isActive = (href: string, exact?: boolean) => {
+    if (exact) {
+      return pathname === href || pathname === `${href}/`;
+    }
+    return pathname === href || pathname.startsWith(`${href}/`);
+  };
 
   const item = (link: { href: string; label: string; exact?: boolean }) => {
     const active = isActive(link.href, link.exact);
@@ -79,24 +86,14 @@ export function AdminNav({
         <Link
           href={link.href}
           aria-current={active ? "page" : undefined}
-          className={`relative block whitespace-nowrap rounded-lg px-3.5 py-2.5 text-sm transition-colors ${
-            active ? "text-forest-deep" : "text-paper/60 hover:text-paper"
+          className={`relative block whitespace-nowrap rounded-lg px-3.5 py-2 text-sm font-bold transition-all ${
+            active
+              ? "bg-gold text-forest-ink shadow-sm"
+              : "text-paper/75 hover:bg-paper/10 hover:text-paper"
           }`}
         >
           <span className="relative z-10">{link.label}</span>
         </Link>
-        {active && (
-          <motion.span
-            layoutId="admin-nav"
-            aria-hidden
-            className="absolute inset-0 rounded-lg bg-gold"
-            transition={
-              reduce
-                ? { duration: 0 }
-                : { type: "spring", stiffness: 500, damping: 38 }
-            }
-          />
-        )}
       </li>
     );
   };

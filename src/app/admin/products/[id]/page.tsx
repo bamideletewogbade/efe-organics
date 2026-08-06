@@ -9,6 +9,10 @@ import {
   setVariantPriceAction,
 } from "@/app/admin/actions";
 import { Card, PageHeader, Pill } from "@/components/admin/AdminUI";
+import { ProductCopyPanel } from "@/components/admin/AiPanel";
+import { ImageUploader } from "@/components/admin/ImageUploader";
+import { auditCosmeticClaimsAction, draftProductCopyAction } from "@/app/admin/ai-actions";
+import { CosmeticClaimChecker } from "@/components/admin/CosmeticClaimChecker";
 import { ActionForm, SubmitButton } from "@/components/admin/Form";
 import { getAdminProduct } from "@/db/queries/admin";
 import { formatPrice } from "@/lib/money";
@@ -225,6 +229,25 @@ export default async function AdminProductEditor({
               Save product
             </SubmitButton>
           </ActionForm>
+
+          {/*
+            Deliberately OUTSIDE the form above.
+
+            Nesting it would make the draft buttons submit the product, and more
+            importantly it keeps the two acts separate: the assistant produces
+            text, a person decides whether it belongs in the shop. Copy, paste,
+            read, save.
+          */}
+          <ProductCopyPanel
+            productId={product.id}
+            action={draftProductCopyAction}
+          />
+          <div className="mt-5">
+            <CosmeticClaimChecker
+              productId={product.id}
+              action={auditCosmeticClaimsAction}
+            />
+          </div>
         </Card>
 
         <div className="grid gap-5 self-start">
@@ -387,49 +410,48 @@ export default async function AdminProductEditor({
               </ul>
             )}
 
-            <ActionForm
-              action={addProductImageAction}
-              className="mt-4 grid gap-3"
-              resetOnSuccess
-            >
-              <input type="hidden" name="productId" value={product.id} />
-              <label className="block">
-                <span className={label}>Picture address</span>
-                <input
-                  name="url"
-                  required
-                  placeholder="/products/lemon-blast-350ml.webp"
-                  className={field}
-                />
-              </label>
-              <label className="block">
-                <span className={label}>
-                  Describe it{" "}
-                  <span className="font-normal text-muted">
-                    (for screen readers)
-                  </span>
-                </span>
-                <input
-                  name="alt"
-                  placeholder="A 350ml bottle of Lemon Blast bath"
-                  className={field}
-                />
-              </label>
-              <SubmitButton variant="quiet" className="justify-self-start">
-                Add picture
-              </SubmitButton>
-            </ActionForm>
+            <div className="mt-4 border-t border-line pt-4">
+              <p className="text-xs font-semibold text-strong">Upload picture file</p>
+              <ImageUploader productId={product.id} />
+            </div>
 
-            {/*
-              Uploading a file rather than typing an address needs somewhere to
-              put it, and that is a decision with a bill attached (Vercel Blob or
-              Cloudflare R2). Until it is made, addresses of pictures already in
-              /public work, which covers the whole imported range.
-            */}
-            <p className="mt-4 rounded-xl bg-surface-sunken p-3 text-xs/5 text-muted">
-              Uploading from your computer needs somewhere to store the files.
-              Once that is chosen this becomes a drag-and-drop box.
-            </p>
+            <details className="mt-4">
+              <summary className="cursor-pointer text-xs font-medium text-muted hover:text-strong">
+                Or paste a picture URL manually...
+              </summary>
+              <ActionForm
+                action={addProductImageAction}
+                className="mt-3 grid gap-3"
+                resetOnSuccess
+              >
+                <input type="hidden" name="productId" value={product.id} />
+                <label className="block">
+                  <span className={label}>Picture address</span>
+                  <input
+                    name="url"
+                    required
+                    placeholder="/products/lemon-blast-350ml.webp"
+                    className={field}
+                  />
+                </label>
+                <label className="block">
+                  <span className={label}>
+                    Describe it{" "}
+                    <span className="font-normal text-muted">
+                      (for screen readers)
+                    </span>
+                  </span>
+                  <input
+                    name="alt"
+                    placeholder="A 350ml bottle of Lemon Blast bath"
+                    className={field}
+                  />
+                </label>
+                <SubmitButton variant="quiet" className="justify-self-start">
+                  Add picture URL
+                </SubmitButton>
+              </ActionForm>
+            </details>
           </Card>
         </div>
       </div>

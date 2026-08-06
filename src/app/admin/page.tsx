@@ -1,12 +1,33 @@
 import Link from "next/link";
 
 import { ButtonLink, Card, PageHeader, Pill } from "@/components/admin/AdminUI";
-import { HealthBar, Sparkline } from "@/components/admin/Sparkline";
+import {
+  HealthBar,
+  Pipeline,
+  RankedBars,
+} from "@/components/admin/Sparkline";
+import { InteractiveChart } from "@/components/admin/InteractiveChart";
 import { getDashboardDetail, getDashboardSummary } from "@/db/queries/admin";
 import { capabilities } from "@/lib/env";
 import { formatPrice } from "@/lib/money";
 
 export const dynamic = "force-dynamic";
+
+/**
+ * The stages worth showing, in the order the work actually happens.
+ *
+ * `cancelled` and `refunded` are left out on purpose. They are outcomes, not
+ * stages, and putting them in a pipeline invites reading them as a step every
+ * order passes through.
+ */
+const PIPELINE_STAGES = [
+  { status: "pending", label: "Waiting", tone: "warn" as const },
+  { status: "confirmed", label: "Confirmed", tone: "info" as const },
+  { status: "paid", label: "Paid", tone: "info" as const },
+  { status: "packed", label: "Packed", tone: "info" as const },
+  { status: "shipped", label: "Shipped", tone: "info" as const },
+  { status: "delivered", label: "Delivered", tone: "good" as const },
+];
 
 /**
  * Overview.
@@ -39,10 +60,17 @@ export const dynamic = "force-dynamic";
  *    have to go and investigate. Listing the three products with their counts
  *    is the job already half done.
  */
-export default async function AdminOverview() {
+export default async function AdminOverview({
+  searchParams,
+}: {
+  searchParams: Promise<{ days?: string }>;
+}) {
+  const { days: rawDays } = await searchParams;
+  const daysNum = [7, 14, 30, 90].includes(Number(rawDays)) ? Number(rawDays) : 14;
+
   const [s, detail] = await Promise.all([
     getDashboardSummary(),
-    getDashboardDetail(14),
+    getDashboardDetail(daysNum),
   ]);
 
   const attention = [
@@ -75,6 +103,7 @@ export default async function AdminOverview() {
     (sum, d) => sum + d.revenueMinor,
     0,
   );
+  const aovMinor = ordersInWindow > 0 ? Math.round(revenueInWindow / ordersInWindow) : 0;
 
   /*
     Live checklist, not a static list of instructions. Steps disappear as they
@@ -168,36 +197,58 @@ export default async function AdminOverview() {
       <div className="mt-8 grid gap-5 lg:grid-cols-[1.4fr_1fr]">
         {/* ---- trade ---- */}
         <Card>
-          <div className="flex flex-wrap items-start justify-between gap-4">
+          <div className="flex flex-wrap items-center justify-between gap-4">
             <div>
-              <h2 className="font-semibold text-strong">Last 14 days</h2>
+              <div className="flex items-center gap-3">
+                <h2 className="font-semibold text-strong">Sales & Performance</h2>
+                <div className="flex items-center gap-1 rounded-xl border border-line bg-surface-sunken p-1">
+                  {[7, 14, 30, 90].map((d) => (
+                    <Link
+                      key={d}
+                      href={`/admin?days=${d}`}
+                      className={`rounded-lg px-2 py-0.5 text-xs font-semibold transition-colors ${
+                        daysNum === d
+                          ? "bg-forest text-paper shadow-sm"
+                          : "text-muted hover:text-strong"
+                      }`}
+                    >
+                      {d}D
+                    </Link>
+                  ))}
+                </div>
+              </div>
               <p className="mt-1 text-xs text-muted">
-                Orders per day. Revenue counts paid orders only.
+                Showing data for the last {daysNum} days.
               </p>
             </div>
-            <div className="flex gap-6 text-right">
+
+            <div className="flex gap-5 text-right">
               <div>
-                <p className="stat text-2xl text-strong">{ordersInWindow}</p>
-                <p className="text-xs text-muted">orders</p>
+                <p className="stat text-xl text-strong">{ordersInWindow}</p>
+                <p className="text-[0.68rem] text-muted">orders</p>
               </div>
               <div>
-                <p className="stat text-2xl text-strong">
+                <p className="stat text-xl text-strong">
                   {formatPrice(revenueInWindow)}
                 </p>
-                <p className="text-xs text-muted">paid</p>
+                <p className="text-[0.68rem] text-muted">paid revenue</p>
+              </div>
+              <div>
+                <p className="stat text-xl text-strong">
+                  {formatPrice(aovMinor)}
+                </p>
+                <p className="text-[0.68rem] text-muted">avg order value</p>
               </div>
             </div>
           </div>
 
           <div className="mt-5">
-            <Sparkline data={detail.daily} />
+            <InteractiveChart data={detail.daily} />
           </div>
 
           {ordersInWindow === 0 && (
             <p className="mt-4 rounded-xl bg-surface-sunken px-4 py-3 text-xs/5 text-muted">
-              No orders yet. This fills in on its own the first time somebody
-              checks out. Every day is drawn, including quiet ones, so a flat
-              row means no sales rather than no data.
+              No orders yet in this time window. This chart updates automatically as customers check out.
             </p>
           )}
 
@@ -305,6 +356,52 @@ export default async function AdminOverview() {
               their restock threshold.
             </p>
           ) : null}
+        </Card>
+      </div>
+
+      {/* ---- what sells, what we stock, where orders are ---- */}
+      <div className="mt-5 grid gap-5 lg:grid-cols-3">
+        <Card>
+          <h2 className="font-semibold text-strong">Best sellers</h2>
+          <p className="mt-1 text-xs text-muted">
+            By units, last 14 days
+          </p>
+          <RankedBars
+            rows={detail.topProducts.map((product) => ({
+              label: product.name,
+              value: product.units,
+              sub: formatPrice(product.revenueMinor),
+            }))}
+            emptyLabel="Nothing sold yet. This ranks products by units once orders start arriving, which is the question the order totals cannot answer."
+          />
+        </Card>
+
+        <Card>
+          <h2 className="font-semibold text-strong">The range</h2>
+          <p className="mt-1 text-xs text-muted">Products per category</p>
+          <RankedBars
+            rows={detail.byCategory.map((category) => ({
+              label: category.name,
+              value: category.products,
+            }))}
+            emptyLabel="No categories yet."
+          />
+        </Card>
+
+        <Card>
+          <h2 className="font-semibold text-strong">Order pipeline</h2>
+          <p className="mt-1 text-xs text-muted">
+            Where orders are sitting right now
+          </p>
+          <Pipeline
+            stages={PIPELINE_STAGES.map((stage) => ({
+              label: stage.label,
+              count:
+                detail.pipeline.find((row) => row.status === stage.status)
+                  ?.count ?? 0,
+              tone: stage.tone,
+            }))}
+          />
         </Card>
       </div>
 

@@ -92,17 +92,24 @@ export default async function StockistsPage() {
             </div>
 
             <div>
+              {/*
+                This used to say the network "is growing", that "we are
+                building" it, and that the page "will fill out" later. All true,
+                all reading as an unfinished website rather than a shop. Same
+                facts, told as an offer: we supply trade, here is how to become
+                one. A customer loses nothing and a prospective stockist gains a
+                reason to write in.
+              */}
               <h2 className="text-2xl sm:text-3xl">
-                Our stockist network is growing
+                Stock Efe in your shop
               </h2>
               <p className="measure mt-4 text-base/7 text-muted">
-                We are building a network of salons, pharmacies and retailers
-                across Ghana. We would rather list nothing than list a shop that
-                does not actually carry us, so this page will fill out as that
-                network is confirmed.
+                We supply salons, pharmacies and retailers across Ghana, and we
+                list a shop here only once it genuinely carries the range. No
+                logo walls, no placeholder partners.
               </p>
               <p className="measure mt-4 text-base/7 text-muted">
-                Know a shop that should stock Efe? Or run one yourself?
+                Run a shop, or know one that should stock us?
               </p>
 
               <div className="mt-7 flex flex-wrap gap-3">

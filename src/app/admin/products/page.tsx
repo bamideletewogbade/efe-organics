@@ -51,9 +51,21 @@ export default async function AdminProductsPage() {
             : undefined
         }
         action={
-          needsStock > 0 ? (
-            <Pill tone="warn">{needsStock} need stock</Pill>
-          ) : undefined
+          <div className="flex flex-wrap items-center gap-2.5">
+            {needsStock > 0 && <Pill tone="warn">{needsStock} need stock</Pill>}
+            <Link
+              href="/admin/products/bulk"
+              className="rounded-full border border-line px-4 py-1.5 text-xs font-semibold text-strong transition-colors hover:border-accent/50 hover:bg-surface-sunken"
+            >
+              Bulk Matrix Edit
+            </Link>
+            <Link
+              href="/admin/products/new"
+              className="rounded-full bg-forest px-4 py-1.5 text-xs font-semibold text-paper transition-all hover:bg-forest/90"
+            >
+              + New Product
+            </Link>
+          </div>
         }
       />
 

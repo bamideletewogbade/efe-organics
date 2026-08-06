@@ -24,7 +24,9 @@ import {
   productImages,
   products,
   stockLedger,
+  stockists,
   variants,
+  wholesaleInquiries,
 } from "@/db/schema";
 import { logger } from "@/lib/logger";
 
@@ -148,6 +150,42 @@ export async function listAdminVariants(): Promise<AdminVariantRow[]> {
   return rows as AdminVariantRow[];
 }
 
+export type BulkVariantRow = {
+  variantId: string;
+  productId: string;
+  productName: string;
+  categoryName: string | null;
+  sizeLabel: string | null;
+  priceMinor: number;
+  compareAtMinor: number | null;
+  stockQty: number;
+  trackStock: boolean;
+};
+
+export async function listAllVariantsForBulk(): Promise<BulkVariantRow[]> {
+  const db = getDb();
+  if (!db) return [];
+
+  const rows = await db
+    .select({
+      variantId: variants.id,
+      productId: products.id,
+      productName: products.name,
+      categoryName: categories.name,
+      sizeLabel: variants.sizeLabel,
+      priceMinor: variants.priceMinor,
+      compareAtMinor: variants.compareAtMinor,
+      stockQty: variants.stockQty,
+      trackStock: variants.trackStock,
+    })
+    .from(variants)
+    .innerJoin(products, eq(variants.productId, products.id))
+    .leftJoin(categories, eq(products.categoryId, categories.id))
+    .orderBy(products.name, variants.sizeLabel);
+
+  return rows;
+}
+
 export type AdminOrderRow = {
   id: string;
   reference: string;
@@ -266,6 +304,12 @@ export type DashboardDetail = {
     actorEmail: string | null;
     createdAt: Date;
   }>;
+  /** Best sellers by units, for the ranked bars. */
+  topProducts: Array<{ name: string; units: number; revenueMinor: number }>;
+  /** How the range is split, which has an answer before any sale happens. */
+  byCategory: Array<{ name: string; products: number }>;
+  /** Live order pipeline, by current status. */
+  pipeline: Array<{ status: string; count: number }>;
 };
 
 export async function getDashboardDetail(days = 14): Promise<DashboardDetail> {
@@ -277,6 +321,9 @@ export async function getDashboardDetail(days = 14): Promise<DashboardDetail> {
     healthy: 0,
     tracked: 0,
     activity: [],
+    topProducts: [],
+    byCategory: [],
+    pipeline: [],
   };
   if (!db) return empty;
 
@@ -284,7 +331,15 @@ export async function getDashboardDetail(days = 14): Promise<DashboardDetail> {
   const sinceSql = sql`${since.toISOString()}::timestamptz`;
 
   try {
-    const [dailyRows, lowRows, valueRows, activityRows] = await Promise.all([
+    const [
+      dailyRows,
+      lowRows,
+      valueRows,
+      activityRows,
+      topRows,
+      categoryRows,
+      pipelineRows,
+    ] = await Promise.all([
       /*
         `generate_series` rather than grouping the orders table.
 
@@ -340,6 +395,41 @@ export async function getDashboardDetail(days = 14): Promise<DashboardDetail> {
         .from(auditLog)
         .orderBy(desc(auditLog.createdAt))
         .limit(8),
+
+      /*
+        Grouped on the NAME SNAPSHOT, not the variant id. Order lines snapshot
+        what was bought so an archived product still reports correctly, and a
+        best-seller list that silently drops discontinued items would misreport
+        last year.
+      */
+      db
+        .select({
+          name: orderItems.nameSnapshot,
+          units: sql<number>`sum(${orderItems.quantity})`,
+          revenue: sql<number>`sum(${orderItems.lineTotalMinor})`,
+        })
+        .from(orderItems)
+        .innerJoin(orders, eq(orders.id, orderItems.orderId))
+        .where(gte(orders.placedAt, since))
+        .groupBy(orderItems.nameSnapshot)
+        .orderBy(desc(sql`sum(${orderItems.quantity})`))
+        .limit(6),
+
+      db
+        .select({
+          name: categories.name,
+          products: sql<number>`count(distinct ${products.id})`,
+        })
+        .from(products)
+        .innerJoin(categories, eq(categories.id, products.categoryId))
+        .where(isNull(products.archivedAt))
+        .groupBy(categories.name)
+        .orderBy(desc(sql`count(distinct ${products.id})`)),
+
+      db
+        .select({ status: orders.status, count: count() })
+        .from(orders)
+        .groupBy(orders.status),
     ]);
 
     return {
@@ -355,6 +445,19 @@ export async function getDashboardDetail(days = 14): Promise<DashboardDetail> {
       healthy: Number(valueRows[0]?.healthy ?? 0),
       tracked: Number(valueRows[0]?.tracked ?? 0),
       activity: activityRows,
+      topProducts: topRows.map((row) => ({
+        name: row.name,
+        units: Number(row.units ?? 0),
+        revenueMinor: Number(row.revenue ?? 0),
+      })),
+      byCategory: categoryRows.map((row) => ({
+        name: row.name,
+        products: Number(row.products ?? 0),
+      })),
+      pipeline: pipelineRows.map((row) => ({
+        status: row.status,
+        count: Number(row.count ?? 0),
+      })),
     };
   } catch (error) {
     // A dashboard panel is never worth taking the page down for.
@@ -552,15 +655,41 @@ export async function getAdminOrder(id: string) {
   const db = getDb();
   if (!db) return null;
 
-  const [order] = await db.select().from(orders).where(eq(orders.id, id));
-  if (!order) return null;
+  try {
+    const [order] = await db.select().from(orders).where(eq(orders.id, id));
+    if (!order) return null;
 
-  const items = await db
-    .select()
-    .from(orderItems)
-    .where(eq(orderItems.orderId, id));
+    const items = await db
+      .select()
+      .from(orderItems)
+      .where(eq(orderItems.orderId, id));
 
-  return { order, items };
+    return { order, items };
+  } catch (_err) {
+    // DB table missing newer schema columns. Run safe ALTER TABLE migration and retry.
+    try {
+      await db.execute(
+        sql`
+          ALTER TABLE orders ADD COLUMN IF NOT EXISTS momo_reference VARCHAR(120);
+          ALTER TABLE orders ADD COLUMN IF NOT EXISTS paystack_reference VARCHAR(120);
+          ALTER TABLE orders ADD COLUMN IF NOT EXISTS delivery_region VARCHAR(80);
+          ALTER TABLE orders ADD COLUMN IF NOT EXISTS delivery_town VARCHAR(120);
+        `,
+      );
+      const [order] = await db.select().from(orders).where(eq(orders.id, id));
+      if (!order) return null;
+
+      const items = await db
+        .select()
+        .from(orderItems)
+        .where(eq(orderItems.orderId, id));
+
+      return { order, items };
+    } catch (retryErr) {
+      log.error("Failed to query admin order", { id, error: retryErr });
+      return null;
+    }
+  }
 }
 
 /** One product with everything the editor needs, in three queries not N+1. */
@@ -770,3 +899,42 @@ export async function getStockHistory(variantId: string, limit = 30) {
     .orderBy(desc(stockLedger.createdAt))
     .limit(limit);
 }
+
+export type StockistRow = {
+  id: string;
+  businessName: string;
+  contactName: string;
+  email: string;
+  phone: string;
+  businessType: string;
+  tier: "bronze" | "silver" | "gold" | "vip";
+  status: "pending" | "approved" | "declined";
+  region: string | null;
+  town: string | null;
+  createdAt: Date;
+};
+
+export async function listAdminStockists(): Promise<StockistRow[]> {
+  const db = getDb();
+  if (!db) return [];
+
+  const rows = await db
+    .select({
+      id: stockists.id,
+      businessName: stockists.businessName,
+      contactName: stockists.contactName,
+      email: stockists.email,
+      phone: stockists.phone,
+      businessType: stockists.businessType,
+      tier: stockists.tier,
+      status: stockists.status,
+      region: stockists.region,
+      town: stockists.town,
+      createdAt: stockists.createdAt,
+    })
+    .from(stockists)
+    .orderBy(desc(stockists.createdAt));
+
+  return rows as StockistRow[];
+}
+

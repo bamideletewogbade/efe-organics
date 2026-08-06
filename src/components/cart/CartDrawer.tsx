@@ -7,7 +7,7 @@ import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 
 import { useCart } from "@/components/cart/CartProvider";
 import { duration, easeSoft } from "@/components/motion/tokens";
-import { sizeLabel } from "@/lib/catalog";
+import { sizeLabel } from "@/lib/catalog.types";
 import { formatPrice } from "@/lib/money";
 import { MAX_QTY_PER_LINE } from "@/lib/cart";
 

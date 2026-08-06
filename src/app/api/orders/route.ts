@@ -8,6 +8,7 @@ import { recordDiscountUse, resolveDiscount } from "@/lib/discounts";
 import { logger } from "@/lib/logger";
 import { notifyNewOrder } from "@/lib/notify";
 import { clientKey, rateLimit } from "@/lib/rate-limit";
+import { getDeliveryQuote } from "@/lib/delivery";
 import { quoteDelivery, quoteTax } from "@/lib/settings";
 
 /**
@@ -161,9 +162,9 @@ export async function POST(request: Request) {
     const discountMinor = applied?.amountMinor ?? 0;
     const afterDiscount = Math.max(0, subtotalMinor - discountMinor);
 
-    /* ---- delivery, if this region has an agreed rate ---- */
-    const quote = await quoteDelivery(delivery.region, afterDiscount);
-    const deliveryMinor = quote.kind === "unquoted" ? null : quote.feeMinor;
+    /* ---- delivery, calculated dynamically via Ghana zone rates ---- */
+    const zoneQuote = getDeliveryQuote(delivery.region, delivery.town);
+    const deliveryMinor = zoneQuote.rateMinor;
 
     /*
       Tax is computed but will be zero until somebody turns it on.
@@ -250,7 +251,7 @@ export async function POST(request: Request) {
       taxMinor,
       totalMinor,
       lines: resolved.length,
-      quoted: quote.kind,
+      quoted: zoneQuote.name,
     });
 
     /*
@@ -291,7 +292,7 @@ export async function POST(request: Request) {
       deliveryMinor,
       taxMinor,
       totalMinor,
-      deliveryQuote: quote,
+      deliveryQuote: zoneQuote,
       lines: resolved,
       whatsappUrl: notice.whatsappUrl,
       confirmationEmailed: notice.emailedCustomer,

@@ -35,16 +35,12 @@ export default async function AdminLayout({
   const dbReady = getDb() !== null;
 
   /**
-   * Defence in depth ONLY. The real gate is `src/proxy.ts`, which rewrites
-   * unauthenticated requests to /admin/locked before any page renders, a
-   * layout cannot prevent its children from executing, so a check here alone
-   * would leak the rendered page in the RSC payload. See proxy.ts for the
-   * full account of that bug.
-   *
-   * This branch should be unreachable in normal operation; it exists so that a
-   * misconfigured matcher fails closed rather than open.
+   * Unauthenticated visitors or locked sessions get the standalone full-screen
+   * sign-in interface without the admin sidebar.
    */
-  if (!session.authenticated) return <AdminSignIn />;
+  if (!session.authenticated) {
+    return <AdminSignIn />;
+  }
 
   return (
     /*

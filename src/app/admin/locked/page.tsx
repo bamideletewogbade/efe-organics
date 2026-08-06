@@ -21,24 +21,26 @@ export default async function AdminLockedPage({
 }) {
   const { reason } = await searchParams;
 
-  if (reason === "locked") {
-    return (
-      <main className="flex min-h-svh items-center justify-center bg-forest-deep p-6">
-        <div className="max-w-md rounded-2xl border border-gold/20 bg-forest-deep p-8 text-center">
-          <div className="flex justify-center">
-            <Wordmark onDark />
+  return (
+    <div className="fixed inset-0 z-[100] overflow-y-auto bg-forest-deep">
+      {reason === "locked" ? (
+        <main className="flex min-h-svh items-center justify-center p-6">
+          <div className="max-w-md rounded-2xl border border-gold/20 bg-forest-deep p-8 text-center">
+            <div className="flex justify-center">
+              <Wordmark onDark />
+            </div>
+            <h1 className="mt-5 text-xl text-paper">Portal Unavailable</h1>
+            <p className="mt-3 text-sm/6 text-paper/60">
+              Access to this resource requires active system configuration.
+            </p>
+            <p className="mt-4 text-xs/5 text-paper/45">
+              Please verify configuration credentials or contact your administrator.
+            </p>
           </div>
-          <h1 className="mt-5 text-xl text-paper">Portal Unavailable</h1>
-          <p className="mt-3 text-sm/6 text-paper/60">
-            Access to this resource requires active system configuration.
-          </p>
-          <p className="mt-4 text-xs/5 text-paper/45">
-            Please verify configuration credentials or contact your administrator.
-          </p>
-        </div>
-      </main>
-    );
-  }
-
-  return <AdminSignIn />;
+        </main>
+      ) : (
+        <AdminSignIn />
+      )}
+    </div>
+  );
 }

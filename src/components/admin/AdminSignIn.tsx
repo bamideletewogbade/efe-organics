@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useEffect } from "react";
 
 import { signInAction } from "@/app/admin/actions";
 import { Wordmark } from "@/components/brand/Wordmark";
@@ -21,6 +21,12 @@ const field =
 
 export function AdminSignIn() {
   const [state, action, pending] = useActionState(signInAction, {});
+
+  useEffect(() => {
+    if (state?.ok) {
+      window.location.href = "/admin";
+    }
+  }, [state?.ok]);
 
   return (
     <main className="flex min-h-svh items-center justify-center bg-forest-deep p-6">

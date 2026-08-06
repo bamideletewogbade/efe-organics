@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
+import { redirect } from "next/navigation";
 import { and, eq, ne, sql } from "drizzle-orm";
 
 import { getDb, requireDb } from "@/db/client";
@@ -141,12 +142,7 @@ export async function signInAction(
   }
 
   revalidatePath("/admin");
-  return {
-    ok: true,
-    message: result.mustChangePassword
-      ? "Signed in. Please set your own password in Settings."
-      : undefined,
-  };
+  redirect("/admin");
 }
 
 export async function signOutAction() {

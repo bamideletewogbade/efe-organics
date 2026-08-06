@@ -38,10 +38,10 @@ export function AdminSignIn() {
         </div>
 
         <p className="mt-5 text-center text-[0.62rem] font-semibold uppercase tracking-[0.22em] text-accent-quiet">
-          Admin
+          Partner Portal
         </p>
         <p className="mt-3 text-center text-sm text-paper/60">
-          Sign in to manage the shop.
+          Sign in to your account.
         </p>
 
         <label className="mt-7 block">
@@ -53,7 +53,7 @@ export function AdminSignIn() {
             type="email"
             autoFocus
             autoComplete="username"
-            placeholder="you@efeorganics.com"
+            placeholder="account@efeorganics.com"
             className={field}
           />
         </label>
@@ -84,12 +84,11 @@ export function AdminSignIn() {
           disabled={pending}
           className="mt-6 w-full rounded-full bg-gold px-6 py-3 font-semibold text-forest-deep transition-transform active:scale-[0.99] disabled:opacity-60"
         >
-          {pending ? "Checking…" : "Sign in"}
+          {pending ? "Authenticating…" : "Sign in"}
         </button>
 
         <p className="mt-4 text-center text-[0.68rem]/5 text-paper/40">
-          Setting up for the first time? Leave the email blank and use the
-          shared password, then create your own account in Settings.
+          Secure verification portal for authorized accounts.
         </p>
       </form>
     </main>

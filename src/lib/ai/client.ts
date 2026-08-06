@@ -52,8 +52,23 @@ Absolute rules:
 - Never claim a product treats, cures, heals or prevents any condition. Never claim a clinical or dermatological result. Never imply a before-and-after.
 - Never invent an ingredient, a certification, a price, a stock level or a delivery time.
 - Never invent a customer review or testimonial.
-- Write plainly, in British English. No marketing filler, no em dashes, no words like "elevate", "unlock", "journey" or "nourishing ritual".
+- Write plainly, in professional British English. No marketing filler, no em dashes, no words like "elevate", "unlock", "journey" or "nourishing ritual".
+- Output formatting: Write clean, well-formatted English prose and bullet points. Never use raw asterisk clutter like "***" or odd symbols.
 - Prices are in Ghana cedis (GH₵).`;
+
+export function formatAiText(raw: string): string {
+  if (!raw) return "";
+  let text = raw;
+  // Clean up excessive triple or quadruple asterisks
+  text = text.replace(/\*{3,}/g, "**");
+  // Clean up bullet point formatting
+  text = text.replace(/^\s*[\*\u2022]\s+/gm, "- ");
+  // Remove markdown horizontal rules if cluttering text
+  text = text.replace(/^[-\*_]{3,}\s*$/gm, "");
+  // Ensure clean double newlines between paragraphs
+  text = text.replace(/\n{3,}/g, "\n\n");
+  return text.trim();
+}
 
 export type AiMessage = { role: "system" | "user" | "assistant"; content: string };
 
@@ -149,7 +164,8 @@ export async function ask(
     }
 
     const body = await response.json();
-    const text: string = body?.choices?.[0]?.message?.content?.trim() ?? "";
+    const rawText: string = body?.choices?.[0]?.message?.content ?? "";
+    const text: string = formatAiText(rawText);
     if (!text) {
       return { ok: false, error: { reason: "empty" } };
     }

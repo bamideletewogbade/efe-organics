@@ -168,7 +168,16 @@ export function SiteFooter() {
           <p>
             &copy; {year} {brand.legalName}. All rights reserved.
           </p>
-          <p>Made in {brand.contact.country}.</p>
+          <div className="flex items-center gap-4">
+            <p>Made in {brand.contact.country}.</p>
+            <span aria-hidden className="text-paper/20">&middot;</span>
+            <Link
+              href="/admin"
+              className="text-paper/30 transition-colors hover:text-paper/60"
+            >
+              Partner Access
+            </Link>
+          </div>
         </Container>
       </div>
     </footer>

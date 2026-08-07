@@ -38,10 +38,7 @@ export async function signPayload(value: string): Promise<string> {
     key,
     new TextEncoder().encode(value),
   );
-  return btoa(String.fromCharCode(...new Uint8Array(signature)))
-    .replace(/\+/g, "-")
-    .replace(/\//g, "_")
-    .replace(/=+$/, "");
+  return Buffer.from(signature).toString("base64url");
 }
 
 /** Constant-time compare, `===` on a signature leaks timing. */

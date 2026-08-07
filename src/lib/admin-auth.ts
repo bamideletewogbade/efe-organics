@@ -3,7 +3,7 @@ import { and, eq } from "drizzle-orm";
 
 import { getDb } from "@/db/client";
 import { adminUsers } from "@/db/schema";
-import { env } from "@/lib/env";
+import { capabilities, env } from "@/lib/env";
 import { logger } from "@/lib/logger";
 import { hashPassword, needsRehash, verifyPassword } from "@/lib/password";
 
@@ -131,7 +131,80 @@ function encode(parts: {
   return [parts.expiry, parts.userId, parts.email, parts.role].join("|");
 }
 
+/**
+ * Clerk, when it is configured. The legacy password path when it is not.
+ *
+ * This is the whole migration. `getAdminSession()` was always described as the
+ * seam that would let auth be swapped without touching a page component, and
+ * this is that swap being cashed in: every screen, every server action and the
+ * audit log carry on reading the same `AdminSession` shape and none of them
+ * know or care which system produced it.
+ *
+ * The two paths coexist on purpose. Landing an auth rewrite that only works
+ * once somebody has pasted a secret into production is how a deploy locks the
+ * owner out of a live shop on a Friday. With the keys absent this is a no-op;
+ * with them present the password path is never reached.
+ */
+async function getClerkSession(): Promise<AdminSession | null> {
+  const { auth, currentUser } = await import("@clerk/nextjs/server");
+  const { isAuthenticated, sessionStatus } = await auth();
+
+  if (!isAuthenticated) return DENIED;
+
+  /*
+    A pending session has not finished what Clerk asked of it: a forced password
+    reset, or MFA enrolment. Treating pending as signed in would let somebody
+    skip the very step an owner turned on to protect this data.
+  */
+  if (sessionStatus === "pending") {
+    return { ...DENIED, lockedReason: "Finish setting up your account to continue." };
+  }
+
+  const user = await currentUser();
+  if (!user) return DENIED;
+
+  const email =
+    user.primaryEmailAddress?.emailAddress ??
+    user.emailAddresses[0]?.emailAddress ??
+    "";
+  if (!email) return DENIED;
+
+  const { linkClerkIdentity } = await import("@/lib/admin-clerk");
+  const linked = await linkClerkIdentity({
+    subject: user.id,
+    email,
+    name: [user.firstName, user.lastName].filter(Boolean).join(" ") || null,
+  });
+
+  /*
+    Signed in to Clerk, but not on Efe's allowlist. This is the case that makes
+    the whole design safe, and it is NOT an error: it is what any member of the
+    public gets. The message says so without hinting that a different address
+    might work.
+  */
+  if (!linked) {
+    return {
+      ...DENIED,
+      lockedReason:
+        "This account does not have access to the Efe back office. Ask an owner to add you.",
+    };
+  }
+
+  return {
+    authenticated: true,
+    devBypass: false,
+    userId: linked.id,
+    actorEmail: linked.email,
+    role: linked.role,
+    shared: false,
+  };
+}
+
 export async function getAdminSession(): Promise<AdminSession> {
+  if (capabilities.hasClerk) {
+    return (await getClerkSession()) ?? DENIED;
+  }
+
   const hasAccounts = Boolean(env.server.databaseUrl);
   const hasShared = Boolean(env.server.adminPassword);
 

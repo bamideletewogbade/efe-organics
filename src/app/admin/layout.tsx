@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { ClerkProvider } from "@clerk/nextjs";
 
 import { AdminNav } from "@/components/admin/AdminNav";
 import { AdminAiDrawer } from "@/components/admin/AdminAiDrawer";
@@ -37,12 +38,23 @@ export default async function AdminLayout({
   /**
    * Unauthenticated visitors or locked sessions get the standalone full-screen
    * sign-in interface without the admin sidebar.
+   *
+   * With Clerk configured this branch is mostly unreachable, because middleware
+   * has already redirected a signed-out visitor. It still matters for the case
+   * middleware CANNOT judge: signed in to Clerk, but not on Efe's allowlist.
+   * That person holds a perfectly valid session and must still be refused, with
+   * a message that says why rather than a login box they have already passed.
    */
   if (!session.authenticated) {
-    return <AdminSignIn />;
+    return (
+      <AdminShell>
+        <AdminSignIn lockedReason={session.lockedReason} />
+      </AdminShell>
+    );
   }
 
   return (
+    <AdminShell>
     /*
       `data-chrome="admin"` is what switches headings off the display face. A
       data attribute rather than a class so the rule in globals.css reads as a
@@ -89,5 +101,48 @@ export default async function AdminLayout({
         <AdminAiDrawer askAction={askShopAction} hasAi={capabilities.hasAI} />
       </main>
     </div>
+    </AdminShell>
+  );
+}
+
+/**
+ * Wraps the admin in ClerkProvider, and ONLY the admin.
+ *
+ * The provider is not at the root layout on purpose. Clerk ships a client
+ * runtime, and putting it there would load it on every product page and every
+ * checkout for a shop where nothing outside /admin has a user account. Three
+ * staff should not cost every shopper a JavaScript download.
+ *
+ * When Clerk is unconfigured this renders its children untouched, which is what
+ * keeps the app building and running with an empty `.env.local`.
+ */
+function AdminShell({ children }: { children: React.ReactNode }) {
+  if (!capabilities.hasClerk) return <>{children}</>;
+
+  return (
+    <ClerkProvider
+      /*
+        Clerk's components are themed to match the admin rather than left at
+        their defaults, so signing in does not feel like leaving the product.
+        The palette references Efe's own tokens.
+      */
+      /*
+        Only variables this SDK version actually declares. `colorText` was in an
+        earlier draft of this and is not a key in Clerk 7's `Variables` type, so
+        it failed the typecheck rather than being silently ignored at runtime,
+        which is the better of the two outcomes.
+      */
+      appearance={{
+        variables: {
+          colorPrimary: "#d98f14",
+          colorBackground: "#0d2c1d",
+          borderRadius: "0.75rem",
+        },
+      }}
+      signInUrl="/admin/sign-in"
+      signInFallbackRedirectUrl="/admin"
+    >
+      {children}
+    </ClerkProvider>
   );
 }

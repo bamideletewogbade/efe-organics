@@ -19,6 +19,7 @@ export const env = {
   public: {
     siteUrl: read("NEXT_PUBLIC_SITE_URL") ?? "http://localhost:3230",
     paystackPublicKey: read("NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY"),
+    clerkPublishableKey: read("NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY"),
   },
 
   /** Server-only. Reading these in a client component is a bug. */
@@ -45,6 +46,8 @@ export const env = {
 
     adminPassword: read("ADMIN_PASSWORD"),
     adminSessionSecret: read("ADMIN_SESSION_SECRET"),
+
+    clerkSecretKey: read("CLERK_SECRET_KEY"),
   },
 } as const;
 
@@ -62,6 +65,20 @@ export const capabilities = {
   hasEmail: Boolean(env.server.resendApiKey && env.server.orderEmailFrom),
   hasOwnerWhatsapp: Boolean(env.server.ownerWhatsapp),
   hasAdminPassword: Boolean(env.server.adminPassword),
+
+  /**
+   * Clerk needs BOTH halves, like Paystack. A publishable key alone renders a
+   * sign-in box that cannot verify anything server-side.
+   *
+   * This flag is what makes the migration safe to land before the keys exist:
+   * with it false the admin keeps using the scrypt password path exactly as it
+   * does today, and the moment both keys appear the whole thing switches over
+   * with no further code change. Shipping an auth rewrite that only works once
+   * somebody pastes a secret is how a deploy locks everyone out of a live shop.
+   */
+  hasClerk: Boolean(
+    env.server.clerkSecretKey && env.public.clerkPublishableKey,
+  ),
 } as const;
 
 export type Capabilities = typeof capabilities;

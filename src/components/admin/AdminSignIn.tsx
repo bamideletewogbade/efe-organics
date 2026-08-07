@@ -19,7 +19,7 @@ import { Wordmark } from "@/components/brand/Wordmark";
 const field =
   "w-full rounded-xl border border-paper/15 bg-forest-deep px-4 py-3 text-sm text-paper transition-colors placeholder:text-paper/30 focus:border-gold focus:outline-none";
 
-export function AdminSignIn() {
+export function AdminSignIn({ lockedReason }: { lockedReason?: string } = {}) {
   const [state, action, pending] = useActionState(signInAction, {});
   const [showPassword, setShowPassword] = useState(false);
 
@@ -60,6 +60,23 @@ export function AdminSignIn() {
         <p className="mt-3 text-center text-sm text-paper/60">
           Sign in to your account.
         </p>
+
+        {/*
+          A refusal is not a login prompt.
+
+          The case this exists for: somebody signed in to Clerk successfully and
+          is still not on Efe's allowlist. Showing them a password box would be
+          telling them to do the thing they have already done. Saying what is
+          actually wrong, and who can fix it, is the only useful answer.
+        */}
+        {lockedReason && (
+          <p
+            role="alert"
+            className="mt-5 rounded-xl border border-[#e08a72]/30 bg-[#e08a72]/10 px-4 py-3 text-center text-sm/6 text-paper/85"
+          >
+            {lockedReason}
+          </p>
+        )}
 
         <label className="mt-7 block">
           <span className="mb-1.5 block text-xs font-semibold text-paper/80">

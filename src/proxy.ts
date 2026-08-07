@@ -76,7 +76,17 @@ async function legacyGate(request: NextRequest) {
     process.env.NODE_ENV === "production",
   );
 
-  if (gate === "open" || gate === "dev-bypass") return NextResponse.next();
+  if (gate === "open" || gate === "dev-bypass") {
+    if (request.nextUrl.pathname === "/admin/locked") {
+      const adminUrl = request.nextUrl.clone();
+      adminUrl.pathname = "/admin";
+      adminUrl.search = "";
+      return NextResponse.redirect(adminUrl, {
+        headers: { "cache-control": "no-store, private" },
+      });
+    }
+    return NextResponse.next();
+  }
 
   // Rewrite, not redirect: the URL the admin typed stays in the bar so signing
   // in returns them where they were, and no admin path is leaked in a redirect

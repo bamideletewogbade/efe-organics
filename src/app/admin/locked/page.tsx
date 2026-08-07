@@ -1,5 +1,7 @@
+import { redirect } from "next/navigation";
 import { AdminSignIn } from "@/components/admin/AdminSignIn";
 import { Wordmark } from "@/components/brand/Wordmark";
+import { getAdminSession } from "@/lib/admin-auth";
 
 export const metadata = {
   title: "Sign in",
@@ -19,6 +21,11 @@ export default async function AdminLockedPage({
 }: {
   searchParams: Promise<{ reason?: string }>;
 }) {
+  const session = await getAdminSession();
+  if (session.authenticated) {
+    redirect("/admin");
+  }
+
   const { reason } = await searchParams;
 
   return (

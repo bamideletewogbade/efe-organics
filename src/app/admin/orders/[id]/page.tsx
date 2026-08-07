@@ -273,7 +273,7 @@ export default async function AdminOrderPage({
           <Card>
             <h2 className="font-semibold text-strong">Mobile Money (MoMo) Payment</h2>
             <p className="mt-1.5 text-xs/5 text-muted">
-              Record customer's MoMo transfer transaction ID to mark as paid.
+              Record the customer&rsquo;s MoMo transfer reference to mark this paid.
             </p>
             <ActionForm action={setMoMoPaymentAction} className="mt-4 grid gap-3">
               <input type="hidden" name="orderId" value={order.id} />

@@ -2,7 +2,6 @@
 
 import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
-import { redirect } from "next/navigation";
 import { and, eq, ne, sql } from "drizzle-orm";
 
 import { getDb, requireDb } from "@/db/client";
@@ -141,8 +140,36 @@ export async function signInAction(
     return { error: "That email and password combination is not right." };
   }
 
-  revalidatePath("/admin");
-  redirect("/admin");
+  /*
+    NO `redirect()` HERE, AND THAT IS DELIBERATE.
+
+    An earlier fix called `redirect("/admin")` from this action. It could not
+    work, for two reasons that compound:
+
+    1. The browser is ALREADY at /admin. `proxy.ts` gates the admin with a
+       rewrite, not a redirect, so the URL bar reads /admin while the content is
+       /admin/locked. Redirecting to the URL you are already on is a no-op for
+       the client router, and the cached locked page stays on screen.
+
+    2. `redirect()` throws NEXT_REDIRECT, so the action never returns. That made
+       the `state.ok` branch in AdminSignIn unreachable, which is where the
+       second half of that fix lived. The two cancelled out and sign-in appeared
+       to do nothing at all.
+
+    So the action returns, and the client performs a FULL page load. That is the
+    only thing guaranteed to re-run middleware with the newly-set cookie; a
+    client-side navigation reuses the router cache and the gate never re-runs.
+    A whole-document load on sign-in is cheap, happens once per session, and
+    removes an entire class of stale-cache bug.
+  */
+  revalidatePath("/admin", "layout");
+
+  return {
+    ok: true,
+    message: result.mustChangePassword
+      ? "Signed in. Set your own password under Settings."
+      : "Signed in",
+  };
 }
 
 export async function signOutAction() {

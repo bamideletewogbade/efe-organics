@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useEffect } from "react";
+import { useActionState, useEffect, useState } from "react";
 
 import { signInAction } from "@/app/admin/actions";
 import { Wordmark } from "@/components/brand/Wordmark";
@@ -21,11 +21,22 @@ const field =
 
 export function AdminSignIn() {
   const [state, action, pending] = useActionState(signInAction, {});
+  const [showPassword, setShowPassword] = useState(false);
 
+  /*
+    A FULL page load, not a router navigation.
+
+    The session cookie is set by the action, but the gate that decides what
+    /admin renders lives in middleware, and middleware only runs on a real
+    document request. `router.push` or `router.refresh` would reuse the client
+    cache and leave the sign-in screen sitting there with a valid cookie behind
+    it, which is exactly the bug this replaced.
+
+    `replace` rather than `href` so the back button does not return to a login
+    form the user has already passed.
+  */
   useEffect(() => {
-    if (state?.ok) {
-      window.location.href = "/admin";
-    }
+    if (state?.ok) window.location.replace("/admin");
   }, [state?.ok]);
 
   return (
@@ -64,17 +75,55 @@ export function AdminSignIn() {
           />
         </label>
 
+        {/*
+          The reveal toggle is not a convenience, it is an accuracy measure.
+
+          Passwords here are handed over verbally or on WhatsApp and typed on a
+          phone keyboard that autocapitalises. Without a way to see what was
+          typed, the only feedback for a mistyped character is a generic "that
+          combination is not right", which is indistinguishable from a wrong
+          password and sends people round the reset loop for a stray capital.
+
+          `type` is swapped rather than the field re-rendered, so the value and
+          the cursor survive the toggle. The button is `tabIndex={-1}` because a
+          keyboard user tabbing from password to submit should reach submit.
+        */}
         <label className="mt-4 block">
           <span className="mb-1.5 block text-xs font-semibold text-paper/80">
             Password
           </span>
-          <input
-            name="password"
-            type="password"
-            required
-            autoComplete="current-password"
-            className={field}
-          />
+          <span className="relative block">
+            <input
+              name="password"
+              type={showPassword ? "text" : "password"}
+              required
+              autoComplete="current-password"
+              className={`${field} pr-12`}
+            />
+            <button
+              type="button"
+              tabIndex={-1}
+              onClick={() => setShowPassword((shown) => !shown)}
+              aria-label={showPassword ? "Hide password" : "Show password"}
+              aria-pressed={showPassword}
+              className="absolute inset-y-0 right-0 flex w-12 items-center justify-center text-paper/45 transition-colors hover:text-paper/80"
+            >
+              <svg
+                viewBox="0 0 24 24"
+                aria-hidden
+                className="h-5 w-5"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.9"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M2.2 12S6 5.2 12 5.2 21.8 12 21.8 12 18 18.8 12 18.8 2.2 12 2.2 12Z" />
+                <circle cx="12" cy="12" r="3.1" />
+                {showPassword && <path d="m4 20 16-16" />}
+              </svg>
+            </button>
+          </span>
         </label>
 
         {/* This plate is always dark, so the dark-theme blocked tone is used

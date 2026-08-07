@@ -724,3 +724,14 @@
     stroke-dashoffset: 0 !important;
   }
 }
+
+/* Chrome autofill dark mode override to preserve dark theme inputs */
+input:-webkit-autofill,
+input:-webkit-autofill:hover, 
+input:-webkit-autofill:focus, 
+input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0px 1000px #0d2c1d inset !important;
+  -webkit-text-fill-color: #faf7f0 !important;
+  caret-color: #faf7f0 !important;
+  transition: background-color 5000s ease-in-out 0s;
+}

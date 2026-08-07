@@ -115,7 +115,7 @@ export function AdminSignIn({ lockedReason }: { lockedReason?: string } = {}) {
               type={showPassword ? "text" : "password"}
               required
               autoComplete="current-password"
-              className={`${field} pr-12`}
+              className={`${field} pr-14`}
             />
             <button
               type="button"
@@ -123,15 +123,15 @@ export function AdminSignIn({ lockedReason }: { lockedReason?: string } = {}) {
               onClick={() => setShowPassword((shown) => !shown)}
               aria-label={showPassword ? "Hide password" : "Show password"}
               aria-pressed={showPassword}
-              className="absolute inset-y-0 right-0 flex w-12 items-center justify-center text-paper/45 transition-colors hover:text-paper/80"
+              className="absolute inset-y-1.5 right-1.5 flex items-center justify-center rounded-lg bg-[#0a1f14] px-2.5 text-gold shadow-sm transition-colors hover:bg-forest hover:text-paper active:scale-95"
             >
               <svg
                 viewBox="0 0 24 24"
                 aria-hidden
-                className="h-5 w-5"
+                className="h-4 w-4"
                 fill="none"
                 stroke="currentColor"
-                strokeWidth="1.9"
+                strokeWidth="2.2"
                 strokeLinecap="round"
                 strokeLinejoin="round"
               >

@@ -98,31 +98,64 @@ export async function linkClerkIdentity(
       .limit(1);
 
     if (!row) {
-      // If there are no active admin users in the system yet, auto-provision
-      // the first Clerk account that signs in as an Owner so the shop is not locked out.
-      const [{ count }] = await db
-        .select({ count: sql<number>`count(*)` })
-        .from(adminUsers);
+      /*
+        BOOTSTRAP, AND WHY IT IS NAMED RATHER THAN AUTOMATIC.
 
-      if (Number(count) === 0) {
-        const [newUser] = await db
-          .insert(adminUsers)
-          .values({
-            email,
-            name: identity.name ?? "Owner",
+        There is a real problem to solve here: with `admin_users` empty and the
+        screen that creates accounts sitting behind the login, nobody can get in.
+
+        An earlier version solved it with "if the table is empty, the first Clerk
+        account to sign in becomes an owner". That is a common pattern and it was
+        unsafe in this specific situation, because all three of these were true
+        at once:
+
+          - `admin_users` had zero rows
+          - efeorganics.com was already serving to the public
+          - Clerk sign-up is open by default
+
+        Which means the first stranger to find /admin and register would have
+        become owner of a live shop holding customer names, phone numbers and
+        addresses. Not a theoretical race: an unattended window of exactly that
+        shape.
+
+        So the bootstrap now requires the email to be NAMED IN ADVANCE, in the
+        environment. Whoever can set an environment variable already controls the
+        deployment, so this grants nothing new, and an attacker cannot supply it.
+        Remove the variable once the first owner exists; from then on accounts
+        come from the admin or from scripts/create-admin.mjs.
+      */
+      const bootstrapEmail = process.env.ADMIN_BOOTSTRAP_EMAIL?.trim().toLowerCase();
+
+      if (bootstrapEmail && bootstrapEmail === email) {
+        const [{ count }] = await db
+          .select({ count: sql<number>`count(*)` })
+          .from(adminUsers);
+
+        // Belt and braces: the named address only bootstraps into an EMPTY
+        // table. Once anybody exists, this path is closed even if the variable
+        // is left set by mistake.
+        if (Number(count) === 0) {
+          const [created] = await db
+            .insert(adminUsers)
+            .values({
+              email,
+              name: identity.name ?? "Owner",
+              role: "owner",
+              authSubject: identity.subject,
+              active: true,
+            })
+            .returning();
+
+          log.warn("bootstrapped the first admin owner", { email });
+          return {
+            id: created.id,
+            email: created.email,
             role: "owner",
-            authSubject: identity.subject,
-            active: true,
-          })
-          .returning();
+            mustChangePassword: false,
+          };
+        }
 
-        log.info("auto-provisioned initial admin owner from Clerk session", { email });
-        return {
-          id: newUser.id,
-          email: newUser.email,
-          role: "owner",
-          mustChangePassword: false,
-        };
+        log.warn("bootstrap email set but accounts already exist, refusing", { email });
       }
 
       log.warn("clerk session with no admin account", { email });

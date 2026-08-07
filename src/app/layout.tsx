@@ -79,7 +79,7 @@ export const metadata: Metadata = {
 export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
-  const content = (
+  return (
     <html
       lang="en-GH"
       className={`${bricolage.variable} ${figtree.variable} ${jetbrainsMono.variable} h-full antialiased`}
@@ -95,18 +95,14 @@ export default function RootLayout({
         >
           Skip to content
         </a>
-        {children}
+        {capabilities.hasClerk ? (
+          <ClerkProvider publishableKey={env.public.clerkPublishableKey}>
+            {children}
+          </ClerkProvider>
+        ) : (
+          children
+        )}
       </body>
     </html>
   );
-
-  if (capabilities.hasClerk) {
-    return (
-      <ClerkProvider publishableKey={env.public.clerkPublishableKey}>
-        {content}
-      </ClerkProvider>
-    );
-  }
-
-  return content;
 }

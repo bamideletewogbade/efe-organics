@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ClerkProvider } from "@clerk/nextjs";
+import { headers } from "next/headers";
 
 import { AdminNav } from "@/components/admin/AdminNav";
 import { AdminAiDrawer } from "@/components/admin/AdminAiDrawer";
@@ -35,6 +36,21 @@ export default async function AdminLayout({
   const session = await getAdminSession();
   const dbReady = getDb() !== null;
 
+  /*
+    The sign-in route renders itself, unwrapped.
+
+    Without this the layout's gate replaces the page beneath it, so Clerk's
+    sign-in component is swapped for the legacy password form and signing in
+    becomes impossible. The flag is set by middleware, which is the only layer
+    that knows the pathname.
+  */
+  const isPublicAdminRoute =
+    (await headers()).get("x-efe-admin-public") === "1";
+
+  if (isPublicAdminRoute) {
+    return <AdminShell>{children}</AdminShell>;
+  }
+
   /**
    * Unauthenticated visitors or locked sessions get the standalone full-screen
    * sign-in interface without the admin sidebar.
@@ -55,12 +71,12 @@ export default async function AdminLayout({
 
   return (
     <AdminShell>
-    /*
+    {/*
       `data-chrome="admin"` is what switches headings off the display face. A
       data attribute rather than a class so the rule in globals.css reads as a
       statement about the chrome rather than yet another utility to remember to
       apply, and so a stray `className` edit cannot quietly undo it.
-    */
+    */}
     <div
       data-chrome="admin"
       className="flex min-h-svh flex-col bg-surface lg:flex-row"

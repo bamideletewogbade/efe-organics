@@ -105,8 +105,23 @@ async function legacyGate(request: NextRequest) {
 const withClerk = clerkMiddleware(async (auth, request) => {
   const { pathname } = request.nextUrl;
 
+  /*
+    The sign-in route tells the layout to stand aside.
+
+    A layout cannot see the current pathname, and `admin/layout.tsx` gates
+    everything beneath it. That included /admin/sign-in, so the layout rendered
+    the legacy password form INSTEAD of Clerk's component and the sign-in page
+    could never appear. The dev log showed it plainly: a POST to
+    /admin/sign-in landing in `signInAction`, the old form, on the new page.
+
+    Middleware is the one layer that does know the path, so it says so in a
+    header the layout can read. Set by us on every request, so a forged value
+    from a client is overwritten rather than trusted.
+  */
   if (!pathname.startsWith("/admin") || isPublicAdminPath(pathname)) {
-    return NextResponse.next();
+    const headers = new Headers(request.headers);
+    headers.set("x-efe-admin-public", isPublicAdminPath(pathname) ? "1" : "0");
+    return NextResponse.next({ request: { headers } });
   }
 
   const { isAuthenticated } = await auth();

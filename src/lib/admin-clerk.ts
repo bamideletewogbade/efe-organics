@@ -1,6 +1,6 @@
 import "server-only";
 
-import { and, eq, or } from "drizzle-orm";
+import { and, eq, or, sql } from "drizzle-orm";
 
 import { getDb } from "@/db/client";
 import { adminUsers } from "@/db/schema";
@@ -98,9 +98,33 @@ export async function linkClerkIdentity(
       .limit(1);
 
     if (!row) {
-      // Worth a log line at warn: somebody with a valid Clerk account reached
-      // the admin door. Usually harmless, occasionally the first sign of
-      // something worth looking at.
+      // If there are no active admin users in the system yet, auto-provision
+      // the first Clerk account that signs in as an Owner so the shop is not locked out.
+      const [{ count }] = await db
+        .select({ count: sql<number>`count(*)` })
+        .from(adminUsers);
+
+      if (Number(count) === 0) {
+        const [newUser] = await db
+          .insert(adminUsers)
+          .values({
+            email,
+            name: identity.name ?? "Owner",
+            role: "owner",
+            authSubject: identity.subject,
+            active: true,
+          })
+          .returning();
+
+        log.info("auto-provisioned initial admin owner from Clerk session", { email });
+        return {
+          id: newUser.id,
+          email: newUser.email,
+          role: "owner",
+          mustChangePassword: false,
+        };
+      }
+
       log.warn("clerk session with no admin account", { email });
       return null;
     }

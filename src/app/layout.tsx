@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import Script from "next/script";
+import { ClerkProvider } from "@clerk/nextjs";
 
 import { brand } from "@/lib/brand";
-import { env } from "@/lib/env";
+import { capabilities, env } from "@/lib/env";
 import "./globals.css";
 
 /**
@@ -78,35 +79,13 @@ export const metadata: Metadata = {
 export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
-  return (
+  const content = (
     <html
       lang="en-GH"
       className={`${bricolage.variable} ${figtree.variable} ${jetbrainsMono.variable} h-full antialiased`}
-      /**
-       * The theme script stamps `data-theme` on this element before React
-       * hydrates, so the server HTML (no attribute) and the client DOM (attribute
-       * present) necessarily differ. That is the intended behaviour, not a bug,
-       * `suppressHydrationWarning` tells React to accept it on this element only.
-       *
-       * Without it you get "A tree hydrated but some attributes … didn't match",
-       * which is noise that hides real hydration bugs.
-       */
       suppressHydrationWarning
     >
       <body className="flex min-h-full flex-col">
-        {/*
-          Theme script via `next/script` with `beforeInteractive`.
-
-          Two earlier attempts were wrong and both produced console errors:
-          a raw <script> as a child of <html> is invalid HTML ("cannot be a child
-          of <html>"), and a raw <script> anywhere in a React tree draws
-          "Scripts inside React components are never executed when rendering on
-          the client".
-
-          `next/script` is the supported route: Next hoists it into the document
-          so it runs before hydration. Which is the whole requirement, since the
-          theme must be set before first paint or the page flashes the wrong one.
-        */}
         <Script id="efe-theme" strategy="beforeInteractive">
           {`(function(){try{document.documentElement.dataset.theme=localStorage.getItem("efe-theme")==="dark"?"dark":"light"}catch(e){document.documentElement.dataset.theme="light"}})()`}
         </Script>
@@ -120,4 +99,14 @@ export default function RootLayout({
       </body>
     </html>
   );
+
+  if (capabilities.hasClerk) {
+    return (
+      <ClerkProvider publishableKey={env.public.clerkPublishableKey}>
+        {content}
+      </ClerkProvider>
+    );
+  }
+
+  return content;
 }

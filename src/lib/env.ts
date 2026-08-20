@@ -10,9 +10,20 @@
  */
 
 const read = (key: string): string | undefined => {
-  const value = process.env[key];
-  return value && value.trim().length > 0 ? value.trim() : undefined;
+  let value = process.env[key];
+  if (!value) return undefined;
+  value = value.trim();
+  if (
+    (value.startsWith('"') && value.endsWith('"')) ||
+    (value.startsWith("'") && value.endsWith("'"))
+  ) {
+    value = value.slice(1, -1).trim();
+  }
+  return value.length > 0 ? value : undefined;
 };
+
+const isClerkKeyValid = (key?: string) =>
+  Boolean(key && (key.startsWith("pk_test_") || key.startsWith("pk_live_")));
 
 export const env = {
   /** Safe in the browser. */
@@ -70,14 +81,11 @@ export const capabilities = {
    * Clerk needs BOTH halves, like Paystack. A publishable key alone renders a
    * sign-in box that cannot verify anything server-side.
    *
-   * This flag is what makes the migration safe to land before the keys exist:
-   * with it false the admin keeps using the scrypt password path exactly as it
-   * does today, and the moment both keys appear the whole thing switches over
-   * with no further code change. Shipping an auth rewrite that only works once
-   * somebody pastes a secret is how a deploy locks everyone out of a live shop.
+   * Checks format (`pk_test_` or `pk_live_`) so an invalid or malformed key
+   * fails closed and falls back to native authentication instead of crashing.
    */
   hasClerk: Boolean(
-    env.server.clerkSecretKey && env.public.clerkPublishableKey,
+    env.server.clerkSecretKey && isClerkKeyValid(env.public.clerkPublishableKey),
   ),
 } as const;
 

@@ -4,10 +4,13 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion, useReducedMotion } from "motion/react";
 
+import { SignOutButton } from "@clerk/nextjs";
+
 import { signOutAction } from "@/app/admin/actions";
 import { AdminSearch } from "@/components/admin/AdminSearch";
 import { Wordmark } from "@/components/brand/Wordmark";
 import { brand } from "@/lib/brand";
+import { capabilities } from "@/lib/env";
 
 /**
  * Admin sidebar.
@@ -182,14 +185,27 @@ export function AdminNav({
             View shop &rarr;
           </Link>
           {!devBypass && (
-            <form action={signOutAction} className="mt-3">
-              <button
-                type="submit"
-                className="text-xs text-paper/45 transition-colors hover:text-paper"
-              >
-                Sign out
-              </button>
-            </form>
+            <div className="mt-3">
+              {capabilities.hasClerk ? (
+                <SignOutButton redirectUrl="/admin/sign-in">
+                  <button
+                    type="button"
+                    className="text-xs text-paper/45 transition-colors hover:text-paper"
+                  >
+                    Sign out
+                  </button>
+                </SignOutButton>
+              ) : (
+                <form action={signOutAction}>
+                  <button
+                    type="submit"
+                    className="text-xs text-paper/45 transition-colors hover:text-paper"
+                  >
+                    Sign out
+                  </button>
+                </form>
+              )}
+            </div>
           )}
         </div>
       </div>
